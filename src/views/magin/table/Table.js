@@ -1,209 +1,140 @@
-import { useEffect, useRef, useState } from 'react';
-import { Button } from '@mui/material';
-import { MaterialReactTable } from 'material-react-table';
-import { data } from './makeData';
+import { useMemo, useState } from 'react';
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+} from 'material-react-table';
+import { IconButton, Tooltip } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import {
+  QueryClient,
+  QueryClientProvider,
+  keepPreviousData,
+  useQuery,
+} from '@tanstack/react-query'; //note: this is TanStack React Query V5
 
-//column definitions...
-const columns = [
-  {
-    accessorKey: 'firstName',
-    header: 'First Name',
-  },
-  {
-    accessorKey: 'lastName',
-    header: 'Last Name',
-  },
-  {
-    accessorKey: 'city',
-    header: 'City',
-  },
-  {
-    accessorKey: 'state',
-    header: 'State',
-  },
-  {
-    accessorKey: 'salary',
-    header: 'Salary',
-  },
-];
-//end
-
-const Table = () => {
-  const isFirstRender = useRef(true);
-
+const Example = () => {
+  //manage our own state for stuff we want to pass to the API
   const [columnFilters, setColumnFilters] = useState([]);
-  const [columnVisibility, setColumnVisibility] = useState({});
-  const [density, setDensity] = useState('comfortable');
-  const [globalFilter, setGlobalFilter] = useState(undefined);
-  const [showGlobalFilter, setShowGlobalFilter] = useState(false);
-  const [columnSizing, setColumnSizing] = useState(false);
-  const [columnOrder, setColumnOrder] = useState([]);
-  const [showColumnFilters, setShowColumnFilters] = useState(false);
+  const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
-  //load state from local storage
-  useEffect(() => {
-    const columnFilters = sessionStorage.getItem('mrt_columnFilters_table_1');
-    const columnVisibility = sessionStorage.getItem(
-      'mrt_columnVisibility_table_1',
-    );
-    const density = sessionStorage.getItem('mrt_density_table_1');
-    const globalFilter = sessionStorage.getItem('mrt_globalFilter_table_1');
-    const showGlobalFilter = sessionStorage.getItem(
-      'mrt_showGlobalFilter_table_1',
-    );
-    const columnSizing = sessionStorage.getItem(
-      'mrt_columnSizing_table_1',
-    );
-    const columnOrder = sessionStorage.getItem(
-      'mrt_columnOrder_table_1',
-    );
-    const showColumnFilters = sessionStorage.getItem(
-      'mrt_showColumnFilters_table_1',
-    );
-    const sorting = sessionStorage.getItem('mrt_sorting_table_1');
+  //consider storing this code in a custom hook (i.e useFetchUsers)
+  const {
+    data: { data = [], totalRowCount } = {}, //your data and api response will probably be different
+    isError,
+    isRefetching,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: [
+      'table-data',
+      columnFilters, //refetch when columnFilters changes
+      globalFilter, //refetch when globalFilter changes
+      pagination.pageIndex, //refetch when pagination.pageIndex changes
+      pagination.pageSize, //refetch when pagination.pageSize changes
+      sorting, //refetch when sorting changes
+    ],
+    queryFn: async () => {
+      const fetchURL = new URL(
+        '/alerts',
+        process.env.NODE_ENV === 'production'
+          ? 'https://www.material-react-table.com'
+          : 'http://192.168.1.201:8080',
+      );
 
-    if (columnFilters) {
-      setColumnFilters(JSON.parse(columnFilters));
-    }
-    if (columnVisibility) {
-      setColumnVisibility(JSON.parse(columnVisibility));
-    }
-    if (density) {
-      setDensity(JSON.parse(density));
-    }
-    if (globalFilter) {
-      setGlobalFilter(JSON.parse(globalFilter) || undefined);
-    }
-    if (showGlobalFilter) {
-      setShowGlobalFilter(JSON.parse(showGlobalFilter));
-    }
-    if (columnSizing) {
-      setColumnSizing(JSON.parse(columnSizing));
-    }
-    if (columnOrder) {
-      setColumnOrder(JSON.parse(columnOrder));
-    }
-    if (showColumnFilters) {
-      setShowColumnFilters(JSON.parse(showColumnFilters));
-    }
-    if (sorting) {
-      setSorting(JSON.parse(sorting));
-    }
-    isFirstRender.current = false;
-  }, []);
+      //read our state and pass it to the API as query params
+      fetchURL.searchParams.set(
+        'start',
+        `${pagination.pageIndex * pagination.pageSize}`,
+      );
+      fetchURL.searchParams.set('size', `${pagination.pageSize}`);
+      fetchURL.searchParams.set('filters', JSON.stringify(columnFilters ?? []));
+      fetchURL.searchParams.set('globalFilter', globalFilter ?? '');
+      fetchURL.searchParams.set('sorting', JSON.stringify(sorting ?? []));
 
-  //save states to local storage
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    sessionStorage.setItem(
-      'mrt_columnFilters_table_1',
-      JSON.stringify(columnFilters),
-    );
-  }, [columnFilters]);
+      //use whatever fetch library you want, fetch, axios, etc
+      const response = await fetch(fetchURL.href);
+      const json = await response.json();
+      return json;
+    },
+    placeholderData: keepPreviousData, //don't go to 0 rows when refetching or paginating to next page
+  });
 
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    sessionStorage.setItem(
-      'mrt_columnVisibility_table_1',
-      JSON.stringify(columnVisibility),
-    );
-  }, [columnVisibility]);
+  const columns = useMemo(
+    //column definitions...
+    () => [
+      {
+        accessorKey: 'username',
+        header: 'User Name',
+      },
+      {
+        accessorKey: 'email',
+        header: 'Email',
+      },
+      {
+        accessorKey: 'role',
+        header: 'Role',
+      },
+      {
+        accessorKey: 'password',
+        header: 'Key',
+      },
 
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    sessionStorage.setItem('mrt_density_table_1', JSON.stringify(density));
-  }, [density]);
-
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    sessionStorage.setItem(
-      'mrt_globalFilter_table_1',
-      JSON.stringify(globalFilter ?? ''),
-    );
-  }, [globalFilter]);
-
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    sessionStorage.setItem(
-      'mrt_showGlobalFilter_table_1',
-      JSON.stringify(showGlobalFilter),
-    );
-  }, [showGlobalFilter]);
-
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    sessionStorage.setItem(
-      'mrt_columnSizing_table_1',
-      JSON.stringify(columnSizing),
-    );
-  }, [columnSizing]);
-
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    sessionStorage.setItem(
-      'mrt_columnOrder_table_1',
-      JSON.stringify(columnOrder),
-    );
-  }, [columnOrder]);
-
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    sessionStorage.setItem(
-      'mrt_showColumnFilters_table_1',
-      JSON.stringify(showColumnFilters),
-    );
-  }, [showColumnFilters]);
-
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    sessionStorage.setItem('mrt_sorting_table_1', JSON.stringify(sorting));
-  }, [sorting]);
-
-  const resetState = () => {
-    sessionStorage.removeItem('mrt_columnFilters_table_1');
-    sessionStorage.removeItem('mrt_columnVisibility_table_1');
-    sessionStorage.removeItem('mrt_density_table_1');
-    sessionStorage.removeItem('mrt_globalFilter_table_1');
-    sessionStorage.removeItem('mrt_showGlobalFilter_table_1');
-    sessionStorage.removeItem('mrt_columnSizing_table_1');
-    sessionStorage.removeItem('mrt_columnOrder_table_1');
-    sessionStorage.removeItem('mrt_showColumnFilters_table_1');
-    sessionStorage.removeItem('mrt_sorting_table_1');
-    window.location.reload();
-  };
-
-  return (
-    <MaterialReactTable
-      enableColumnOrdering={true}
-      enableColumnResizing={true}
-      columns={columns}
-      data={data}
-      onColumnFiltersChange={setColumnFilters}
-      onColumnVisibilityChange={setColumnVisibility}
-      onDensityChange={setDensity}
-      onGlobalFilterChange={setGlobalFilter}
-      onShowColumnFiltersChange={setShowColumnFilters}
-      onShowGlobalFilterChange={setShowGlobalFilter}
-      onColumnSizingChange={setColumnSizing}
-      onColumnOrderChange={setColumnOrder}
-      onSortingChange={setSorting}
-      state={{
-        columnFilters,
-        columnVisibility,
-        density,
-        globalFilter,
-        showColumnFilters,
-        showGlobalFilter,
-        sorting,
-        columnSizing,
-        columnOrder
-      }}
-      renderTopToolbarCustomActions={() => (
-        <Button onClick={resetState}>Reset State</Button>
-      )}
-    />
+    ],
+    [],
+    //end
   );
+
+  const table = useMaterialReactTable({
+    columns,
+    data,
+    initialState: { showColumnFilters: true },
+    manualFiltering: true, //turn off built-in client-side filtering
+    manualPagination: true, //turn off built-in client-side pagination
+    manualSorting: true, //turn off built-in client-side sorting
+    muiToolbarAlertBannerProps: isError
+      ? {
+        color: 'error',
+        children: 'Error loading data',
+      }
+      : undefined,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    onSortingChange: setSorting,
+    renderTopToolbarCustomActions: () => (
+      <Tooltip arrow title="Refresh Data">
+        <IconButton onClick={() => refetch()}>
+          <RefreshIcon />
+        </IconButton>
+      </Tooltip>
+    ),
+    rowCount: totalRowCount ? totalRowCount : 0,
+    state: {
+      columnFilters,
+      globalFilter,
+      isLoading,
+      pagination,
+      showAlertBanner: isError,
+      showProgressBars: isRefetching,
+      sorting,
+    },
+  });
+
+  return <MaterialReactTable table={table} />;
 };
 
-export default Table;
+const queryClient = new QueryClient();
+
+const ExampleWithReactQueryProvider = () => (
+  //App.tsx or AppProviders file. Don't just wrap this component with QueryClientProvider! Wrap your whole App!
+  <QueryClientProvider client={queryClient}>
+    <Example />
+  </QueryClientProvider>
+);
+
+export default ExampleWithReactQueryProvider;
