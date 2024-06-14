@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react';
 import { useAuth } from '../../../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
   CButton,
   CCard,
@@ -20,24 +21,22 @@ import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
 
-import { login } from '../../../services/api';
 
 const Login = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
-
-  //const { login } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
-
   const handleLogin = async () => {
     try {
-      await login(username, password);
-      // Redirect or handle successful login
+      const response = await axios.post('http://192.168.1.201:8080/login', { username, password });
+      const { token } = response.data;
+      login(token); // Set the global context
+      navigate("/dashboard")
     } catch (error) {
       // Handle login error
-      navigate('/login');
+      console.error('Login error:', error);
     }
 
   };

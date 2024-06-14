@@ -131,6 +131,20 @@ const _nav = [
   },
   {
     component: CNavGroup,
+    name: 'Magin',
+    to: '/magin',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Table',
+        to: '/magin/table',
+      },
+
+    ],
+  },
+  {
+    component: CNavGroup,
     name: 'Buttons',
     to: '/buttons',
     icon: <CIcon icon={cilCursor} customClassName="nav-icon" />,
