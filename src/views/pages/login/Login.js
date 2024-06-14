@@ -1,5 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useState } from 'react';
+import { useAuth } from '../../../auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import {
   CButton,
   CCard,
@@ -16,7 +19,29 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
+
+import { login } from '../../../services/api';
+
 const Login = () => {
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+
+  //const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    try {
+      await login(username, password);
+      // Redirect or handle successful login
+    } catch (error) {
+      // Handle login error
+      navigate('/login');
+    }
+
+  };
+
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -32,7 +57,7 @@ const Login = () => {
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Username" autoComplete="username" />
+                      <CFormInput placeholder="Username" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
@@ -42,11 +67,13 @@ const Login = () => {
                         type="password"
                         placeholder="Password"
                         autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4">
+                        <CButton onClick={handleLogin} color="primary" className="px-4">
                           Login
                         </CButton>
                       </CCol>
