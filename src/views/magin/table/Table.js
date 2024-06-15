@@ -39,7 +39,7 @@ const Table = () => {
     const url = new URL(
       '/alerts',
       process.env.NODE_ENV === 'production'
-        ? 'https://www.material-react-table.com'
+        ? 'http://192.168.1.201:8080'
         : 'http://192.168.1.201:8080',
     );
     url.searchParams.set('start', `${pagination.pageIndex * pagination.pageSize}`);
@@ -67,15 +67,12 @@ const Table = () => {
 
   useEffect(() => {
     // Save states to localStorage
-    localStorage.setItem('columnFilters', JSON.stringify(columnFilters));
-    localStorage.setItem('globalFilter', globalFilter);
-    localStorage.setItem('sorting', JSON.stringify(sorting));
     localStorage.setItem('pagination', JSON.stringify(pagination));
     localStorage.setItem('columnOrder', JSON.stringify(columnOrder));
     localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
     localStorage.setItem('density', density);
     localStorage.setItem('columnSizing', JSON.stringify(columnSizing));
-  }, [columnFilters, globalFilter, sorting, pagination, columnOrder, columnVisibility, density, columnSizing]);
+  }, [pagination, columnOrder, columnVisibility, density, columnSizing]);
 
   const columns = useMemo(
     () => [
@@ -147,27 +144,23 @@ const Table = () => {
       columnVisibility,
       density,
       globalFilter,
-      isLoading,
       pagination,
       showAlertBanner: isError,
       showProgressBars: isRefetching,
       sorting,
     },
     positionToolbarAlertBanner: 'bottom',
-    renderTopToolbarCustomActions: ({ table }) => (
-      <CButtonGroup role="group" aria-label="Basic example">
-        <CButton color="primary" variant="outline"
+    // renderTopToolbarCustomActions: ({ table }) => (
+    //   <CButtonGroup role="group" aria-label="Basic example">
+    //     <CButton color="primary" variant="outline"
+    //       onClick={() => {
+    //         alert('Create New Account');
+    //       }}>Left</CButton>
+    //     <CButton color="primary" variant="outline" size="sm" disabled >Middle</CButton>
+    //     <CButton color="primary" variant="outline" size="sm">Right</CButton>
+    //   </CButtonGroup>
 
-          onClick={() => {
-
-            alert('Create New Account');
-
-          }}>Left</CButton>
-        <CButton color="primary" variant="outline" size="sm" disabled >Middle</CButton>
-        <CButton color="primary" variant="outline" size="sm">Right</CButton>
-      </CButtonGroup>
-
-    ),
+    // ),
 
   });
 

@@ -140,6 +140,11 @@ const _nav = [
         name: 'Table',
         to: '/magin/table',
       },
+      {
+        component: CNavItem,
+        name: 'TableNew',
+        to: '/magin/tablenew',
+      },
 
     ],
   },

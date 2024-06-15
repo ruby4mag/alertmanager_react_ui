@@ -6,7 +6,7 @@ const Typography = React.lazy(() => import('./views/theme/typography/Typography'
 
 // Magin
 const Table = React.lazy(() => import('./views/magin/table/Table'))
-
+const Tablenew = React.lazy(() => import('./views/magin/table/Tablenew'))
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -102,6 +102,7 @@ const routes = [
   { path: '/widgets', name: 'Widgets', element: Widgets },
   { path: '/magin', name: 'Base', element: Cards, exact: true },
   { path: '/magin/table', name: 'Table', element: Table },
+  { path: '/magin/tablenew', name: 'Tablenew', element: Tablenew },
 ]
 
 export default routes
