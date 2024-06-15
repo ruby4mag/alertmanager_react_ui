@@ -1,121 +1,117 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
-import { IconButton, Tooltip } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import {
-  QueryClient,
-  QueryClientProvider,
-  keepPreviousData,
-  useQuery,
-} from '@tanstack/react-query'; //note: this is TanStack React Query V5
 
-const Example = () => {
-  //manage our own state for stuff we want to pass to the API
+const Table = () => {
+  // Load saved states from localStorage
+  const initialPagination = JSON.parse(localStorage.getItem('pagination')) || { pageIndex: 0, pageSize: 10 };
+  const initialColumnOrder = JSON.parse(localStorage.getItem('columnOrder')) || [];
+  const initialColumnVisibility = JSON.parse(localStorage.getItem('columnVisibility')) || {};
+  const initialDensity = localStorage.getItem('density') || 'default';
+  const initialColumnSizing = JSON.parse(localStorage.getItem('columnSizing')) || {};
+
+  // Data and fetching state
+  const [data, setData] = useState([]);
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRefetching, setIsRefetching] = useState(false);
+  const [rowCount, setRowCount] = useState(0);
+
+  // Table state
   const [columnFilters, setColumnFilters] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState([]);
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+  const [pagination, setPagination] = useState(initialPagination);
+  const [columnOrder, setColumnOrder] = useState(initialColumnOrder);
+  const [columnVisibility, setColumnVisibility] = useState(initialColumnVisibility);
+  const [density, setDensity] = useState(initialDensity);
+  const [columnSizing, setColumnSizing] = useState(initialColumnSizing);
 
-  //consider storing this code in a custom hook (i.e useFetchUsers)
-  const {
-    data: { data = [], totalRowCount } = {}, //your data and api response will probably be different
-    isError,
-    isRefetching,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: [
-      'table-data',
-      columnFilters, //refetch when columnFilters changes
-      globalFilter, //refetch when globalFilter changes
-      pagination.pageIndex, //refetch when pagination.pageIndex changes
-      pagination.pageSize, //refetch when pagination.pageSize changes
-      sorting, //refetch when sorting changes
-    ],
-    queryFn: async () => {
-      const fetchURL = new URL(
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+
+      const url = new URL(
         '/alerts',
         process.env.NODE_ENV === 'production'
           ? 'https://www.material-react-table.com'
           : 'http://192.168.1.201:8080',
       );
+      url.searchParams.set('start', `${pagination.pageIndex * pagination.pageSize}`);
+      url.searchParams.set('size', `${pagination.pageSize}`);
+      url.searchParams.set('filters', JSON.stringify(columnFilters ?? []));
+      url.searchParams.set('globalFilter', globalFilter ?? '');
+      url.searchParams.set('sorting', JSON.stringify(sorting ?? []));
 
-      //read our state and pass it to the API as query params
-      fetchURL.searchParams.set(
-        'start',
-        `${pagination.pageIndex * pagination.pageSize}`,
-      );
-      fetchURL.searchParams.set('size', `${pagination.pageSize}`);
-      fetchURL.searchParams.set('filters', JSON.stringify(columnFilters ?? []));
-      fetchURL.searchParams.set('globalFilter', globalFilter ?? '');
-      fetchURL.searchParams.set('sorting', JSON.stringify(sorting ?? []));
+      try {
+        const response = await fetch(url.href);
+        const json = await response.json();
+        setData(json.data);
+        setRowCount(json.totalRowCount);
+      } catch (error) {
+        setIsError(true);
+        console.error(error);
+      }
+      setIsLoading(false);
+      setIsRefetching(false);
+    };
 
-      //use whatever fetch library you want, fetch, axios, etc
-      const response = await fetch(fetchURL.href);
-      const json = await response.json();
-      return json;
-    },
-    placeholderData: keepPreviousData, //don't go to 0 rows when refetching or paginating to next page
-  });
+    fetchData();
+  }, [columnFilters, globalFilter, pagination, sorting]);
+
+  useEffect(() => {
+    // Save states to localStorage
+    localStorage.setItem('pagination', JSON.stringify(pagination));
+    localStorage.setItem('columnOrder', JSON.stringify(columnOrder));
+    localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
+    localStorage.setItem('density', density);
+    localStorage.setItem('columnSizing', JSON.stringify(columnSizing));
+  }, [pagination, columnOrder, columnVisibility, density, columnSizing]);
 
   const columns = useMemo(
-    //column definitions...
     () => [
-      {
-        accessorKey: 'username',
-        header: 'User Name',
-      },
-      {
-        accessorKey: 'email',
-        header: 'Email',
-      },
-      {
-        accessorKey: 'role',
-        header: 'Role',
-      },
-      {
-        accessorKey: 'password',
-        header: 'Key',
-      },
-
+      { accessorKey: 'username', header: 'User Name' },
+      { accessorKey: 'email', header: 'Email' },
+      { accessorKey: 'role', header: 'Role' },
+      { accessorKey: 'password', header: 'Key' },
     ],
     [],
-    //end
   );
 
   const table = useMaterialReactTable({
     columns,
     data,
-    initialState: { showColumnFilters: true },
-    manualFiltering: true, //turn off built-in client-side filtering
-    manualPagination: true, //turn off built-in client-side pagination
-    manualSorting: true, //turn off built-in client-side sorting
-    muiToolbarAlertBannerProps: isError
-      ? {
-        color: 'error',
-        children: 'Error loading data',
-      }
-      : undefined,
+    enableColumnOrdering: true,
+    enableColumnResizing: true,
+    enableRowSelection: true,
+    getRowId: (row) => row.id,
+    initialState: {
+      columnVisibility,
+      columnSizing,
+      density,
+      //showColumnFilters: true,
+    },
+    manualFiltering: true,
+    manualPagination: true,
+    manualSorting: true,
+    muiToolbarAlertBannerProps: isError ? { color: 'error', children: 'Error loading data' } : undefined,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
-    renderTopToolbarCustomActions: () => (
-      <Tooltip arrow title="Refresh Data">
-        <IconButton onClick={() => refetch()}>
-          <RefreshIcon />
-        </IconButton>
-      </Tooltip>
-    ),
-    rowCount: totalRowCount ? totalRowCount : 0,
+    onColumnOrderChange: setColumnOrder,
+    onColumnVisibilityChange: setColumnVisibility,
+    onDensityChange: setDensity,
+    onColumnSizingChange: setColumnSizing,
+    rowCount,
     state: {
       columnFilters,
+      columnOrder,
+      columnSizing,
+      columnVisibility,
+      density,
       globalFilter,
       isLoading,
       pagination,
@@ -128,13 +124,4 @@ const Example = () => {
   return <MaterialReactTable table={table} />;
 };
 
-const queryClient = new QueryClient();
-
-const ExampleWithReactQueryProvider = () => (
-  //App.tsx or AppProviders file. Don't just wrap this component with QueryClientProvider! Wrap your whole App!
-  <QueryClientProvider client={queryClient}>
-    <Example />
-  </QueryClientProvider>
-);
-
-export default ExampleWithReactQueryProvider;
+export default Table;
