@@ -1,19 +1,19 @@
 import React from 'react'
 import {
-    CForm, CFormLabel, CFormInput, CFormTextarea, CButton, CToaster, CToast, CToastHeader, CToastBody
-} from '@coreui/react';
+    CForm, CFormLabel, CFormInput, CFormTextarea, CButton, CToaster } from '@coreui/react';
 import { useState, useRef } from 'react';
 import { QueryBuilder, formatQuery } from 'react-querybuilder';
 import 'react-querybuilder/dist/query-builder.css';
 import useAxios from '../../../services/useAxios';
 import MyToast from '../../../components/Toast'
+import { useNavigate } from 'react-router-dom';
 
 
 const New = () => {
 
     const [toast, addToast] = useState(0)
     const toaster = useRef()
-
+    const navigate = useNavigate();
 
     const [name, setName] = useState("")
     const [description, setDescription] = useState("")
@@ -89,6 +89,10 @@ const New = () => {
         setSelectedOption(event.target.value);
     };
 
+    const handleBackButtonClick = () => {
+        navigate('/rule/alertrule/list');
+    };
+
     return (
         <>
 
@@ -120,7 +124,11 @@ const New = () => {
                     <QueryBuilder fields={fields} query={query} onQueryChange={handleQueryChange} />
                 </div>
             </CForm>
-            <CButton onClick={handleQueryExport} color="primary">Add rule</CButton>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+                <CButton disabled={name == "" || description == "" || selectedOption == "" || query.rules == "" ? true : false} variant="outline" onClick={handleQueryExport} color="primary">Add Rule</CButton>
+                <CButton variant="outline" onClick={handleBackButtonClick} color="primary">Go Back</CButton>
+            </div>
         </>
     )
 }

@@ -48,6 +48,32 @@ const _nav = [
   },
   {
     component: CNavGroup,
+    name: 'Alerts',
+    to: '/alert',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Alert Dashboard',
+        to: '/alert/dashboard',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Configs',
+    to: '/rule',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'AlertRule',
+        to: '/rule/alertrule/list',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
     name: 'Base',
     to: '/base',
     icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
@@ -126,37 +152,6 @@ const _nav = [
         component: CNavItem,
         name: 'Tooltips',
         to: '/base/tooltips',
-      },
-    ],
-  },
-  {
-    component: CNavGroup,
-    name: 'Alerts',
-    to: '/alert',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Alert Dashboard',
-        to: '/alert/dashboard',
-      },
-    ],
-  },
-  {
-    component: CNavGroup,
-    name: 'Configs',
-    to: '/rule',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'AlertRule',
-        to: '/rule/alertrule/list',
-      },
-      {
-        component: CNavItem,
-        name: 'AlertRule New',
-        to: '/rule/alertrule/new',
       },
     ],
   },
