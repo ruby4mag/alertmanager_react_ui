@@ -131,21 +131,33 @@ const _nav = [
   },
   {
     component: CNavGroup,
-    name: 'Magin',
-    to: '/magin',
+    name: 'Alerts',
+    to: '/alert',
     icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
-        name: 'Table',
-        to: '/magin/table',
+        name: 'Alert Dashboard',
+        to: '/alert/dashboard',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Configs',
+    to: '/rule',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'AlertRule',
+        to: '/rule/alertrule/list',
       },
       {
         component: CNavItem,
-        name: 'TableNew',
-        to: '/magin/tablenew',
+        name: 'AlertRule New',
+        to: '/rule/alertrule/new',
       },
-
     ],
   },
   {

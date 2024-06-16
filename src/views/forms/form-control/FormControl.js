@@ -25,7 +25,7 @@ const FormControl = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get('/protected/resource');
+        const response = await api.get('/api/resource');
         setData(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);

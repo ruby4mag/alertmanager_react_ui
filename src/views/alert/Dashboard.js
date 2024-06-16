@@ -5,7 +5,7 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 
-const Table = () => {
+const DataTable = () => {
   // Load saved states from localStorage
   const initialColumnFilters = JSON.parse(localStorage.getItem('columnFilters')) || [];
   const initialGlobalFilter = localStorage.getItem('globalFilter') || '';
@@ -63,16 +63,19 @@ const Table = () => {
 
   useEffect(() => {
     fetchData(columnFilters, globalFilter, sorting, pagination);
-  }, [columnFilters, globalFilter, pagination, sorting]);
+  }, [columnFilters, globalFilter, sorting, pagination, columnOrder, columnVisibility, density, columnSizing]);
 
   useEffect(() => {
     // Save states to localStorage
+    localStorage.setItem('columnFilters', JSON.stringify(columnFilters));
+    localStorage.setItem('globalFilter', globalFilter);
+    localStorage.setItem('sorting', JSON.stringify(sorting));
     localStorage.setItem('pagination', JSON.stringify(pagination));
     localStorage.setItem('columnOrder', JSON.stringify(columnOrder));
     localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility));
     localStorage.setItem('density', density);
     localStorage.setItem('columnSizing', JSON.stringify(columnSizing));
-  }, [pagination, columnOrder, columnVisibility, density, columnSizing]);
+  }, [columnFilters, globalFilter, sorting, pagination, columnOrder, columnVisibility, density, columnSizing]);
 
   const columns = useMemo(
     () => [
@@ -116,6 +119,7 @@ const Table = () => {
     data,
     enableColumnOrdering: true,
     enableColumnResizing: true,
+    enableStickyHeader: true,
     enableRowSelection: true,
     getRowId: (row) => row.id,
     initialState: {
@@ -150,21 +154,21 @@ const Table = () => {
       sorting,
     },
     positionToolbarAlertBanner: 'bottom',
-    // renderTopToolbarCustomActions: ({ table }) => (
-    //   <CButtonGroup role="group" aria-label="Basic example">
-    //     <CButton color="primary" variant="outline"
-    //       onClick={() => {
-    //         alert('Create New Account');
-    //       }}>Left</CButton>
-    //     <CButton color="primary" variant="outline" size="sm" disabled >Middle</CButton>
-    //     <CButton color="primary" variant="outline" size="sm">Right</CButton>
-    //   </CButtonGroup>
+    renderTopToolbarCustomActions: ({ table }) => (
+      <CButtonGroup role="group" aria-label="Basic example">
+        <CButton color="primary" variant="outline"
+          onClick={() => {
+            alert('Create New Account');
+          }}>Left</CButton>
+        <CButton color="primary" variant="outline" size="sm" disabled >Middle</CButton>
+        <CButton color="primary" variant="outline" size="sm">Right</CButton>
+      </CButtonGroup>
 
-    // ),
+    ),
 
   });
 
   return <MaterialReactTable table={table} />;
 };
 
-export default Table;
+export default DataTable;

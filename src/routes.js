@@ -5,8 +5,12 @@ const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
 // Magin
-const Table = React.lazy(() => import('./views/magin/table/Table'))
-const Tablenew = React.lazy(() => import('./views/magin/table/Tablenew'))
+const AlertDashboard = React.lazy(() => import('./views/alert/Dashboard'))
+
+// Rules
+const AlertRuleList = React.lazy(() => import('./views/rule/alertrule/List'))
+const AlertRuleNew = React.lazy(() => import('./views/rule/alertrule/New'))
+
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -100,9 +104,11 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   { path: '/widgets', name: 'Widgets', element: Widgets },
-  { path: '/magin', name: 'Base', element: Cards, exact: true },
-  { path: '/magin/table', name: 'Table', element: Table },
-  { path: '/magin/tablenew', name: 'Tablenew', element: Tablenew },
+  { path: '/alert', name: 'Base', element: Cards, exact: true },
+  { path: '/alert/dashboard', name: 'AlertDashboard', element: AlertDashboard },
+  { path: '/rule/alertrule/list', name: 'AlertRuleList', element: AlertRuleList },
+  { path: '/rule/alertrule/new', name: 'AlertRuleList', element: AlertRuleNew },
+
 ]
 
 export default routes
