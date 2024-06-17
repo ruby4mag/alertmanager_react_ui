@@ -44,13 +44,15 @@ const List = () => {
                         <div>
 
                             <Link to={`/rule/alertrule/edit/${item['_id']}`}>
-                                <CButton size="sm" variant="outline" color="primary" className="me-2">View</CButton>
+                                <CButton size="sm" variant="outline" color="primary" className="me-2">Edit</CButton>
                             </Link>
-                            <CButton size="sm" variant="outline" color="primary">Edit</CButton>
+                            <Link to={`/rule/alertrule/view/${item['_id']}`}>
+                                <CButton size="sm" variant="outline" color="primary">View</CButton>
+                            </Link>
                         </div>
                     </CListGroupItem>
                 ))}
-            </CListGroup>
+            </CListGroup >
         </>
     )
 }

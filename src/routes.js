@@ -11,6 +11,7 @@ const AlertDashboard = React.lazy(() => import('./views/alert/Dashboard'))
 const AlertRuleList = React.lazy(() => import('./views/rule/alertrule/List'))
 const AlertRuleNew = React.lazy(() => import('./views/rule/alertrule/New'))
 const AlertRuleEdit = React.lazy(() => import('./views/rule/alertrule/Edit'))
+const AlertRuleView = React.lazy(() => import('./views/rule/alertrule/View'))
 
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
@@ -110,6 +111,7 @@ const routes = [
   { path: '/rule/alertrule/list', name: 'AlertRuleList', element: AlertRuleList },
   { path: '/rule/alertrule/new', name: 'AlertRuleList', element: AlertRuleNew },
   { path: "/rule/alertrule/edit/:id", name: 'AlertRuleList', element: AlertRuleEdit },
+  { path: "/rule/alertrule/view/:id", name: 'AlertRuleList', element: AlertRuleView },
 
 ]
 

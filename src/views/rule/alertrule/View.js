@@ -131,15 +131,15 @@ function EditPage() {
             <CForm>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlInput1">Rule Name</CFormLabel>
-                    <CFormInput type="text" id="exampleFormControlInput1" placeholder="Alert Rule name" value={name} onChange={(e) => setName(e.target.value)} />
+                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Alert Rule name" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlTextarea1">Rule Description</CFormLabel>
-                    <CFormTextarea id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
+                    <CFormTextarea disabled id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
                 </div>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlTextarea1">Feild To Set</CFormLabel>
-                    <select value={selectedOption} onChange={handleSelectChange} className="form-select" aria-label="Default select example">
+                    <select disabled value={selectedOption} onChange={handleSelectChange} className="form-select" aria-label="Default select example">
                         <option value="" >Select Field</option>
                         <option value="Entity">Entity</option>
                         <option value="Severity">Severity</option>
@@ -148,16 +148,15 @@ function EditPage() {
                 </div>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlInput1">Value To Set</CFormLabel>
-                    <CFormInput type="text" id="exampleFormControlInput1" placeholder="Enter new value to be set" value={fieldvalue} onChange={(e) => setFieldvalue(e.target.value)} />
+                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Enter new value to be set" value={fieldvalue} onChange={(e) => setFieldvalue(e.target.value)} />
                 </div>
                 <div className="mb-3">
                     <CFormLabel >Alert Rule </CFormLabel>
-                    <QueryBuilder fields={fields} query={query} onQueryChange={handleQueryChange} />
+                    <QueryBuilder disabled fields={fields} query={query} onQueryChange={handleQueryChange} />
                 </div>
             </CForm>
 
             <div style={{ display: 'flex', gap: '10px' }}>
-                <CButton disabled={name == "" || description == "" || selectedOption == "" || query.rules == "" ? true : false} variant="outline" onClick={handleQueryExport} color="primary">Update Rule</CButton>
                 <CButton variant="outline" onClick={handleBackButtonClick} color="primary">Go Back</CButton>
             </div>
         </>
