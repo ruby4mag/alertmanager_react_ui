@@ -1,11 +1,142 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CButtonGroup, CButton } from '@coreui/react';
+import { CForm, CFormLabel, CFormTextarea, CButtonGroup, CButton, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer } from '@coreui/react';
+import CIcon from '@coreui/icons-react'
+import { cilArrowThickRight } from '@coreui/icons'
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
+import SlidingPane from 'react-sliding-pane';
+import 'react-sliding-pane/dist/react-sliding-pane.css';
+
+const CommentComponent = () => {
+  const [comment, setComment] = useState("")
+  return (
+    <CContainer>
+      <CForm>
+        <div className="mb-3">
+          <CFormLabel htmlFor="exampleFormControlTextarea1">Add Comment</CFormLabel>
+          <CFormTextarea id="exampleFormControlTextarea12" rows={3} placeholder="Add Comment" value={comment} onChange={(e) => setComment(e.target.value)}></CFormTextarea>
+        </div>
+      </CForm>
+      <CButton disabled={comment == "" ? true : false} variant="outline" color="primary">Add Comment</CButton>
+    </CContainer>
+  )
+}
+
+const SliderComponent = (sliderdata) => {
+
+
+  const d = sliderdata
+  console.log(d)
+  const isObject = (variable) => {
+    return variable !== null && typeof variable === 'object' && !Array.isArray(variable);
+  };
+  return (
+    <>
+      {/* <div>
+        <table>
+          <tbody>
+            {Object.keys(d['sdata']).map(key => (
+
+              < tr key={key} >
+                <td>{key}</td>
+                <td> {isObject(d['sdata'][key]) ? "" : d['sdata'][key]} </td>
+              </tr>
+
+            ))}
+          </tbody>
+        </table>
+      </div > */}
+      <CContainer>
+        <CTable bordered >
+          <CTableHead>
+
+          </CTableHead>
+          <CTableBody>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Entity</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['entity']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Entity</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['entity']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Time</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertTime']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Latest Time</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertLastTime']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Clear Time</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertClearTime']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Source</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertSource']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Service Name</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['serviceName']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Summary</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertSummary']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Status</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertStatus']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Notes</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertNotes']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Acknowledged</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertAcked']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Severity</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['severity']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Id</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertId']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Priority</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertPriority']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Ip Addess</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['ipAddress']}</CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableHeaderCell scope="row">Alert Count</CTableHeaderCell>
+              <CTableDataCell>{d['sdata']['alertCount']}</CTableDataCell>
+            </CTableRow>
+          </CTableBody>
+        </CTable>
+      </CContainer>
+      <CommentComponent></CommentComponent>
+    </>
+  );
+};
+
 
 const DataTable = () => {
+
+  // Sliding Pane
+  const [state, setState] = useState({
+    isPaneOpen: false,
+    isPaneOpenLeft: false,
+  });
+
+  const [sliderdata, setSliderdata] = useState({})
+
   // Load saved states from localStorage
   const initialColumnFilters = JSON.parse(localStorage.getItem('columnFilters')) || [];
   const initialGlobalFilter = localStorage.getItem('globalFilter') || '';
@@ -79,7 +210,20 @@ const DataTable = () => {
 
   const columns = useMemo(
     () => [
-      { accessorKey: 'entity', header: 'Entity' },
+      {
+        accessorKey: 'entity', header: 'Entity', Cell: ({ cell }) => (
+          <span
+            style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+            onClick={() => {
+              setState({ isPaneOpen: true })
+              setSliderdata(cell.row.original)
+
+            }}
+          >
+            {cell.getValue()}
+          </span>
+        ),
+      },
       { accessorKey: 'alertTime', header: 'Alert Time' },
       { accessorKey: 'alertLastTime', header: 'Latest Alert' },
       { accessorKey: 'alertClearTime', header: 'alertcleartime' },
@@ -101,7 +245,6 @@ const DataTable = () => {
     [],
   );
 
-
   useEffect(() => {
     // Auto-refresh table data every 15 seconds
     const intervalId = setInterval(() => {
@@ -111,8 +254,6 @@ const DataTable = () => {
     // Clear interval on component unmount
     return () => clearInterval(intervalId);
   }, [columnFilters, globalFilter, sorting, pagination]);
-
-
 
   const table = useMaterialReactTable({
     columns,
@@ -163,12 +304,51 @@ const DataTable = () => {
         <CButton color="primary" variant="outline" size="sm" disabled >Middle</CButton>
         <CButton color="primary" variant="outline" size="sm">Right</CButton>
       </CButtonGroup>
-
     ),
-
   });
 
-  return <MaterialReactTable table={table} />;
+  if (state.isPaneOpen) {
+    const elements = document.querySelectorAll(".MuiPaper-root");
+    elements.forEach(element => {
+      element.style.display = 'none';
+    });
+  } else {
+    const elements = document.querySelectorAll(".MuiPaper-root");
+    elements.forEach(element => {
+      element.style.display = 'block';
+    });
+  }
+
+  const hideElementsByClass = (className) => {
+    const elements = document.querySelectorAll(`.${MuiBox - root}`);
+    elements.forEach(element => {
+      element.style.visible = 'hidden';
+    });
+  };
+
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <div>
+        <SlidingPane style={{ marginTop: '532px' }}
+          className="dsome-custom-class"
+          overlayClassName="some-custom-overlay-class"
+          isOpen={state.isPaneOpen}
+          closeIcon={<div><CIcon icon={cilArrowThickRight} className="me-2" /></div>}
+          title="Event Details"
+          subtitle=""
+          width="80%"
+          onRequestClose={() => {
+            setState({ isPaneOpen: false });
+          }}
+        >
+          <SliderComponent sdata={sliderdata} />
+        </SlidingPane>
+
+      </div>
+    </>
+  )
+
 };
 
 export default DataTable;
