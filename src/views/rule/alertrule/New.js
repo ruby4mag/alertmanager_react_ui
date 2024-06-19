@@ -1,6 +1,7 @@
 import React from 'react'
 import {
-    CForm, CFormLabel, CFormInput, CFormTextarea, CButton, CToaster } from '@coreui/react';
+    CForm, CFormLabel, CFormInput, CFormTextarea, CButton, CToaster
+} from '@coreui/react';
 import { useState, useRef } from 'react';
 import { QueryBuilder, formatQuery } from 'react-querybuilder';
 import 'react-querybuilder/dist/query-builder.css';

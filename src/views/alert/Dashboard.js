@@ -1,142 +1,37 @@
-import { useEffect, useMemo, useState } from 'react';
-import { CForm, CFormLabel, CFormTextarea, CButtonGroup, CButton, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer } from '@coreui/react';
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { CForm, CFormLabel, CFormTextarea, CButtonGroup, CButton, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer, CToaster, CCardBody, CCard, CRow, CCol, CCardTitle, CCardText } from '@coreui/react';
+import {
+  cilBell,
+  cilWarning,
+  cilCreditCard,
+  cilCommentSquare,
+  cilEnvelopeOpen,
+  cilFile,
+  cilAccountLogout,
+  cilSettings,
+  cilTask,
+  cilUser,
+} from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import { cilArrowThickRight } from '@coreui/icons'
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
-import SlidingPane from 'react-sliding-pane';
 import 'react-sliding-pane/dist/react-sliding-pane.css';
 
-const CommentComponent = () => {
-  const [comment, setComment] = useState("")
-  return (
-    <CContainer>
-      <CForm>
-        <div className="mb-3">
-          <CFormLabel htmlFor="exampleFormControlTextarea1">Add Comment</CFormLabel>
-          <CFormTextarea id="exampleFormControlTextarea12" rows={3} placeholder="Add Comment" value={comment} onChange={(e) => setComment(e.target.value)}></CFormTextarea>
-        </div>
-      </CForm>
-      <CButton disabled={comment == "" ? true : false} variant="outline" color="primary">Add Comment</CButton>
-    </CContainer>
-  )
-}
-
-const SliderComponent = (sliderdata) => {
-
-
-  const d = sliderdata
-  console.log(d)
-  const isObject = (variable) => {
-    return variable !== null && typeof variable === 'object' && !Array.isArray(variable);
-  };
-  return (
-    <>
-      {/* <div>
-        <table>
-          <tbody>
-            {Object.keys(d['sdata']).map(key => (
-
-              < tr key={key} >
-                <td>{key}</td>
-                <td> {isObject(d['sdata'][key]) ? "" : d['sdata'][key]} </td>
-              </tr>
-
-            ))}
-          </tbody>
-        </table>
-      </div > */}
-      <CContainer>
-        <CTable bordered >
-          <CTableHead>
-
-          </CTableHead>
-          <CTableBody>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Entity</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['entity']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Entity</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['entity']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Time</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertTime']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Latest Time</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertLastTime']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Clear Time</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertClearTime']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Source</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertSource']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Service Name</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['serviceName']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Summary</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertSummary']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Status</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertStatus']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Notes</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertNotes']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Acknowledged</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertAcked']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Severity</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['severity']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Id</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertId']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Priority</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertPriority']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Ip Addess</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['ipAddress']}</CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableHeaderCell scope="row">Alert Count</CTableHeaderCell>
-              <CTableDataCell>{d['sdata']['alertCount']}</CTableDataCell>
-            </CTableRow>
-          </CTableBody>
-        </CTable>
-      </CContainer>
-      <CommentComponent></CommentComponent>
-    </>
-  );
-};
-
+import { Link } from 'react-router-dom';
+import useAxios from '../../services/useAxios';
+import './styles.css'; // Import your custom CSS
 
 const DataTable = () => {
-
   // Sliding Pane
   const [state, setState] = useState({
     isPaneOpen: false,
     isPaneOpenLeft: false,
   });
-
+  const [theme, setTheme] = useState(localStorage.getItem('coreui-free-react-admin-template-theme') || 'dark');
   const [sliderdata, setSliderdata] = useState({})
-
+  const api = useAxios();
   // Load saved states from localStorage
   const initialColumnFilters = JSON.parse(localStorage.getItem('columnFilters')) || [];
   const initialGlobalFilter = localStorage.getItem('globalFilter') || '';
@@ -168,7 +63,7 @@ const DataTable = () => {
     setIsLoading(true);
 
     const url = new URL(
-      '/alerts',
+      '/api/alerts',
       process.env.NODE_ENV === 'production'
         ? 'http://192.168.1.201:8080'
         : 'http://192.168.1.201:8080',
@@ -180,8 +75,8 @@ const DataTable = () => {
     url.searchParams.set('sorting', JSON.stringify(sorting ?? []));
 
     try {
-      const response = await fetch(url.href);
-      const json = await response.json();
+      const response = await api.get(url.href);
+      const json = response.data;
       setData(json.data);
       setRowCount(json.totalRowCount);
     } catch (error) {
@@ -212,16 +107,9 @@ const DataTable = () => {
     () => [
       {
         accessorKey: 'entity', header: 'Entity', Cell: ({ cell }) => (
-          <span
-            style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
-            onClick={() => {
-              setState({ isPaneOpen: true })
-              setSliderdata(cell.row.original)
-
-            }}
-          >
+          <Link to={`/alert/details/${cell.row.original.ID}`}>
             {cell.getValue()}
-          </span>
+          </Link>
         ),
       },
       { accessorKey: 'alertTime', header: 'Alert Time' },
@@ -233,7 +121,13 @@ const DataTable = () => {
       { accessorKey: 'alertStatus', header: 'alertstatus' },
       { accessorKey: 'alertNotes', header: 'alertnotes' },
       { accessorKey: 'alertAcked', header: 'alertacked' },
-      { accessorKey: 'severity', header: 'severity' },
+      {
+        accessorKey: 'severity', header: 'severity', Cell: ({ cell }) => (
+          cell.getValue() == "WARNING" ? <CIcon icon={cilWarning} className="me-2 text-warning" size="lg" /> : <CIcon icon={cilWarning} className="me-2 text-danger" size="lg" />
+
+
+        ),
+      },
       { accessorKey: 'alertId', header: 'alertid' },
       { accessorKey: 'alertPriority', header: 'alertpriority' },
       { accessorKey: 'ipAddress', header: 'ipaddress' },
@@ -328,23 +222,8 @@ const DataTable = () => {
 
   return (
     <>
-      <MaterialReactTable table={table} />
-      <div>
-        <SlidingPane style={{ marginTop: '532px' }}
-          className="dsome-custom-class"
-          overlayClassName="some-custom-overlay-class"
-          isOpen={state.isPaneOpen}
-          closeIcon={<div><CIcon icon={cilArrowThickRight} className="me-2" /></div>}
-          title="Event Details"
-          subtitle=""
-          width="80%"
-          onRequestClose={() => {
-            setState({ isPaneOpen: false });
-          }}
-        >
-          <SliderComponent sdata={sliderdata} />
-        </SlidingPane>
-
+      <div className={theme == 'light' ? "" : "dark-theme"}>
+        <MaterialReactTable table={table} />
       </div>
     </>
   )

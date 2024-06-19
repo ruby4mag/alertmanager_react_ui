@@ -4,8 +4,10 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
-// Magin
+// Alert
 const AlertDashboard = React.lazy(() => import('./views/alert/Dashboard'))
+const AlertDetail = React.lazy(() => import('./views/alert/Detail'))
+
 
 // Rules
 const AlertRuleList = React.lazy(() => import('./views/rule/alertrule/List'))
@@ -108,6 +110,8 @@ const routes = [
   { path: '/widgets', name: 'Widgets', element: Widgets },
   { path: '/alert', name: 'Base', element: Cards, exact: true },
   { path: '/alert/dashboard', name: 'AlertDashboard', element: AlertDashboard },
+  { path: "/alert/details/:id", name: 'AlertRuleList', element: AlertDetail },
+  { path: "/rule/alertrule/view/:id", name: 'AlertDashboard', element: AlertDetail },
   { path: '/rule/alertrule/list', name: 'AlertRuleList', element: AlertRuleList },
   { path: '/rule/alertrule/new', name: 'AlertRuleList', element: AlertRuleNew },
   { path: "/rule/alertrule/edit/:id", name: 'AlertRuleList', element: AlertRuleEdit },

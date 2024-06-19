@@ -64,6 +64,24 @@ function EditPage() {
         fetchData(id);
     }, [id]);
 
+    // Go back to list page
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                navigate(-1); // Equivalent to history.goBack()
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        // Clean up the event listener on component unmount
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [navigate]);
+
+
     const fetchData = async () => {
         try {
             const response = await api.get(`/api/alertrules/${id}`);
