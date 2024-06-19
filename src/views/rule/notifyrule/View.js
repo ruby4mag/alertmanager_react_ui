@@ -24,8 +24,7 @@ function EditPage() {
 
     const [name, setName] = useState("")
     const [description, setDescription] = useState("")
-    const [selectedOption, setSelectedOption] = useState('');
-    const [fieldvalue, setFieldvalue] = useState("")
+    const [payload, setPayload] = useState('');
 
     const [formattedQuery, setFormattedQuery] = useState(null);
     const fields = [
@@ -64,16 +63,33 @@ function EditPage() {
         fetchData(id);
     }, [id]);
 
+    // Go back to list page
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                navigate(-1); // Equivalent to history.goBack()
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        // Clean up the event listener on component unmount
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [navigate]);
+
+
     const fetchData = async () => {
         try {
-            const response = await api.get(`/api/alertrules/${id}`);
+            const response = await api.get(`/api/notifyrules/${id}`);
             console.log(response.data);
             setData(response.data)
 
             setName(response.data['rulename'])
             setDescription(response.data['ruledescription'])
-            setSelectedOption(response.data['setfield'])
-            setFieldvalue(response.data['setvalue'])
+            setPayload(response.data['payload'])
             setQuery(JSON.parse(response.data['ruleobject']))
 
         } catch (error) {
@@ -86,7 +102,7 @@ function EditPage() {
         console.log(JSON.stringify(formattedQuery));
         const fetchData = async () => {
             try {
-                const response = await api.put(`/api/alertrules/${id}`, { rulename: name, ruledescription: description, ruleobject: formattedQuery.toString(), setfield: selectedOption, setvalue: fieldvalue });
+                const response = await api.put(`/api/notifyrules/${id}`, { rulename: name, ruledescription: description, ruleobject: formattedQuery.toString(), payload: payload });
                 console.log(response.data);
                 addToast(MyToast({
                     title: "Alert Rule",
@@ -118,7 +134,7 @@ function EditPage() {
     };
 
     const handleBackButtonClick = () => {
-        navigate('/rule/alertrule/list');
+        navigate('/rule/notifyrule/list');
     };
 
     if (!data) {
@@ -138,17 +154,8 @@ function EditPage() {
                     <CFormTextarea disabled id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
                 </div>
                 <div className="mb-3">
-                    <CFormLabel htmlFor="exampleFormControlTextarea1">Feild To Set</CFormLabel>
-                    <select disabled value={selectedOption} onChange={handleSelectChange} className="form-select" aria-label="Default select example">
-                        <option value="" >Select Field</option>
-                        <option value="Entity">Entity</option>
-                        <option value="Severity">Severity</option>
-                        <option value="AlertSummary">Alert Summary</option>
-                    </select>
-                </div>
-                <div className="mb-3">
-                    <CFormLabel htmlFor="exampleFormControlInput1">Value To Set</CFormLabel>
-                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Enter new value to be set" value={fieldvalue} onChange={(e) => setFieldvalue(e.target.value)} />
+                    <CFormLabel htmlFor="exampleFormControlTextarea1">Rule Description</CFormLabel>
+                    <CFormTextarea disabled id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={payload} onChange={(e) => setPayload(e.target.value)}></CFormTextarea>
                 </div>
                 <div className="mb-3">
                     <CFormLabel >Alert Rule </CFormLabel>
@@ -164,6 +171,7 @@ function EditPage() {
 }
 
 export default EditPage;
+
 
 
 

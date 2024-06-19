@@ -70,6 +70,11 @@ const _nav = [
         name: 'AlertRule',
         to: '/rule/alertrule/list',
       },
+      {
+        component: CNavItem,
+        name: 'NotifyRule',
+        to: '/rule/notifyrule/list',
+      },
     ],
   },
   {

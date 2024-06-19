@@ -69,7 +69,7 @@
 }
 
 .dark-theme .MuiTableContainer-root::-webkit-scrollbar-thumb {
-  background-color: #555555;
+  background-color: #421a1a;
   border-radius: 5px;
 }
 
@@ -78,7 +78,7 @@
 }
 
 .dark-theme .MuiTableContainer-root::-webkit-scrollbar-track {
-  background-color: #2c2c2c;
+  background-color: #422222;
 }
 
 .dark-theme .MuiIconButton-root {
@@ -88,20 +88,32 @@
 
 .dark-theme .MuiTableRow-head
 {
-  background-color: #332454;
+  background-color: #bcb4d1;
   color: white;
 }
 
 .dark-theme .MuiTableCell-root
 {
-  background-color: #222a4a;
-  color: white;
+  background-color: #2a2e3d;
+  color: rgb(188, 202, 215);
 }
 
 .dark-theme .MuiBox-root
 {
-  background-color: #222a4a;
+  background-color: #2a2e3d;
   color: white;
 }
 
+.link {
+  color: #6c8ac5;
+}
+.link:hover {
+   color: rgb(202, 201, 213)
+}
+
+
+
+.MuiInputBase-input .MuiInput-input .MuiInputBase-inputAdornedEnd {
+  color: rgba(203, 197, 236, 0.87);
+}
 

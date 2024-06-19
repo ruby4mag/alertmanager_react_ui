@@ -15,6 +15,11 @@ const AlertRuleNew = React.lazy(() => import('./views/rule/alertrule/New'))
 const AlertRuleEdit = React.lazy(() => import('./views/rule/alertrule/Edit'))
 const AlertRuleView = React.lazy(() => import('./views/rule/alertrule/View'))
 
+const NotifyRuleList = React.lazy(() => import('./views/rule/notifyrule/List'))
+const NotifyRuleNew = React.lazy(() => import('./views/rule/notifyrule/New'))
+const NotifyRuleEdit = React.lazy(() => import('./views/rule/notifyrule/Edit'))
+const NotifyRuleView = React.lazy(() => import('./views/rule/notifyrule/View'))
+
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -111,11 +116,16 @@ const routes = [
   { path: '/alert', name: 'Base', element: Cards, exact: true },
   { path: '/alert/dashboard', name: 'AlertDashboard', element: AlertDashboard },
   { path: "/alert/details/:id", name: 'AlertRuleList', element: AlertDetail },
-  { path: "/rule/alertrule/view/:id", name: 'AlertDashboard', element: AlertDetail },
+  { path: "/rule/alertrule/view/:id", name: 'AlertDashboard', element: AlertRuleEdit },
   { path: '/rule/alertrule/list', name: 'AlertRuleList', element: AlertRuleList },
   { path: '/rule/alertrule/new', name: 'AlertRuleList', element: AlertRuleNew },
   { path: "/rule/alertrule/edit/:id", name: 'AlertRuleList', element: AlertRuleEdit },
   { path: "/rule/alertrule/view/:id", name: 'AlertRuleList', element: AlertRuleView },
+
+  { path: '/rule/notifyrule/list', name: 'NotifyRuleList', element: NotifyRuleList },
+  { path: '/rule/notifyrule/new', name: 'NotifyRuleList', element: NotifyRuleNew },
+  { path: "/rule/notifyrule/edit/:id", name: 'NotifyRuleList', element: NotifyRuleEdit },
+  { path: "/rule/notifyrule/view/:id", name: 'NotifyRuleList', element: NotifyRuleView },
 
 ]
 

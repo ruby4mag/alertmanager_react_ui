@@ -1,17 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
-import { CForm, CFormLabel, CFormTextarea, CButtonGroup, CButton, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer, CToaster, CCardBody, CCard, CRow, CCol, CCardTitle, CCardText } from '@coreui/react';
-import {
-  cilBell,
-  cilWarning,
-  cilCreditCard,
-  cilCommentSquare,
-  cilEnvelopeOpen,
-  cilFile,
-  cilAccountLogout,
-  cilSettings,
-  cilTask,
-  cilUser,
-} from '@coreui/icons'
+import { CButtonGroup, CButton } from '@coreui/react';
+import { cilWarning } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import {
   MaterialReactTable,
@@ -107,7 +96,7 @@ const DataTable = () => {
     () => [
       {
         accessorKey: 'entity', header: 'Entity', Cell: ({ cell }) => (
-          <Link to={`/alert/details/${cell.row.original.ID}`}>
+          <Link className="link" to={`/alert/details/${cell.row.original.ID}`}>
             {cell.getValue()}
           </Link>
         ),
@@ -124,8 +113,6 @@ const DataTable = () => {
       {
         accessorKey: 'severity', header: 'severity', Cell: ({ cell }) => (
           cell.getValue() == "WARNING" ? <CIcon icon={cilWarning} className="me-2 text-warning" size="lg" /> : <CIcon icon={cilWarning} className="me-2 text-danger" size="lg" />
-
-
         ),
       },
       { accessorKey: 'alertId', header: 'alertid' },

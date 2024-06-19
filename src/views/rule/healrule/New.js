@@ -1,38 +1,33 @@
-// EditPage.js
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import useAxios from '../../../services/useAxios';
-
-
+import React from 'react'
 import {
     CForm, CFormLabel, CFormInput, CFormTextarea, CButton, CToaster
 } from '@coreui/react';
+import { useState, useRef } from 'react';
 import { QueryBuilder, formatQuery } from 'react-querybuilder';
 import 'react-querybuilder/dist/query-builder.css';
+import useAxios from '../../../services/useAxios';
 import MyToast from '../../../components/Toast'
 import { useNavigate } from 'react-router-dom';
 
 
-function EditPage() {
-    const navigate = useNavigate();
-    const api = useAxios();
-    const { id } = useParams();
-    const [data, setData] = useState(null);
+const New = () => {
 
     const [toast, addToast] = useState(0)
     const toaster = useRef()
+    const navigate = useNavigate();
 
     const [name, setName] = useState("")
     const [description, setDescription] = useState("")
     const [selectedOption, setSelectedOption] = useState('');
     const [fieldvalue, setFieldvalue] = useState("")
 
+    const api = useAxios();
+
     const [formattedQuery, setFormattedQuery] = useState(null);
     const fields = [
         { name: 'Entity', label: 'Entity', type: "string" },
         { name: 'Severity', label: 'Severity', type: "string" },
     ];
-
 
     const customProcessor = (rule) => {
         // Add type to each rule based on the field
@@ -59,39 +54,18 @@ function EditPage() {
         setQuery(q);
     };
 
-    useEffect(() => {
-        // Fetch the data for the given ID
-        fetchData(id);
-    }, [id]);
-
-    const fetchData = async () => {
-        try {
-            const response = await api.get(`/api/alertrules/${id}`);
-            console.log(response.data);
-            setData(response.data)
-
-            setName(response.data['rulename'])
-            setDescription(response.data['ruledescription'])
-            setSelectedOption(response.data['setfield'])
-            setFieldvalue(response.data['setvalue'])
-            setQuery(JSON.parse(response.data['ruleobject']))
-
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
     const handleQueryExport = () => {
         const formattedQuery = customFormatQuery(query);
         setFormattedQuery(formattedQuery);
         console.log(JSON.stringify(formattedQuery));
         const fetchData = async () => {
             try {
-                const response = await api.put(`/api/alertrules/${id}`, { rulename: name, ruledescription: description, ruleobject: formattedQuery.toString(), setfield: selectedOption, setvalue: fieldvalue });
+                const response = await api.post('/api/alertrules', { rulename: name, ruledescription: description, ruleobject: formattedQuery.toString(), setfield: selectedOption, setvalue: fieldvalue });
                 console.log(response.data);
                 addToast(MyToast({
                     title: "Alert Rule",
                     timestamp: "Just now",
-                    body: "Alert Rule updated successfully",
+                    body: "Alert Rule added successfully",
                     color: 'success',
                     autohide: true,
                     dismissible: true
@@ -101,7 +75,7 @@ function EditPage() {
                 addToast(MyToast({
                     title: "Alert Rule",
                     timestamp: "Just now",
-                    body: "Failed to update alert rule.",
+                    body: "Failed to add alert rule.",
                     color: 'danger',
                     autohide: true,
                     dismissible: true
@@ -110,7 +84,6 @@ function EditPage() {
         };
 
         fetchData();
-
     };
 
     const handleSelectChange = (event) => {
@@ -121,25 +94,22 @@ function EditPage() {
         navigate('/rule/alertrule/list');
     };
 
-    if (!data) {
-        return <div>Loading...</div>;
-    }
-
     return (
         <>
+
             <CToaster ref={toaster} push={toast} placement="top-end" />
             <CForm>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlInput1">Rule Name</CFormLabel>
-                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Alert Rule name" value={name} onChange={(e) => setName(e.target.value)} />
+                    <CFormInput type="text" id="exampleFormControlInput1" placeholder="Alert Rule name" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlTextarea1">Rule Description</CFormLabel>
-                    <CFormTextarea disabled id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
+                    <CFormTextarea id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
                 </div>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlTextarea1">Feild To Set</CFormLabel>
-                    <select disabled value={selectedOption} onChange={handleSelectChange} className="form-select" aria-label="Default select example">
+                    <select value={selectedOption} onChange={handleSelectChange} className="form-select" aria-label="Default select example">
                         <option value="" >Select Field</option>
                         <option value="Entity">Entity</option>
                         <option value="Severity">Severity</option>
@@ -148,23 +118,20 @@ function EditPage() {
                 </div>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlInput1">Value To Set</CFormLabel>
-                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Enter new value to be set" value={fieldvalue} onChange={(e) => setFieldvalue(e.target.value)} />
+                    <CFormInput type="text" id="exampleFormControlInput1" placeholder="Enter new value to be set" value={fieldvalue} onChange={(e) => setFieldvalue(e.target.value)} />
                 </div>
                 <div className="mb-3">
                     <CFormLabel >Alert Rule </CFormLabel>
-                    <QueryBuilder disabled fields={fields} query={query} onQueryChange={handleQueryChange} />
+                    <QueryBuilder fields={fields} query={query} onQueryChange={handleQueryChange} />
                 </div>
             </CForm>
 
             <div style={{ display: 'flex', gap: '10px' }}>
+                <CButton disabled={name == "" || description == "" || selectedOption == "" || query.rules == "" ? true : false} variant="outline" onClick={handleQueryExport} color="primary">Add Rule</CButton>
                 <CButton variant="outline" onClick={handleBackButtonClick} color="primary">Go Back</CButton>
             </div>
         </>
-    );
+    )
 }
 
-export default EditPage;
-
-
-
-
+export default New
