@@ -101,26 +101,30 @@ const DataTable = () => {
           </Link>
         ),
       },
-      { accessorKey: 'alertTime', header: 'Alert Time' },
-      { accessorKey: 'alertLastTime', header: 'Latest Alert' },
-      { accessorKey: 'alertClearTime', header: 'alertcleartime' },
-      { accessorKey: 'alertSource', header: 'alertsource' },
-      { accessorKey: 'serviceName', header: 'servicename' },
-      { accessorKey: 'alertSummary', header: 'alertsummary' },
-      { accessorKey: 'alertStatus', header: 'alertstatus' },
-      { accessorKey: 'alertNotes', header: 'alertnotes' },
-      { accessorKey: 'alertAcked', header: 'alertacked' },
+      { accessorKey: 'alertfirsttime', header: 'Alert Time' },
+      { accessorKey: 'alertlasttime', header: 'Latest Alert' },
+      { accessorKey: 'alertcleartime', header: 'alertcleartime' },
+      { accessorKey: 'alertsource', header: 'alertsource' },
+      { accessorKey: 'servicename', header: 'servicename' },
+      { accessorKey: 'alertsummary', header: 'alertsummary' },
+      {
+        accessorKey: 'alertstatus', header: 'alertstatus', Cell: ({ cell }) => (
+          cell.getValue() == "OPEN" ? <span class="badge text-bg-warning">{cell.getValue()}</span> : <span class="badge text-bg-success">New</span>
+        ),
+      },
+      { accessorKey: 'alertnotes', header: 'alertnotes' },
+      { accessorKey: 'alertacked', header: 'alertacked' },
       {
         accessorKey: 'severity', header: 'severity', Cell: ({ cell }) => (
           cell.getValue() == "WARNING" ? <CIcon icon={cilWarning} className="me-2 text-warning" size="lg" /> : <CIcon icon={cilWarning} className="me-2 text-danger" size="lg" />
         ),
       },
-      { accessorKey: 'alertId', header: 'alertid' },
-      { accessorKey: 'alertPriority', header: 'alertpriority' },
-      { accessorKey: 'ipAddress', header: 'ipaddress' },
-      { accessorKey: 'alertType', header: 'alerttype' },
-      { accessorKey: 'alertCount', header: 'alertcount' },
-      { accessorKey: 'alertDropped', header: 'alertDropped' },
+      { accessorKey: 'alertid', header: 'alertid' },
+      { accessorKey: 'alertpriority', header: 'alertpriority' },
+      { accessorKey: 'ipaddress', header: 'ipaddress' },
+      { accessorKey: 'alerttype', header: 'alerttype' },
+      { accessorKey: 'alertcount', header: 'alertcount' },
+      { accessorKey: 'alertdropped', header: 'alertDropped' },
 
     ],
     [],

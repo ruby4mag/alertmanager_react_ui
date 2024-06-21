@@ -19,6 +19,7 @@ const New = () => {
     const [name, setName] = useState("")
     const [description, setDescription] = useState("")
     const [payload, setPayload] = useState('');
+    const [endpoint, setEndpoint] = useState('');
 
     const api = useAxios();
 
@@ -59,7 +60,7 @@ const New = () => {
         console.log(JSON.stringify(formattedQuery));
         const fetchData = async () => {
             try {
-                const response = await api.post('/api/notifyrules', { rulename: name, ruledescription: description, ruleobject: formattedQuery.toString(), payload: payload });
+                const response = await api.post('/api/notifyrules', { rulename: name, ruledescription: description, ruleobject: formattedQuery.toString(), payload: payload, endpoint: endpoint });
                 console.log(response.data);
                 addToast(MyToast({
                     title: "Notify Rule",
@@ -107,17 +108,21 @@ const New = () => {
                     <CFormTextarea id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
                 </div>
                 <div className="mb-3">
-                    <CFormLabel htmlFor="exampleFormControlTextarea1">Rule Payload</CFormLabel>
+                    <CFormLabel htmlFor="exampleFormControlTextarea1">Notification Payload</CFormLabel>
                     <CFormTextarea id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={payload} onChange={(e) => setPayload(e.target.value)}></CFormTextarea>
                 </div>
                 <div className="mb-3">
-                    <CFormLabel >Alert Rule </CFormLabel>
+                    <CFormLabel htmlFor="exampleFormControlInput1">Notification Endpoint</CFormLabel>
+                    <CFormInput type="text" id="exampleFormControlInput1" placeholder="Webhook Endpoint" value={endpoint} onChange={(e) => setEndpoint(e.target.value)} />
+                </div>
+                <div className="mb-3">
+                    <CFormLabel >Filter alerts to notity  </CFormLabel>
                     <QueryBuilder fields={fields} query={query} onQueryChange={handleQueryChange} />
                 </div>
             </CForm>
 
             <div style={{ display: 'flex', gap: '10px' }}>
-                <CButton disabled={name == "" || description == "" || payload == "" || query.rules == "" ? true : false} variant="outline" onClick={handleQueryExport} color="primary">Add Rule</CButton>
+                <CButton disabled={name == "" || description == "" || payload == "" || query.rules == "" || endpoint == "" ? true : false} variant="outline" onClick={handleQueryExport} color="primary">Add Rule</CButton>
                 <CButton variant="outline" onClick={handleBackButtonClick} color="primary">Go Back</CButton>
             </div>
         </>

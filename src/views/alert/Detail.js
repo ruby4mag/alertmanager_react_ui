@@ -2,7 +2,7 @@ import React from 'react'
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useParams, } from 'react-router-dom';
-import { CForm, CFormLabel, CFormTextarea, CButton, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer, CToaster, CCardBody, CCard, CRow, CCol, CCardTitle, CCardText } from '@coreui/react';
+import { CForm, CFormLabel, CFormTextarea, CButton, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer, CToaster, CCardBody, CCard, CRow, CCol, CCardTitle, CCardText, CCardHeader } from '@coreui/react';
 import MyToast from '../../components/Toast'
 import useAxios from '../../services/useAxios';
 
@@ -47,6 +47,13 @@ const Detail = () => {
         };
     }, [navigate]);
 
+    const UrlLink = ({ url, text }) => {
+        return (
+            <a href={url} target="_blank" rel="noopener noreferrer">
+                {text}
+            </a>
+        );
+    };
 
     const CommentComponent = () => {
 
@@ -92,7 +99,6 @@ const Detail = () => {
                 <CContainer>
                     <CForm>
                         <div className="mb-3">
-                            <CFormLabel htmlFor="exampleFormControlTextarea1">Add Comment</CFormLabel>
                             <CFormTextarea id="exampleFormControlTextarea12" rows={3} placeholder="Add Comment" value={comment} onChange={(e) => setComment(e.target.value)}></CFormTextarea>
                         </div>
                     </CForm>
@@ -104,103 +110,132 @@ const Detail = () => {
 
     return (
         <>
-            <CToaster ref={toaster} push={toast} placement="top-end" />
-            <h4>Event Details</h4>
-            <CRow>
-                <CCol style={{ flex: '0 0 60%' }}>
-                    <div >
+            <CContainer >
+                <CToaster ref={toaster} push={toast} placement="top-end" />
+                <CRow>
+                    <CCol >
                         <CRow>
                             <CContainer>
-                                <CTable small >
-                                    <CTableHead>
-                                    </CTableHead>
-                                    <CTableBody>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Entity</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['entity']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Time</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertTime']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Latest Time</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertLastTime']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Clear Time</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertClearTime']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Source</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertSource']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Service Name</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['serviceName']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Summary</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertSummary']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Status</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertStatus']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Notes</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertNotes']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Acknowledged</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertAcked']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Severity</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['severity']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Id</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertId']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Priority</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertPriority']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Ip Addess</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['ipAddress']}</CTableDataCell>
-                                        </CTableRow>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="row">Alert Count</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertCount']}</CTableDataCell>
-                                        </CTableRow>
-                                    </CTableBody>
-                                </CTable>
+                                <CCard>
+                                    <CCardHeader>Event Details</CCardHeader>
+                                    <CCardBody>
+                                        <CTable small >
+                                            <CTableBody>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Entity</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['entity']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Time</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertfirsttime']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Latest Time</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertlasttime']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Clear Time</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertcleartime']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Source</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertsource']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Service Name</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['servicename']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Summary</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertsummary']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Status</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertstatus']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Notes</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertnotes']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Acknowledged</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertacked']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Severity</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['severity']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Id</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertid']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Priority</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertpriority']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Ip Addess</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['ipaddress']}</CTableDataCell>
+                                                </CTableRow>
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Alert Count</CTableHeaderCell>
+                                                    <CTableDataCell>{data && data['alertcount']}</CTableDataCell>
+                                                </CTableRow>
+                                            </CTableBody>
+                                        </CTable>
+                                    </CCardBody>
+                                </CCard>
                             </CContainer>
-                            <CommentComponent ></CommentComponent>
                         </CRow>
-                    </div>
-                </CCol>
-                <CCol style={{ flex: '0 0 40%' }}>
-                    <div >
-                        Comments
-                        {data && data['WorkLogs'] && data['WorkLogs'].reverse().map((comment, index) => (
-                            <CCard className="mb-4">
+                    </CCol>
+                    <CCol>
+                        <CContainer>
+                            <CCard>
+                                <CCardHeader>Additional Details</CCardHeader>
                                 <CCardBody>
-                                    <CCardText>
-                                        Date : {comment['createdAt']}<br />
-                                        Author : {comment['author']}<br />
-                                        Comment : {comment['comment']}
-                                    </CCardText>
+                                    <CTable small >
+                                        <CTableBody>
+                                            {data && data['additionaldetails'] && Object.entries(data['additionaldetails']).map(([key, value]) => (
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">{key}</CTableHeaderCell>
+                                                    {key == 'ticket' ? <CTableDataCell> <UrlLink url={value} text="Ticket" /></CTableDataCell> : <CTableDataCell> {value}</CTableDataCell>}
+                                                </CTableRow>
+                                            ))}
+                                        </CTableBody>
+                                    </CTable>
                                 </CCardBody>
                             </CCard>
-                        ))}
-                    </div>
-                </CCol>
-            </CRow >
+                            <CCard className='mt-4'>
+                                <CCardHeader>Add Comment</CCardHeader>
+                                <CCardBody>
+                                    <CommentComponent ></CommentComponent>
+                                </CCardBody>
+                            </CCard>
+                        </CContainer>
+                    </CCol>
+                </CRow>
+            </CContainer >
+            <CContainer>
 
-
+                <CCard className="mt-4 mb-4" hidden={data && data['WorkLogs'] ? false : true} >
+                    <CCardHeader>Comments</CCardHeader>
+                    <CCardBody>
+                        <CCol >
+                            {data && data['WorkLogs'] && data['WorkLogs'].reverse().map((comment, index) => (
+                                <CCard className="mb-4" key={comment['id']}>
+                                    <CCardBody>
+                                        <CCardText>
+                                            Date : {comment['createdAt']}<br />
+                                            Author : {comment['author']}<br />
+                                            Comment : {comment['comment']}
+                                        </CCardText>
+                                    </CCardBody>
+                                </CCard>
+                            ))}
+                        </CCol>
+                    </CCardBody>
+                </CCard>
+            </CContainer >
         </>
     )
 }

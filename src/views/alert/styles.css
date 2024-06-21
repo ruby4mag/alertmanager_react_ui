@@ -111,9 +111,17 @@
    color: rgb(202, 201, 213)
 }
 
-
-
-.MuiInputBase-input .MuiInput-input .MuiInputBase-inputAdornedEnd {
-  color: rgba(203, 197, 236, 0.87);
+table .table-sm > th {
+  color: #4a83b4;
 }
+
+table:nth-child(1) > tbody > tr > th {
+  color: #8280b7;
+}
+
+table:nth-child(1) > tbody > tr > td {
+  color: #b3c0c8;
+}
+
+
 
