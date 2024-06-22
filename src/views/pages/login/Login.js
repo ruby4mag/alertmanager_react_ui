@@ -31,8 +31,8 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       const response = await axios.post('http://192.168.1.201:8080/login', { username, password });
-      const { token } = response.data;
-      login(token); // Set the global context
+      const { token, role } = response.data;
+      login(token, role); // Set the global context
       navigate("/dashboard")
     } catch (error) {
       // Handle login error

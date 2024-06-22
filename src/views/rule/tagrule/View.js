@@ -3,7 +3,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import useAxios from '../../../services/useAxios';
 
-
 import {
     CForm, CFormLabel, CFormInput, CFormTextarea, CButton, CToaster
 } from '@coreui/react';
@@ -12,12 +11,9 @@ import 'react-querybuilder/dist/query-builder.css';
 import MyToast from '../../../components/Toast'
 import { useNavigate } from 'react-router-dom';
 
-
-function EditPage(roles) {
-
-    const navigate = useNavigate();
-
+function TagRuleEdit() {
     const api = useAxios();
+    const navigate = useNavigate();
     const { id } = useParams();
     const [data, setData] = useState(null);
 
@@ -26,7 +22,10 @@ function EditPage(roles) {
 
     const [name, setName] = useState("")
     const [description, setDescription] = useState("")
-    const [payload, setPayload] = useState('');
+    const [tagName, setTagName] = useState("")
+    const [selectedOption, setSelectedOption] = useState("");
+    const [fieldExtraction, setFieldExtraction] = useState("")
+    const [tagValue, setTagValue] = useState("")
 
     const [formattedQuery, setFormattedQuery] = useState(null);
     const fields = [
@@ -85,14 +84,17 @@ function EditPage(roles) {
 
     const fetchData = async () => {
         try {
-            const response = await api.get(`/api/notifyrules/${id}`);
+            const response = await api.get(`/api/tagrules/${id}`);
             console.log(response.data);
             setData(response.data)
 
             setName(response.data['rulename'])
             setDescription(response.data['ruledescription'])
-            setPayload(response.data['payload'])
+            setSelectedOption(response.data['fieldname'])
+            setFieldExtraction(response.data['fieldextraction'])
             setQuery(JSON.parse(response.data['ruleobject']))
+            setTagValue(response.data['tagvalue'])
+            setTagName(response.data['tagname'])
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -104,12 +106,12 @@ function EditPage(roles) {
         console.log(JSON.stringify(formattedQuery));
         const fetchData = async () => {
             try {
-                const response = await api.put(`/api/notifyrules/${id}`, { rulename: name, ruledescription: description, ruleobject: formattedQuery.toString(), payload: payload });
+                const response = await api.put('/api/tagrules', { rulename: name, ruledescription: description, ruleobject: formattedQuery.toString(), fieldname: selectedOption, fieldextraction: fieldExtraction, tagname: tagName, tagvalue: tagValue });
                 console.log(response.data);
                 addToast(MyToast({
-                    title: "Alert Rule",
+                    title: "Tag Rule",
                     timestamp: "Just now",
-                    body: "Alert Rule updated successfully",
+                    body: "Tag Rule updated successfully",
                     color: 'success',
                     autohide: true,
                     dismissible: true
@@ -117,9 +119,9 @@ function EditPage(roles) {
             } catch (error) {
                 console.error('Error fetching data:', error);
                 addToast(MyToast({
-                    title: "Alert Rule",
+                    title: "Tag Rule",
                     timestamp: "Just now",
-                    body: "Failed to update alert rule.",
+                    body: "Failed to update tag rule.",
                     color: 'danger',
                     autohide: true,
                     dismissible: true
@@ -136,7 +138,7 @@ function EditPage(roles) {
     };
 
     const handleBackButtonClick = () => {
-        navigate('/rule/notifyrule/list');
+        navigate('/rule/tagrule/list');
     };
 
     if (!data) {
@@ -149,18 +151,35 @@ function EditPage(roles) {
             <CForm>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlInput1">Rule Name</CFormLabel>
-                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Alert Rule name" value={name} onChange={(e) => setName(e.target.value)} />
+                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Tag Rule name" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlTextarea1">Rule Description</CFormLabel>
-                    <CFormTextarea disabled id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
+                    <CFormTextarea disabled id="exampleFormControlTextarea1" rows={3} placeholder="Tag Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
                 </div>
                 <div className="mb-3">
-                    <CFormLabel htmlFor="exampleFormControlTextarea1">Rule Description</CFormLabel>
-                    <CFormTextarea disabled id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={payload} onChange={(e) => setPayload(e.target.value)}></CFormTextarea>
+                    <CFormLabel htmlFor="exampleFormControlInput1">Tag Name</CFormLabel>
+                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Tag Rule name" value={tagName} onChange={(e) => setTagName(e.target.value)} />
                 </div>
                 <div className="mb-3">
-                    <CFormLabel >Alert Rule </CFormLabel>
+                    <CFormLabel htmlFor="exampleFormControlTextarea1">Feild To Extract From</CFormLabel>
+                    <select disabled value={selectedOption} onChange={handleSelectChange} className="form-select" aria-label="Default select example">
+                        <option value="" >Select Field</option>
+                        <option value="Entity">Entity</option>
+                        <option value="Severity">Severity</option>
+                        <option value="AlertSummary">Alert Summary</option>
+                    </select>
+                </div>
+                <div className="mb-3">
+                    <CFormLabel htmlFor="exampleFormControlInput1">Regex to extract</CFormLabel>
+                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Enter regex to extract" value={fieldExtraction} onChange={(e) => setFieldExtraction(e.target.value)} />
+                </div>
+                <div className="mb-3">
+                    <CFormLabel htmlFor="exampleFormControlInput1">Tag Value</CFormLabel>
+                    <CFormInput disabled type="text" id="exampleFormControlInput1" placeholder="Tag Rule name" value={tagValue} onChange={(e) => setTagValue(e.target.value)} />
+                </div>
+                <div className="mb-3">
+                    <CFormLabel >Tag Rule </CFormLabel>
                     <QueryBuilder disabled fields={fields} query={query} onQueryChange={handleQueryChange} />
                 </div>
             </CForm>
@@ -172,7 +191,7 @@ function EditPage(roles) {
     );
 }
 
-export default EditPage;
+export default TagRuleEdit;
 
 
 

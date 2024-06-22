@@ -96,7 +96,7 @@ const DataTable = () => {
     () => [
       {
         accessorKey: 'entity', header: 'Entity', Cell: ({ cell }) => (
-          <Link className="link" to={`/alert/details/${cell.row.original.ID}`}>
+          <Link className="link" to={`/alert/details/${cell.row.original.ID}`} >
             {cell.getValue()}
           </Link>
         ),
@@ -125,10 +125,20 @@ const DataTable = () => {
       { accessorKey: 'alerttype', header: 'alerttype' },
       { accessorKey: 'alertcount', header: 'alertcount' },
       { accessorKey: 'alertdropped', header: 'alertDropped' },
+      { accessorKey: 'parent', header: 'Parent' },
 
     ],
     [],
   );
+
+  // const getRowProps = (row) => {
+  //   console.log("here")
+  //   return {
+  //     style: {
+  //       backgroundColor: row.original.entity === "tradebeam" ? 'red' : 'black',
+  //     },
+  //   };
+  // };
 
   useEffect(() => {
     // Auto-refresh table data every 15 seconds
@@ -147,6 +157,13 @@ const DataTable = () => {
     enableColumnResizing: true,
     enableStickyHeader: true,
     enableRowSelection: true,
+    muiTableBodyRowProps: ({ row }) => ({
+      //conditionally style  rows
+      sx: {
+        backgroundColor: row.getValue('parent') === true ? 'rgb(34, 43, 111)' : '',
+      },
+    }),
+    //muiTa,bleBodyRowProps: { getRowProps },
     getRowId: (row) => row.id,
     initialState: {
       columnVisibility,
@@ -154,6 +171,10 @@ const DataTable = () => {
       density,
       //showColumnFilters: true,
     },
+    // sx: {
+    //   height: "500px",
+    //   overflowY: 'auto', // Set your desired height
+    // },
     manualFiltering: true,
     manualPagination: true,
     manualSorting: true,

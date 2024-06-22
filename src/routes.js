@@ -4,6 +4,11 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
+// Governace
+const AccessDenied = React.lazy(() => import('./components/AccessDenied'))
+
+
+
 // Alert
 const AlertDashboard = React.lazy(() => import('./views/alert/Dashboard'))
 const AlertDetail = React.lazy(() => import('./views/alert/Detail'))
@@ -19,6 +24,11 @@ const NotifyRuleList = React.lazy(() => import('./views/rule/notifyrule/List'))
 const NotifyRuleNew = React.lazy(() => import('./views/rule/notifyrule/New'))
 const NotifyRuleEdit = React.lazy(() => import('./views/rule/notifyrule/Edit'))
 const NotifyRuleView = React.lazy(() => import('./views/rule/notifyrule/View'))
+
+const TagRuleList = React.lazy(() => import('./views/rule/tagrule/List'))
+const TagRuleNew = React.lazy(() => import('./views/rule/tagrule/New'))
+const TagRuleEdit = React.lazy(() => import('./views/rule/tagrule/Edit'))
+const TagRuleView = React.lazy(() => import('./views/rule/tagrule/View'))
 
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
@@ -116,16 +126,23 @@ const routes = [
   { path: '/alert', name: 'Base', element: Cards, exact: true },
   { path: '/alert/dashboard', name: 'AlertDashboard', element: AlertDashboard },
   { path: "/alert/details/:id", name: 'AlertRuleList', element: AlertDetail },
-  { path: "/rule/alertrule/view/:id", name: 'AlertDashboard', element: AlertRuleEdit },
+
   { path: '/rule/alertrule/list', name: 'AlertRuleList', element: AlertRuleList },
   { path: '/rule/alertrule/new', name: 'AlertRuleList', element: AlertRuleNew },
-  { path: "/rule/alertrule/edit/:id", name: 'AlertRuleList', element: AlertRuleEdit },
+  { path: "/rule/alertrule/edit/:id", name: 'AlertRuleList', element: AlertRuleEdit, roles: ['admin'] },
   { path: "/rule/alertrule/view/:id", name: 'AlertRuleList', element: AlertRuleView },
 
   { path: '/rule/notifyrule/list', name: 'NotifyRuleList', element: NotifyRuleList },
   { path: '/rule/notifyrule/new', name: 'NotifyRuleList', element: NotifyRuleNew },
-  { path: "/rule/notifyrule/edit/:id", name: 'NotifyRuleList', element: NotifyRuleEdit },
+  { path: "/rule/notifyrule/edit/:id", name: 'NotifyRuleList', element: NotifyRuleEdit, roles: ['admin'] },
   { path: "/rule/notifyrule/view/:id", name: 'NotifyRuleList', element: NotifyRuleView },
+
+  { path: '/rule/tagrule/list', name: 'TagRuleList', element: TagRuleList },
+  { path: '/rule/tagrule/new', name: 'TagRuleList', element: TagRuleNew },
+  { path: "/rule/tagrule/edit/:id", name: 'TagRuleList', element: TagRuleEdit, roles: ['admin'] },
+  { path: "/rule/tagrule/view/:id", name: 'TagRuleList', element: TagRuleView },
+
+  { path: "/accessdenied", name: 'NotifyRuleList', element: AccessDenied },
 
 ]
 

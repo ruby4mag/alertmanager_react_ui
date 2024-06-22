@@ -15,7 +15,7 @@ const List = () => {
 
     const fetchData = async () => {
         try {
-            const response = await api.get('/api/notifyrules');
+            const response = await api.get('/api/tagrules');
             console.log(response.data);
             setData(response.data)
 
@@ -30,7 +30,7 @@ const List = () => {
     }, []);
 
     const handleButtonClick = () => {
-        navigate('/rule/notifyrule/new');
+        navigate('/rule/tagrule/new');
     };
 
 
@@ -38,18 +38,18 @@ const List = () => {
         <>
             <CToaster ref={toaster} push={toast} placement="top-end" />
             <CButton variant="outline" onClick={handleButtonClick} color="primary">Add rule</CButton>
-            <CListGroup className="mt-3">
+            <CListGroup className="mt-3 md" >
                 {data.map((item, index) => (
                     <CListGroupItem key={item['_id']} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>{item['rulename']}</span>
                         <div>
                             {role == 'admin' ?
-                                <Link to={`/rule/notifyrule/edit/${item['_id']}`}>
+                                <Link to={`/rule/tagrule/edit/${item['_id']}`}>
                                     <CButton size="sm" variant="outline" color="primary" className="me-2">Edit</CButton>
                                 </Link>
                                 : ""
                             }
-                            <Link to={`/rule/notifyrule/view/${item['_id']}`}>
+                            <Link to={`/rule/tagrule/view/${item['_id']}`}>
                                 <CButton size="sm" variant="outline" color="primary">View</CButton>
                             </Link>
                         </div>

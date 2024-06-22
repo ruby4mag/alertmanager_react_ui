@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import useAxios from '../../../services/useAxios';
+import useCheckPermission from '../../../services/useCheckPermission';
 
 
 import {
@@ -13,9 +14,16 @@ import MyToast from '../../../components/Toast'
 import { useNavigate } from 'react-router-dom';
 
 
-function EditPage() {
-    const navigate = useNavigate();
+function EditPage(roles) {
+
     const api = useAxios();
+    const navigate = useNavigate();
+
+    const checkPermission = useCheckPermission("NotifyRuleEdit");
+    useEffect(() => {
+        checkPermission("NotifyRuleEdit")
+    }, [checkPermission]);
+
     const { id } = useParams();
     const [data, setData] = useState(null);
 

@@ -35,6 +35,7 @@ const useAxios = () => {
             if (status === 401) {
                 // Clear user session and redirect to login page
                 localStorage.removeItem('token'); // Remove token from local storage
+                localStorage.removeItem('userRole'); // Remove token from local storage
                 navigate('/login'); // Redirect to login page
             }
 

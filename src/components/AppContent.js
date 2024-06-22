@@ -23,7 +23,7 @@ const AppContent = () => {
                   path={route.path}
                   exact={route.exact}
                   name={route.name}
-                  element={<route.element />}
+                  element={<route.element roles={route.roles} />}
                 />
               )
             )

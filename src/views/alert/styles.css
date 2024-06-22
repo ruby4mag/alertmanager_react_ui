@@ -4,7 +4,8 @@
 .dark-theme .MuiTable-root {
   background-color: #1e1e1e;
   color: #ffffff;
-  background: #2c2c2c;
+  height: 72vh;
+  overflow-y: auto;
 }
 
 /* Styles for table cells */
@@ -23,6 +24,11 @@
   background-color: #2c2c2c;
 }
 
+.dark-theme .MuiTableRow-head {
+  background-color: #1e1e1e;
+  color: white;
+}
+.css-s
 .dark-theme .MuiTableHead-root .MuiTableCell-root {
   color: #ffffff;
 }
@@ -86,15 +92,15 @@
   color: white;
 }
 
-.dark-theme .MuiTableRow-head
+/* .dark-theme .MuiTableRow-head
 {
   background-color: #bcb4d1;
   color: white;
-}
+} */
 
 .dark-theme .MuiTableCell-root
 {
-  background-color: #2a2e3d;
+  /* background-color: #2a2e3d; */
   color: rgb(188, 202, 215);
 }
 
@@ -121,6 +127,11 @@ table:nth-child(1) > tbody > tr > th {
 
 table:nth-child(1) > tbody > tr > td {
   color: #b3c0c8;
+}
+
+.dark-theme .MuiTableRow-head {
+  background-color: #292d3c;
+  color: white;
 }
 
 

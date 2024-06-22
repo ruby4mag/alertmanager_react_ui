@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { CListGroup, CListGroupItem, CToaster, CContainer, CRow, CCol, CButton } from '@coreui/react';
 import useAxios from '../../../services/useAxios';
 import { useNavigate, Link } from 'react-router-dom';
-import MyToast from '../../../components/Toast'
+import { useAuth } from '../../../auth/AuthContext';
 
 const List = () => {
     const api = useAxios();
@@ -11,6 +11,7 @@ const List = () => {
     const toaster = useRef()
     const [data, setData] = useState([])
     const navigate = useNavigate();
+    const { role } = useAuth();
 
     const fetchData = async () => {
         try {
@@ -37,15 +38,17 @@ const List = () => {
         <>
             <CToaster ref={toaster} push={toast} placement="top-end" />
             <CButton variant="outline" onClick={handleButtonClick} color="primary">Add rule</CButton>
-            <CListGroup className="mt-3">
+            <CListGroup className="mt-3 md" >
                 {data.map((item, index) => (
                     <CListGroupItem key={item['_id']} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>{item['rulename']}</span>
                         <div>
-
-                            <Link to={`/rule/alertrule/edit/${item['_id']}`}>
-                                <CButton size="sm" variant="outline" color="primary" className="me-2">Edit</CButton>
-                            </Link>
+                            {role == 'admin' ?
+                                <Link to={`/rule/alertrule/edit/${item['_id']}`}>
+                                    <CButton size="sm" variant="outline" color="primary" className="me-2">Edit</CButton>
+                                </Link>
+                                : ""
+                            }
                             <Link to={`/rule/alertrule/view/${item['_id']}`}>
                                 <CButton size="sm" variant="outline" color="primary">View</CButton>
                             </Link>

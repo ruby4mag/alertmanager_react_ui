@@ -96,7 +96,7 @@ const Detail = () => {
         return (
             <>
 
-                <CContainer>
+                <CContainer fluid>
                     <CForm>
                         <div className="mb-3">
                             <CFormTextarea id="exampleFormControlTextarea12" rows={3} placeholder="Add Comment" value={comment} onChange={(e) => setComment(e.target.value)}></CFormTextarea>
@@ -110,7 +110,7 @@ const Detail = () => {
 
     return (
         <>
-            <CContainer >
+            <CContainer fluid>
                 <CToaster ref={toaster} push={toast} placement="top-end" />
                 <CRow>
                     <CCol >
@@ -154,10 +154,6 @@ const Detail = () => {
                                                     <CTableDataCell>{data && data['alertstatus']}</CTableDataCell>
                                                 </CTableRow>
                                                 <CTableRow>
-                                                    <CTableHeaderCell scope="row">Alert Notes</CTableHeaderCell>
-                                                    <CTableDataCell>{data && data['alertnotes']}</CTableDataCell>
-                                                </CTableRow>
-                                                <CTableRow>
                                                     <CTableHeaderCell scope="row">Alert Acknowledged</CTableHeaderCell>
                                                     <CTableDataCell>{data && data['alertacked']}</CTableDataCell>
                                                 </CTableRow>
@@ -189,7 +185,7 @@ const Detail = () => {
                         </CRow>
                     </CCol>
                     <CCol>
-                        <CContainer>
+                        <CContainer fluid>
                             <CCard>
                                 <CCardHeader>Additional Details</CCardHeader>
                                 <CCardBody>
@@ -206,6 +202,14 @@ const Detail = () => {
                                 </CCardBody>
                             </CCard>
                             <CCard className='mt-4'>
+                                <CCardHeader>Alert Notes</CCardHeader>
+                                <CCardBody>
+                                    <CTableRow>
+                                        <CTableDataCell>{data && data['alertnotes']}</CTableDataCell>
+                                    </CTableRow>
+                                </CCardBody>
+                            </CCard>
+                            <CCard className='mt-4'>
                                 <CCardHeader>Add Comment</CCardHeader>
                                 <CCardBody>
                                     <CommentComponent ></CommentComponent>
@@ -215,13 +219,13 @@ const Detail = () => {
                     </CCol>
                 </CRow>
             </CContainer >
-            <CContainer>
+            <CContainer fluid>
 
-                <CCard className="mt-4 mb-4" hidden={data && data['WorkLogs'] ? false : true} >
+                <CCard className="mt-4 mb-4" hidden={data && data['worklogs'] ? false : true} >
                     <CCardHeader>Comments</CCardHeader>
                     <CCardBody>
                         <CCol >
-                            {data && data['WorkLogs'] && data['WorkLogs'].reverse().map((comment, index) => (
+                            {data && data['worklogs'] && data['worklogs'].reverse().map((comment, index) => (
                                 <CCard className="mb-4" key={comment['id']}>
                                     <CCardBody>
                                         <CCardText>
