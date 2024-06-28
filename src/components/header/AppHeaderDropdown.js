@@ -61,7 +61,7 @@ const AppHeaderDropdown = () => {
         <CDropdownItem href="#">
           <CIcon icon={cilTask} className="me-2" />
           Tasks
-          <CBadge color="danger" className="ms-2">
+          <CBadge color="danger" className="ms-2"
             42
           </CBadge>
         </CDropdownItem>

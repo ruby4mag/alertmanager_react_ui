@@ -7,6 +7,13 @@
   height: 72vh;
   overflow-y: auto;
 }
+.dark-theme .MuiTable-root {
+  background-color: #1e1e1e;
+  color: #ffffff;
+  height: 72vh;
+  overflow-y: auto;
+}
+
 
 /* Styles for table cells */
 .dark-theme .MuiTableCell-root {
@@ -28,7 +35,7 @@
   background-color: #1e1e1e;
   color: white;
 }
-.css-s
+
 .dark-theme .MuiTableHead-root .MuiTableCell-root {
   color: #ffffff;
 }
@@ -117,15 +124,15 @@
    color: rgb(202, 201, 213)
 }
 
-table .table-sm > th {
+.dark-theme table .table-sm > th {
   color: #4a83b4;
 }
 
-table:nth-child(1) > tbody > tr > th {
+.dark-theme table:nth-child(1) > tbody > tr > th {
   color: #8280b7;
 }
 
-table:nth-child(1) > tbody > tr > td {
+.dark-theme table:nth-child(1) > tbody > tr > td {
   color: #b3c0c8;
 }
 
@@ -133,6 +140,32 @@ table:nth-child(1) > tbody > tr > td {
   background-color: #292d3c;
   color: white;
 }
+
+.dark-theme .MuiCheckbox-colorPrimary{
+  cursor: pointer;
+  color: inherit;
+  color: rgba(217, 217, 222, 0.6);
+}
+
+.MuiTable-root {
+
+  height: 72vh;
+  overflow-y: auto;
+}
+.dark-theme .MuiPaper-root   .MuiAlert-root {
+  background-color: #2a2e3d
+}
+
+.dark-theme .MuiFormLabel-root .MuiInputLabel-root {
+  color: rgba(228, 213, 213, 0.6);
+}
+
+.dark-theme .MuiInputBase-root .MuiInput-root .MuiSelect-root {
+  color: rgba(228, 213, 213, 0.6);
+}
+
+
+
 
 
 

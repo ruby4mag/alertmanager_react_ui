@@ -35,7 +35,7 @@ const _nav = {
 
       {
         component: CNavGroup,
-        name: 'Configurations',
+        name: 'CONFIGURATION',
         to: '/rule',
         icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
         items: [
@@ -85,7 +85,7 @@ const _nav = {
 
       {
         component: CNavGroup,
-        name: 'Configs',
+        name: 'CONFIGURATION',
         to: '/rule',
         icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
         items: [
