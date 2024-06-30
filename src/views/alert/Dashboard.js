@@ -1,26 +1,17 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
-import { CButtonGroup, CButton, CBadge, CContainer } from '@coreui/react';
 import { cilWarning } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import * as icon from '@coreui/icons';
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
-import 'react-sliding-pane/dist/react-sliding-pane.css';
-
 import { Link } from 'react-router-dom';
 import useAxios from '../../services/useAxios';
 import './styles.css'; // Import your custom CSS
-var initial = true;
+
 const DataTable = () => {
-  // Sliding Pane
-  const [state, setState] = useState({
-    isPaneOpen: false,
-    isPaneOpenLeft: false,
-  });
+  const isFirstRender = useRef(true);
   const [theme, setTheme] = useState(localStorage.getItem('coreui-free-react-admin-template-theme') || 'dark');
-  const [sliderdata, setSliderdata] = useState({})
   const api = useAxios();
   // Load saved states from localStorage
   const initialColumnFilters = JSON.parse(localStorage.getItem('columnFilters')) || [];
@@ -49,20 +40,9 @@ const DataTable = () => {
   const [density, setDensity] = useState(initialDensity);
   const [columnSizing, setColumnSizing] = useState(initialColumnSizing);
 
-
   const fetchData = async (columnFilters, globalFilter, sorting, pagination) => {
     console.log("In fetch", JSON.stringify(pagination))
-    console.log("In fetch Row Count", rowCount)
-
-    if (!data.length) {
-
-      setIsLoading(true);
-
-    } else {
-
-      setIsRefetching(true);
-
-    }
+    setIsLoading(true);
 
     const url = new URL(
       '/api/alerts',
@@ -79,33 +59,20 @@ const DataTable = () => {
 
     try {
       const response = await api.get(url.href);
-      const json = await response.data;
-
+      const json = response.data;
       setData(json.data);
       setRowCount(json.totalRowCount);
-      console.log("After fetch Row Count", rowCount, json.totalRowCount)
-
     } catch (error) {
       setIsError(true);
       console.error(error);
     }
-    setIsError(false);
-
-    setIsLoading(false);
-
+    setIsLoading(true);
     setIsRefetching(false);
-
+    isFirstRender.current = false;
   };
-  useEffect(() => {
-    console.log("Initial Fetch")
-    fetchData(columnFilters, globalFilter, sorting, pagination)
-  }, [pagination])
-
 
   useEffect(() => {
 
-    console.log("Change Fetch")
-    console.log("In One" + JSON.stringify(pagination))
     localStorage.setItem('columnFilters', JSON.stringify(columnFilters));
     localStorage.setItem('globalFilter', globalFilter);
     localStorage.setItem('sorting', JSON.stringify(sorting));
@@ -115,14 +82,8 @@ const DataTable = () => {
     localStorage.setItem('density', density);
     localStorage.setItem('columnSizing', JSON.stringify(columnSizing));
     fetchData(columnFilters, globalFilter, sorting, pagination);
-  }, [columnFilters, globalFilter, sorting, pagination, columnOrder, columnVisibility, density, columnSizing]);
+  }, [pagination, columnFilters, globalFilter,]);
 
-  // useEffect(() => {
-  //   console.log("In Two")
-
-  //   // Save states to localStorage
-
-  // }, [columnFilters, globalFilter, sorting, pagination, columnOrder, columnVisibility, density, columnSizing]);
 
   const columns = useMemo(
     () => [
@@ -164,16 +125,26 @@ const DataTable = () => {
     ],
     [],
   );
+  const handlePaginationChange = (updater) => {
+    if (isFirstRender.current) return;
+    //call the setState as normal, but need to check if using an updater callback with a previous state
+    setPagination((prevPagination) =>
+      //if updater is a function, call it with the previous state, otherwise just use the updater value
+      updater instanceof Function ? updater(prevPagination) : JSON.parse(localStorage.getItem('pagination')),
+    );
 
-  // useEffect(() => {
-  //   // Auto-refresh table data every 15 seconds
-  //   const intervalId = setInterval(() => {
-  //     fetchData(columnFilters, globalFilter, sorting, pagination);
-  //   }, 100000);
+    //put more code for your side effects here, guaranteed to only run once, even in React Strict Mode
+  };
 
-  //   // Clear interval on component unmount
-  //   return () => clearInterval(intervalId);
-  // }, [columnFilters, globalFilter, sorting, pagination]);
+  useEffect(() => {
+    // Auto-refresh table data every 15 seconds
+    const intervalId = setInterval(() => {
+      fetchData(columnFilters, globalFilter, sorting, pagination);
+    }, 10000);
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [columnFilters, globalFilter, sorting, pagination]);
 
   const table = useMaterialReactTable({
     columns,
@@ -182,6 +153,7 @@ const DataTable = () => {
     enableColumnResizing: true,
     enableStickyHeader: true,
     enableRowSelection: true,
+    pageCount: -1,
     muiTableBodyRowProps: ({ row }) => ({
       //conditionally style  rows
       sx: {
@@ -191,18 +163,15 @@ const DataTable = () => {
     //muiTa,bleBodyRowProps: { getRowProps },
     getRowId: (row) => row.id,
     initialState: {
-      // columnVisibility,
-      // columnSizing,
       //showColumnFilters: true,
     },
     manualFiltering: true,
-
     manualPagination: true,
     manualSorting: true,
     muiToolbarAlertBannerProps: isError ? { color: 'error', children: 'Error loading alerts' } : undefined,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePaginationChange,
     onSortingChange: setSorting,
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
@@ -221,41 +190,15 @@ const DataTable = () => {
       showAlertBanner: isError,
       showProgressBars: isRefetching,
       sorting,
-      isLoading,
     },
     positionToolbarAlertBanner: 'bottom',
-    // renderTopToolbarCustomActions: ({ table }) => (
-    //   <CContainer fluid>
-    //     <CButtonGroup role="group" aria-label="Basic example" flex>
-    //       <CButtonGroup size="sm" role="group" aria-label="Small button group">
-    //         <CButton color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilList} size="lg" /></CButton>
-    //         <CButton color="primary" variant="outline"><CIcon className='text-primary' icon={icon.cilApple} size="lg" /></CButton>
-    //         <CButton color="primary" variant="outline"><CIcon className='text-danger' icon={icon.cilLineStyle} size="lg" /></CButton>
-    //         <CButton color="primary" variant="outline"><CIcon className='text-warning' icon={icon.cilPaperclip} size="lg" /></CButton>
-    //         <CButton color="primary" variant="outline"><CIcon className='text-primary' icon={icon.cilQrCode} size="lg" /></CButton>
-    //         <CButton color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilThumbUp} size="lg" /></CButton>
-    //         <CButton color="primary" variant="outline"><CIcon className='text-warning' icon={icon.cilTrash} size="lg" /></CButton>
-    //         <CButton color="primary" variant="outline"><CIcon className='text-danger' icon={icon.cilXCircle} size="lg" /></CButton>
-    //       </CButtonGroup>
-    //     </CButtonGroup>
-    //   </CContainer>
 
-    // ),
   });
-
-
-
-  // const hideElementsByClass = (className) => {
-  //   const elements = document.querySelectorAll(`.${MuiBox - root}`);
-  //   elements.forEach(element => {
-  //     element.style.visible = 'hidden';
-  //   });
-  // };
 
   return (
     <>
       <div className={theme == 'light' ? "" : "dark-theme"}>
-        {!isRefetching || !isLoading ? (<MaterialReactTable table={table} />) : ""}
+        <MaterialReactTable table={table} />
       </div>
     </>
   )
