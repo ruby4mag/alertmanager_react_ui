@@ -155,10 +155,7 @@ function EditPage(roles) {
                     <CFormLabel htmlFor="exampleFormControlTextarea1">Rule Description</CFormLabel>
                     <CFormTextarea disabled id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
                 </div>
-                <div className="mb-3">
-                    <CFormLabel htmlFor="exampleFormControlTextarea1">Rule Description</CFormLabel>
-                    <CFormTextarea disabled id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={payload} onChange={(e) => setPayload(e.target.value)}></CFormTextarea>
-                </div>
+
                 <div className="mb-3">
                     <CFormLabel >Alert Rule </CFormLabel>
                     <QueryBuilder disabled fields={fields} query={query} onQueryChange={handleQueryChange} />

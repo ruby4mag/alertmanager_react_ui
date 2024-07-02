@@ -2,13 +2,18 @@ import React from 'react'
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useParams, } from 'react-router-dom';
-import { CForm, CFormLabel, CFormTextarea, CButton, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer, CToaster, CCardBody, CCard, CRow, CCol, CCardTitle, CCardText, CCardHeader } from '@coreui/react';
+import {
+    CForm, CFormLabel, CButtonGroup, CButton, CFormTextarea, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer, CToaster,
+    CCardBody, CCard, CRow, CCol, CCardTitle, CCardText, CCardHeader,
+    CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem
+} from '@coreui/react';
 import MyToast from '../../components/Toast'
 import useAxios from '../../services/useAxios';
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
 import CIcon from '@coreui/icons-react';
 import { cilUser, cilShieldAlt } from '@coreui/icons';
+import * as icon from '@coreui/icons';
 
 
 
@@ -20,6 +25,7 @@ const Detail = () => {
     const navigate = useNavigate();
     const toaster = useRef()
     const [data, setData] = useState(null);
+    const [notifications, setNotifications] = useState(null);
 
     const fetchData = async () => {
         try {
@@ -32,6 +38,21 @@ const Detail = () => {
         }
     };
 
+    const fetchNotifications = async () => {
+        try {
+            const response = await api.get('/api/notifyrules');
+            console.log(response.data);
+            setNotifications(response.data)
+        } catch (error) {
+            console.error('Error fetching data:', error);
+
+        }
+
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
     useEffect(() => {
         // Fetch the data for the given ID
         fetchData(id);
@@ -60,6 +81,123 @@ const Detail = () => {
             </a>
         );
     };
+
+
+    const handleActionButtonClick = async (ModelAction) => {
+        var action
+        if (typeof ModelAction === 'object') {
+            action = ModelAction['modalAction']
+        } else {
+            action = ModelAction
+        }
+
+
+        // Acknowledge Action
+        if (action == 'ack') {
+            const newComment = {
+                comment: "Alert Acknowledged"
+            };
+
+            try {
+                const response = await api.post(`/api/alerts/${id}/acknowledge`, newComment);
+                console.log(`Alert ${id} acknowledged:`, response.data);
+                addToast(MyToast({
+                    title: "Alert Acknowledgement",
+                    timestamp: "Just now",
+                    body: "Alert acknowledged successfully",
+                    color: 'success',
+                    autohide: true,
+                    dismissible: true
+                }))
+                fetchData(id);
+            } catch (error) {
+                console.error(`Failed to acknowledge alert ${id}:`, error);
+            }
+
+
+        }
+
+        // Unacknowledge Action
+        if (action == 'unack') {
+            const newComment = {
+                comment: "Alert Unacknowledged"
+            };
+
+            try {
+                const response = await api.post(`/api/alerts/${id}/unacknowledge`, newComment);
+                console.log(`Alert ${id} acknowledged:`, response.data);
+                addToast(MyToast({
+                    title: "Alert Acknowledgement",
+                    timestamp: "Just now",
+                    body: "Alert unacknowledged successfully",
+                    color: 'success',
+                    autohide: true,
+                    dismissible: true
+                }))
+                fetchData(id);
+            } catch (error) {
+                console.error(`Failed to acknowledge alert ${id}:`, error);
+            }
+
+
+        }
+
+
+
+        // Clear Action
+        if (action == 'clear') {
+            const newComment = {
+                comment: "Clearing Alert"
+            };
+
+            try {
+                const response = await api.post(`/api/alerts/${id}/clear`, newComment);
+                console.log(`Alert ${id} cleared:`, response.data);
+                addToast(MyToast({
+                    title: "Alert Clear",
+                    timestamp: "Just now",
+                    body: "Alert cleared successfully",
+                    color: 'success',
+                    autohide: true,
+                    dismissible: true
+                }))
+                fetchData(id);
+            } catch (error) {
+                console.error(`Failed to clear alert ${id}:`, error);
+            }
+
+        }
+        console.log('Selected Data IDs:', selectedDataIds);
+    };
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    const triggerNotify = async (notificationId, notificationName) => {
+        const newComment = {
+            comment: `Triggering Notification : ${notificationName}`
+        };
+        try {
+            const response = await api.post(`/api/alerts/${id}/notify/${notificationId}`, newComment);
+            console.log(`Alert ${id} cleared:`, response.data);
+            addToast(MyToast({
+                title: "Alert Action",
+                timestamp: "Just now",
+                body: "Alert Notified successfully",
+                color: 'success',
+                autohide: true,
+                dismissible: true
+            }))
+            sleep(2000).then(() => {
+                console.log('End');
+                fetchData(id);
+            });
+
+        } catch (error) {
+            console.error(`Failed to trigger notifivcation  ${notificationName}:`, error);
+        }
+
+    }
 
     const CommentComponent = () => {
 
@@ -116,9 +254,27 @@ const Detail = () => {
 
     return (
         <>
-            <CContainer fluid>
-                <CToaster ref={toaster} push={toast} placement="top-end" />
 
+            <CContainer fluid>
+                <CContainer fluid className='mb-4'>
+
+                    <CToaster ref={toaster} push={toast} placement="top-end" />
+                    <CButtonGroup size="sm" role="group" aria-label="Small button group" className='me-4'>
+                        <CButton onClick={() => handleActionButtonClick('ack')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilUserFollow} size="lg" /></CButton>
+                        <CButton onClick={() => handleActionButtonClick('unack')} color="primary" variant="outline"><CIcon className='text-warning' icon={icon.cilUserUnfollow} size="lg" /></CButton>
+                        <CButton onClick={() => handleActionButtonClick('clear')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilCheckCircle} size="lg" /></CButton>
+                    </CButtonGroup>
+                    <CDropdown>
+                        <CDropdownToggle color="primary" variant="outline" size="sm">Actions</CDropdownToggle>
+                        <CDropdownMenu>
+                            {notifications && notifications.map((notification) => (
+                                <CDropdownItem onClick={() => triggerNotify(notification['_id'], notification['rulename'])}  >{notification['rulename']}</CDropdownItem>
+                            ))}
+
+                        </CDropdownMenu>
+                    </CDropdown>
+
+                </CContainer >
                 {(data && data['parent'] == true) ? (
                     <div>
                         <CCard className='mb-4'>
