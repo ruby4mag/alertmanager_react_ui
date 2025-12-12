@@ -393,6 +393,15 @@ const DataTable = () => {
           .attr('width', width)
           .attr('height', height)
 
+        // add a container group that will be zoomed/panned
+        const g = svg.append('g')
+
+        // enable zoom and pan on the svg, transforming the container group
+        const zoom = d3.zoom().scaleExtent([0.2, 6]).on('zoom', (event) => {
+          g.attr('transform', event.transform)
+        })
+        svg.call(zoom)
+
         // Normalize incoming graph payload: support {nodes, edges} or {nodes, links}
         let nodes = graphData.nodes || []
         let links = graphData.links || graphData.edges || []
@@ -489,13 +498,16 @@ const DataTable = () => {
         function drag() {
           function dragstarted(event, d) {
             if (!event.active) simulation.alphaTarget(0.3).restart()
-            d.fx = d.x
-            d.fy = d.y
+            // account for current zoom transform when fixing positions
+            const t = d3.zoomTransform(svg.node())
+            d.fx = t.invertX(event.x)
+            d.fy = t.invertY(event.y)
           }
 
           function dragged(event, d) {
-            d.fx = event.x
-            d.fy = event.y
+            const t = d3.zoomTransform(svg.node())
+            d.fx = t.invertX(event.x)
+            d.fy = t.invertY(event.y)
           }
 
           function dragended(event, d) {
@@ -507,7 +519,7 @@ const DataTable = () => {
           return d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended)
         }
 
-        const link = svg
+        const link = g
           .append('g')
           .attr('stroke', '#999')
           .attr('stroke-opacity', 0.6)
@@ -516,7 +528,7 @@ const DataTable = () => {
           .join('line')
           .attr('stroke-width', (d) => Math.sqrt(d.value || 1))
 
-        const node = svg
+        const node = g
           .append('g')
           .attr('stroke', '#fff')
           .attr('stroke-width', 1.5)
@@ -527,7 +539,7 @@ const DataTable = () => {
           .attr('fill', (d) => (d.severity === 'WARN' || d.severity === 'WARNING' ? '#f0ad4e' : '#69b3a2'))
           .call(drag())
 
-        const label = svg
+        const label = g
           .append('g')
           .selectAll('text')
           .data(nodesFiltered)
