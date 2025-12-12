@@ -9,6 +9,7 @@ import CIcon from '@coreui/icons-react'
 import * as icon from '@coreui/icons';
 import { Link } from 'react-router-dom';
 import useAxios from '../../services/useAxios';
+import * as d3 from 'd3'
 import './styles.css'; // Import your custom CSS
 import MyToast from '../../components/Toast'
 import { IconButton, Tooltip } from '@mui/material';
@@ -17,6 +18,12 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 
 const DataTable = () => {
   const [visible, setVisible] = useState(false)
+  const [graphVisible, setGraphVisible] = useState(false)
+  const [graphData, setGraphData] = useState(null)
+  const [graphLoading, setGraphLoading] = useState(false)
+  const [graphError, setGraphError] = useState(null)
+  const [graphTitle, setGraphTitle] = useState('')
+  const graphRef = useRef(null)
   const [toast, addToast] = useState(0)
   const toaster = useRef()
   const [comment, setComment] = useState("")
@@ -136,7 +143,50 @@ const DataTable = () => {
         ),
       },
       { accessorKey: 'alertid', header: 'alertid' },
-      { accessorKey: 'alertpriority', header: 'alertpriority' },
+      {
+        accessorKey: 'alertpriority',
+        header: 'alertpriority',
+        Cell: ({ cell }) => {
+          const value = cell.getValue()
+          const entity = cell.row.original && cell.row.original.entity
+
+          const openExternal = async (e) => {
+            e && e.preventDefault()
+            if (!entity) {
+              setGraphError('No entity available')
+              setGraphData(null)
+              setGraphTitle('No entity')
+              setGraphVisible(true)
+              return
+            }
+
+            const url = `http://192.168.1.201:8080/entity/${encodeURIComponent(entity)}`
+            try {
+              setGraphLoading(true)
+              setGraphError(null)
+              setGraphTitle(`Graph for ${entity}`)
+              const response = await api.get(url)
+              setGraphData(response.data)
+              setGraphVisible(true)
+            } catch (err) {
+              console.error('Failed to fetch graph:', err)
+              setGraphError(err?.message || 'Failed to fetch graph')
+              setGraphData(null)
+              setGraphVisible(true)
+            } finally {
+              setGraphLoading(false)
+            }
+          }
+
+          return value === 'NORMAL' ? (
+            <a href="#" className="link" onClick={openExternal}>
+              {value}
+            </a>
+          ) : (
+            value
+          )
+        },
+      },
       { accessorKey: 'ipaddress', header: 'ipaddress' },
       { accessorKey: 'alerttype', header: 'alerttype' },
       { accessorKey: 'alertcount', header: 'alertcount' },
@@ -305,6 +355,207 @@ const DataTable = () => {
     return () => clearInterval(intervalId);
   }, [columnFilters, globalFilter, sorting, pagination]);
 
+
+  // Render D3 graph into modal when graphData is set and modal is visible
+  useEffect(() => {
+    if (!graphVisible || !graphData) return
+
+    // debug: effect entry
+    // eslint-disable-next-line no-console
+    console.log('D3 effect triggered', { graphVisible, hasGraphData: !!graphData })
+
+    // Helper: wait until container has measurable size (modal rendering may be delayed)
+    const waitForSize = async (maxAttempts = 10, delayMs = 100) => {
+      for (let i = 0; i < maxAttempts; i++) {
+        const el = graphRef.current
+        if (el) {
+          const w = el.clientWidth
+          const h = el.clientHeight
+          if (w > 20 && h > 20) return { width: w, height: h }
+        }
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((r) => setTimeout(r, delayMs))
+      }
+      const el = graphRef.current
+      return { width: (el && el.clientWidth) || 800, height: (el && el.clientHeight) || 600 }
+    }
+
+    // clear previous contents
+    d3.select(graphRef.current).selectAll('*').remove()
+
+      // async render so we can wait for sizing
+      ; (async () => {
+        const { width, height } = await waitForSize()
+
+        const svg = d3
+          .select(graphRef.current)
+          .append('svg')
+          .attr('width', width)
+          .attr('height', height)
+
+        // Normalize incoming graph payload: support {nodes, edges} or {nodes, links}
+        let nodes = graphData.nodes || []
+        let links = graphData.links || graphData.edges || []
+
+        // Ensure each node has an 'id' field (use name when id missing)
+        nodes = nodes.map((n, i) => ({ ...n, id: n.id || n.name || `node-${i}` }))
+
+        // Normalize links so source/target are ids (strings)
+        links = links.map((l) => ({
+          ...l,
+          source: typeof l.source === 'object' ? (l.source.id || l.source.name) : l.source,
+          target: typeof l.target === 'object' ? (l.target.id || l.target.name) : l.target,
+          value: l.value || 1,
+        }))
+
+        // Build adjacency for path-finding (undirected)
+        const idToNode = new Map(nodes.map((n) => [n.id, n]))
+        const adj = new Map()
+        nodes.forEach((n) => adj.set(n.id, []))
+        links.forEach((l) => {
+          if (l.source && l.target && adj.has(l.source) && adj.has(l.target)) {
+            adj.get(l.source).push(l.target)
+            adj.get(l.target).push(l.source)
+          }
+        })
+
+        // Find alert nodes
+        const alertNodeIds = Array.from(new Set(nodes.filter((n) => n.has_alert).map((n) => n.id)))
+
+        // Helper: BFS shortest path between two node ids (returns array of ids) or null
+        const bfsPath = (startId, goalId) => {
+          if (startId === goalId) return [startId]
+          const queue = [startId]
+          const visited = new Set([startId])
+          const parent = new Map()
+          while (queue.length) {
+            const cur = queue.shift()
+            const neighbors = adj.get(cur) || []
+            for (const nb of neighbors) {
+              if (visited.has(nb)) continue
+              visited.add(nb)
+              parent.set(nb, cur)
+              if (nb === goalId) {
+                // reconstruct path
+                const path = [goalId]
+                let p = goalId
+                while (p !== startId) {
+                  p = parent.get(p)
+                  if (!p) break
+                  path.push(p)
+                }
+                return path.reverse()
+              }
+              queue.push(nb)
+            }
+          }
+          return null
+        }
+
+        // Determine which nodes to include: nodes with alerts + any nodes on shortest paths between alert nodes
+        const includedIds = new Set(alertNodeIds)
+        for (let i = 0; i < alertNodeIds.length; i++) {
+          for (let j = i + 1; j < alertNodeIds.length; j++) {
+            const a = alertNodeIds[i]
+            const b = alertNodeIds[j]
+            const path = bfsPath(a, b)
+            if (path && path.length > 0) {
+              path.forEach((id) => includedIds.add(id))
+            }
+          }
+        }
+
+        // If there are no alert nodes, show only nodes that explicitly have alerts (will be empty) —
+        // this follows the requirement to show only alerting nodes and their connecting path nodes.
+        const nodesFiltered = nodes.filter((n) => includedIds.has(n.id))
+        const linksFiltered = links.filter((l) => l.source && l.target && includedIds.has(l.source) && includedIds.has(l.target))
+
+        // debug log
+        // eslint-disable-next-line no-console
+        console.log('D3 graph nodes (normalized):', nodes)
+        // eslint-disable-next-line no-console
+        console.log('D3 graph links (normalized):', links)
+        // eslint-disable-next-line no-console
+        console.log('D3 graph nodes (filtered):', nodesFiltered)
+        // eslint-disable-next-line no-console
+        console.log('D3 graph links (filtered):', linksFiltered)
+
+        const simulation = d3
+          .forceSimulation(nodesFiltered)
+          .force('link', d3.forceLink(linksFiltered).id((d) => d.id).distance(80))
+          .force('charge', d3.forceManyBody().strength(-300))
+          .force('center', d3.forceCenter(width / 2, height / 2))
+
+        function drag() {
+          function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart()
+            d.fx = d.x
+            d.fy = d.y
+          }
+
+          function dragged(event, d) {
+            d.fx = event.x
+            d.fy = event.y
+          }
+
+          function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0)
+            d.fx = null
+            d.fy = null
+          }
+
+          return d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended)
+        }
+
+        const link = svg
+          .append('g')
+          .attr('stroke', '#999')
+          .attr('stroke-opacity', 0.6)
+          .selectAll('line')
+          .data(linksFiltered)
+          .join('line')
+          .attr('stroke-width', (d) => Math.sqrt(d.value || 1))
+
+        const node = svg
+          .append('g')
+          .attr('stroke', '#fff')
+          .attr('stroke-width', 1.5)
+          .selectAll('circle')
+          .data(nodesFiltered)
+          .join('circle')
+          .attr('r', (d) => (d.has_alert ? 8 : 6))
+          .attr('fill', (d) => (d.severity === 'WARN' || d.severity === 'WARNING' ? '#f0ad4e' : '#69b3a2'))
+          .call(drag())
+
+        const label = svg
+          .append('g')
+          .selectAll('text')
+          .data(nodesFiltered)
+          .join('text')
+          .text((d) => d.id || d.name || '')
+          .attr('font-size', 10)
+          .attr('dx', 8)
+          .attr('dy', 4)
+
+        // add simple tooltips on hover
+        node.append('title').text((d) => `${d.id}${d.has_alert ? ' (ALERT)' : ''}`)
+
+        simulation.on('tick', () => {
+          link.attr('x1', (d) => d.source.x).attr('y1', (d) => d.source.y).attr('x2', (d) => d.target.x).attr('y2', (d) => d.target.y)
+
+          node.attr('cx', (d) => d.x).attr('cy', (d) => d.y)
+
+          label.attr('x', (d) => d.x).attr('y', (d) => d.y)
+        })
+
+        // cleanup when modal closes
+        return () => {
+          simulation.stop()
+          d3.select(graphRef.current).selectAll('*').remove()
+        }
+      })()
+  }, [graphVisible, graphData])
+
   const table = useMaterialReactTable({
     columns,
     data,
@@ -395,6 +646,31 @@ const DataTable = () => {
               CANCEL
             </CButton>
             <CButton onClick={() => handleActionButtonClick({ modalAction })} color="primary">{modalAction.toUpperCase()}</CButton>
+          </CModalFooter>
+        </CModal>
+        <CModal
+          visible={graphVisible}
+          onClose={() => setGraphVisible(false)}
+          size="xl"
+          aria-labelledby="Graph Modal"
+        >
+          <CModalHeader>
+            <CModalTitle id="graphTitle">{graphTitle}</CModalTitle>
+          </CModalHeader>
+          <CModalBody style={{ minHeight: '60vh' }}>
+            {graphLoading && <div>Loading graph...</div>}
+            {graphError && <div style={{ color: 'red' }}>{graphError}</div>}
+            {!graphLoading && !graphError && graphData && (
+              <div ref={graphRef} style={{ width: '100%', height: '60vh' }} />
+            )}
+            {!graphLoading && !graphError && !graphData && (
+              <div>No graph data available.</div>
+            )}
+          </CModalBody>
+          <CModalFooter>
+            <CButton color="secondary" onClick={() => setGraphVisible(false)}>
+              Close
+            </CButton>
           </CModalFooter>
         </CModal>
       </div>
