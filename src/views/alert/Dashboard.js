@@ -537,8 +537,28 @@ const DataTable = () => {
           .attr('dx', 8)
           .attr('dy', 4)
 
-        // add simple tooltips on hover
-        node.append('title').text((d) => `${d.id}${d.has_alert ? ' (ALERT)' : ''}`)
+        // add richer tooltips on hover showing only node info and alert summaries
+        const formatTooltip = (d) => {
+          const lines = []
+          if (d.id) lines.push(`ID: ${d.id}`)
+          if (d.name && d.name !== d.id) lines.push(`Name: ${d.name}`)
+          if (d.severity) lines.push(`Severity: ${d.severity}`)
+          if (typeof d.has_alert !== 'undefined') lines.push(`Has alert: ${d.has_alert}`)
+
+          // list alert summaries if present (support several common field names)
+          const alerts = d.alerts || d.alertsList || d.alertList || d.alerts_details
+          if (Array.isArray(alerts) && alerts.length > 0) {
+            lines.push('Alerts:')
+            alerts.forEach((a) => {
+              const summary = a.alertsummary || a.summary || a.message || a.title || a.text || a.body || JSON.stringify(a)
+              lines.push(`  - ${summary}`)
+            })
+          }
+
+          return lines.join('\n')
+        }
+
+        node.append('title').text((d) => formatTooltip(d))
 
         simulation.on('tick', () => {
           link.attr('x1', (d) => d.source.x).attr('y1', (d) => d.source.y).attr('x2', (d) => d.target.x).attr('y2', (d) => d.target.y)
