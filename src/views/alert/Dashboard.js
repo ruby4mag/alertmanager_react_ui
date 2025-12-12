@@ -537,28 +537,66 @@ const DataTable = () => {
           .attr('dx', 8)
           .attr('dy', 4)
 
-        // add richer tooltips on hover showing only node info and alert summaries
-        const formatTooltip = (d) => {
-          const lines = []
-          if (d.id) lines.push(`ID: ${d.id}`)
-          if (d.name && d.name !== d.id) lines.push(`Name: ${d.name}`)
-          if (d.severity) lines.push(`Severity: ${d.severity}`)
-          if (typeof d.has_alert !== 'undefined') lines.push(`Has alert: ${d.has_alert}`)
-
-          // list alert summaries if present (support several common field names)
-          const alerts = d.alerts || d.alertsList || d.alertList || d.alerts_details
-          if (Array.isArray(alerts) && alerts.length > 0) {
-            lines.push('Alerts:')
-            alerts.forEach((a) => {
-              const summary = a.alertsummary || a.summary || a.message || a.title || a.text || a.body || JSON.stringify(a)
-              lines.push(`  - ${summary}`)
-            })
-          }
-
-          return lines.join('\n')
+        // add a styled HTML tooltip (better than the default SVG title)
+        const escapeHtml = (unsafe) => {
+          return String(unsafe)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
         }
 
-        node.append('title').text((d) => formatTooltip(d))
+        const formatTooltipHTML = (d) => {
+          let html = '<div style="line-height:1.2">'
+          if (d.id) html += `<div><strong>ID:</strong> ${escapeHtml(d.id)}</div>`
+          if (d.name && d.name !== d.id) html += `<div><strong>Name:</strong> ${escapeHtml(d.name)}</div>`
+          if (d.severity) html += `<div><strong>Severity:</strong> ${escapeHtml(d.severity)}</div>`
+          if (typeof d.has_alert !== 'undefined') html += `<div><strong>Has alert:</strong> ${escapeHtml(String(d.has_alert))}</div>`
+
+          const alerts = d.alerts || d.alertsList || d.alertList || d.alerts_details
+          if (Array.isArray(alerts) && alerts.length > 0) {
+            html += '<div style="margin-top:6px"><strong>Alerts:</strong><ul style="margin:6px 0 0 16px;padding:0">'
+            alerts.forEach((a) => {
+              const summary = a.alertsummary || a.summary || a.message || a.title || a.text || a.body || JSON.stringify(a)
+              html += `<li style="margin-bottom:4px">${escapeHtml(summary)}</li>`
+            })
+            html += '</ul></div>'
+          }
+
+          html += '</div>'
+          return html
+        }
+
+        // create tooltip div inside the graph container
+        const container = d3.select(graphRef.current)
+        // remove any existing tooltip to avoid duplicates
+        container.selectAll('.d3-tooltip').remove()
+        const tooltip = container.append('div')
+          .attr('class', 'd3-tooltip')
+          .style('position', 'absolute')
+          .style('pointer-events', 'none')
+          .style('background', 'rgba(0,0,0,0.85)')
+          .style('color', '#fff')
+          .style('padding', '8px')
+          .style('border-radius', '6px')
+          .style('font-size', '12px')
+          .style('max-width', '360px')
+          .style('display', 'none')
+          .style('z-index', 1000)
+
+        node.on('mouseenter', function (event, d) {
+          tooltip.html(formatTooltipHTML(d)).style('display', 'block')
+        })
+          .on('mousemove', function (event) {
+            const rect = graphRef.current.getBoundingClientRect()
+            const x = event.clientX - rect.left + 12
+            const y = event.clientY - rect.top + 12
+            tooltip.style('left', `${x}px`).style('top', `${y}px`)
+          })
+          .on('mouseleave', function () {
+            tooltip.style('display', 'none')
+          })
 
         simulation.on('tick', () => {
           link.attr('x1', (d) => d.source.x).attr('y1', (d) => d.source.y).attr('x2', (d) => d.target.x).attr('y2', (d) => d.target.y)
