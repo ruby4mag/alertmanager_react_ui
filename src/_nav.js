@@ -54,6 +54,11 @@ const _nav = {
             name: 'Tags',
             to: '/rule/tagrule/list',
           },
+          {
+            component: CNavItem,
+            name: 'Correlation Rules',
+            to: '/rule/correlationrule/list',
+          },
         ],
       },
 
@@ -108,6 +113,11 @@ const _nav = {
             component: CNavItem,
             name: 'Users',
             to: '/rule/notifyrule/list',
+          },
+          {
+            component: CNavItem,
+            name: 'Correlation Rules',
+            to: '/rule/correlationrule/list',
           },
         ],
       },

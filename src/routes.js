@@ -30,6 +30,11 @@ const TagRuleNew = React.lazy(() => import('./views/rule/tagrule/New'))
 const TagRuleEdit = React.lazy(() => import('./views/rule/tagrule/Edit'))
 const TagRuleView = React.lazy(() => import('./views/rule/tagrule/View'))
 
+const CorrelationRuleList = React.lazy(() => import('./views/rule/correlationrule/List'))
+const CorrelationRuleNew = React.lazy(() => import('./views/rule/correlationrule/New'))
+const CorrelationRuleEdit = React.lazy(() => import('./views/rule/correlationrule/Edit'))
+const CorrelationRuleView = React.lazy(() => import('./views/rule/correlationrule/View'))
+
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -141,6 +146,11 @@ const routes = [
   { path: '/rule/tagrule/new', name: 'TagRuleList', element: TagRuleNew },
   { path: "/rule/tagrule/edit/:id", name: 'TagRuleList', element: TagRuleEdit, roles: ['admin'] },
   { path: "/rule/tagrule/view/:id", name: 'TagRuleList', element: TagRuleView },
+
+  { path: '/rule/correlationrule/list', name: 'CorrelationRuleList', element: CorrelationRuleList },
+  { path: '/rule/correlationrule/new', name: 'CorrelationRuleList', element: CorrelationRuleNew },
+  { path: "/rule/correlationrule/edit/:id", name: 'CorrelationRuleList', element: CorrelationRuleEdit, roles: ['admin'] },
+  { path: "/rule/correlationrule/view/:id", name: 'CorrelationRuleList', element: CorrelationRuleView },
 
   { path: "/accessdenied", name: 'NotifyRuleList', element: AccessDenied },
 
