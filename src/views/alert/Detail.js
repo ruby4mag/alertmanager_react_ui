@@ -292,7 +292,7 @@ const Detail = () => {
                                     <CTableBody>
                                         {data && data['childalerts'] && data['childalerts'].map((alert) => (
                                             <CTableRow>
-                                                <CTableDataCell><Link className="link" to={`/alert/details/${alert.ID}`} > {alert.entity}</Link></CTableDataCell>
+                                                <CTableDataCell><Link className="link" to={`/alert/details/${alert._id}`} > {alert.entity}</Link></CTableDataCell>
                                                 <CTableDataCell>{alert.alertfirsttime}</CTableDataCell>
                                                 <CTableDataCell>{alert.entity}</CTableDataCell>
                                                 <CTableDataCell>{alert.alertsummary}</CTableDataCell>

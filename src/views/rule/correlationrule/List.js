@@ -30,7 +30,7 @@ const List = () => {
     }, []);
 
     const handleButtonClick = () => {
-        navigate('/rule/tagrule/new');
+        navigate('/rule/correlationrule/new');
     };
 
 
@@ -44,12 +44,12 @@ const List = () => {
                         <span>{item['groupname']}</span>
                         <div>
                             {role == 'admin' ?
-                                <Link to={`/rule/tagrule/edit/${item['_id']}`}>
+                                <Link to={`/rule/correlationrule/edit/${item['_id']}`}>
                                     <CButton size="sm" variant="outline" color="primary" className="me-2">Edit</CButton>
                                 </Link>
                                 : ""
                             }
-                            <Link to={`/rule/tagrule/view/${item['_id']}`}>
+                            <Link to={`/rule/correlationrule/view/${item['_id']}`}>
                                 <CButton size="sm" variant="outline" color="primary">View</CButton>
                             </Link>
                         </div>
