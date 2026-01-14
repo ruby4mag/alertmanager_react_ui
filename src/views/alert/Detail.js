@@ -304,6 +304,31 @@ const Detail = () => {
                         </CCard>
                     </div>
                 ) : ""}
+
+                {(data && data['parent'] == true && data['grouping_reason']) ? (
+                    <div className="mb-4">
+                        <CCard>
+                            <CCardHeader>Why grouped?</CCardHeader>
+                            <CCardBody>
+                                {data['grouping_reason'].type === 'SIMILARITY' ? (
+                                    <>
+                                        <p className="mb-2"><strong>Grouped by similarity:</strong></p>
+                                        <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
+                                            {data['grouping_reason'].reasons && data['grouping_reason'].reasons.map((reason, idx) => (
+                                                <li key={idx} className="mb-1">
+                                                    <span className="text-success me-2">✔</span>
+                                                    {reason}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                ) : (
+                                    <p>{data['grouping_reason'].description || "Grouped based on correlation rules."}</p>
+                                )}
+                            </CCardBody>
+                        </CCard>
+                    </div>
+                ) : null}
                 <CCol>
                     <CRow>
                         <CCol >

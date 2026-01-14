@@ -28,15 +28,26 @@
 }
 
 // Card improvements
+// Card improvements
 .card {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
+  // Default Light Mode
   background: white;
+  color: #1e293b; // Slate 800
   border-radius: 1rem;
   
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  // Ensure card header/footer text is also visible
+  .card-header, .card-footer {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-weight: 600;
+    // Color inherits from card
   }
 }
 
@@ -52,14 +63,30 @@
 }
 
 // Header glassmorphism
+// Header glassmorphism
 .header {
   // Override CoreUI variables for header
   --cui-header-bg: rgba(255, 255, 255, 0.8);
-  background: var(--cui-header-bg) !important;
+  background: var(--cui-header-bg); // Removed !important to allow override
   backdrop-filter: blur(20px) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
   z-index: 1030;
+  
+  // Default Text Color (Light Mode)
+  color: #1e293b;
+  
+  .nav-link, .header-toggler {
+    color: #475569; // Slate 600
+    
+    &:hover, &:focus, &.active {
+      color: #0f172a; // Slate 900
+    }
+    
+    .icon {
+      color: currentColor;
+    }
+  }
 }
 
 // Sidebar modifications for modern look
@@ -123,7 +150,70 @@
   --cui-primary-rgb: 8, 145, 178;
 }
 
+// Custom Dark/Light Mode Handling
 body {
   font-family: var(--cui-body-font-family);
-  background-color: #ecfeff !important; // Cyan 50
+  // Default (Light Mode) Specifics if variables define them, otherwise fallback
+  background-color: var(--cui-body-bg, #ecfeff);
+  color: var(--cui-body-color, #1e293b);
+}
+
+// Global Text Visibility Overrides - Conditional on theme
+.dropdown-menu, .modal-content, .popover, .form-control, .form-select {
+  // Use CSS variables for colors so they adapt
+  color: var(--cui-body-color);
+  background-color: var(--cui-body-bg);
+  border-color: var(--cui-border-color);
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  color: var(--cui-heading-color, inherit);
+}
+
+input, textarea, select {
+  color: var(--cui-input-color, inherit) !important;
+  background-color: var(--cui-input-bg, inherit);
+}
+
+// Ensure icons in buttons/navs inherit or are visible
+.nav-icon, .header-toggler-icon {
+  color: currentColor;
+}
+
+// Dark Mode Overrides using CoreUI standard mixin
+@include color-mode(dark) {
+  body {
+    background-color: var(--cui-body-bg);
+    color: var(--cui-body-color);
+  }
+
+  .card {
+    background-color: var(--cui-card-bg);
+    color: var(--cui-body-color);
+    box-shadow: none;
+    border: 1px solid var(--cui-border-color);
+  }
+
+  .header {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    
+    .nav-link, .header-toggler {
+      color: var(--cui-body-color) !important;
+      
+      &:hover, &:focus, &.active {
+        color: var(--cui-high-emphasis-color, #fff) !important;
+      }
+    }
+  }
+
+  .glass-panel {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .sidebar {
+    --cui-sidebar-bg: #0f172a; // Darker shade for sidebar in dark mode
+    background-color: var(--cui-sidebar-bg) !important;
+  }
 }

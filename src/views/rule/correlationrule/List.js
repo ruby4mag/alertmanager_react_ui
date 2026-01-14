@@ -39,22 +39,25 @@ const List = () => {
             <CToaster ref={toaster} push={toast} placement="top-end" />
             <CButton variant="outline" onClick={handleButtonClick} color="primary">Add rule</CButton>
             <CListGroup className="mt-3 md" >
-                {data.map((item, index) => (
-                    <CListGroupItem key={item['_id']} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>{item['groupname']}</span>
-                        <div>
-                            {role == 'admin' ?
-                                <Link to={`/rule/correlationrule/edit/${item['_id']}`}>
-                                    <CButton size="sm" variant="outline" color="primary" className="me-2">Edit</CButton>
+                {data.map((item, index) => {
+                    const itemId = item._id || item.id || item.ID;
+                    return (
+                        <CListGroupItem key={itemId || index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>{item['groupname']}</span>
+                            <div>
+                                {role == 'admin' ?
+                                    <Link to={`/rule/correlationrule/edit/${itemId}`}>
+                                        <CButton size="sm" variant="outline" color="primary" className="me-2">Edit</CButton>
+                                    </Link>
+                                    : ""
+                                }
+                                <Link to={`/rule/correlationrule/view/${itemId}`}>
+                                    <CButton size="sm" variant="outline" color="primary">View</CButton>
                                 </Link>
-                                : ""
-                            }
-                            <Link to={`/rule/correlationrule/view/${item['_id']}`}>
-                                <CButton size="sm" variant="outline" color="primary">View</CButton>
-                            </Link>
-                        </div>
-                    </CListGroupItem>
-                ))}
+                            </div>
+                        </CListGroupItem>
+                    );
+                })}
             </CListGroup >
         </>
     )
