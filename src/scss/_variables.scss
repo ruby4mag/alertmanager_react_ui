@@ -3,3 +3,54 @@
 // If you want to customize your project please add your variables below.
 
 $enable-deprecation-messages: false !default;
+
+// Colors - Ocean / Teal Theme
+$primary: #0891b2; // Cyan 600
+$secondary: #64748b; // Slate 500
+$success: #10b981; // Emerald 500
+$info: #3b82f6; // Blue 500
+$warning: #f59e0b; // Amber 500
+$danger: #ef4444; // Red 500
+$light: #f1f5f9; // Slate 100
+$dark: #0f172a; // Slate 900
+
+// Body
+$body-bg: #ecfeff; // Cyan 50 - Very light tint
+$body-color: #1e293b; // Slate 800
+
+// Typography
+$font-family-base: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+$headings-font-weight: 700;
+
+// Components
+$border-radius: 0.75rem; // More rounded
+$border-radius-lg: 1rem;
+$border-radius-sm: 0.5rem;
+
+$box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+$box-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+$card-border-width: 0;
+$card-box-shadow: $box-shadow;
+$card-cap-bg: transparent;
+
+$input-border-color: #cbd5e1;
+$input-focus-border-color: $primary;
+$input-focus-box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+
+$btn-font-weight: 600;
+$btn-focus-box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+
+// Sidebar
+$sidebar-width: 17rem; // Slightly wider
+$sidebar-bg: #164e63; // Cyan 900 - Deep Rich Teal
+$sidebar-color: #cffafe; // Cyan 100
+$sidebar-nav-link-color: #a5f3fc; // Cyan 200
+$sidebar-nav-link-active-color: #ffffff;
+$sidebar-nav-link-active-bg: rgba(0, 0, 0, 0.2);
+$sidebar-nav-link-hover-color: #ffffff;
+$sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+
+$header-bg: rgba(255, 255, 255, 0.9);
+$header-box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+$header-border-bottom-width: 0;

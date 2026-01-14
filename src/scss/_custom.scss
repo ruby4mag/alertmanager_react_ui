@@ -1,1 +1,129 @@
-// Here you can add other styles
+// Custom styles
+
+// Soften scrollbars
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+// Glassmorphism utility
+.glass-panel {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+// Card improvements
+.card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  background: white;
+  border-radius: 1rem;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+}
+
+// Table styling tweaks
+.table {
+  th {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: #0e7490; // Dark Cyan
+  }
+}
+
+// Header glassmorphism
+.header {
+  // Override CoreUI variables for header
+  --cui-header-bg: rgba(255, 255, 255, 0.8);
+  background: var(--cui-header-bg) !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+  z-index: 1030;
+}
+
+// Sidebar modifications for modern look
+.sidebar {
+  --cui-sidebar-bg: #164e63; // Cyan 900
+  background-color: var(--cui-sidebar-bg) !important;
+  border-right: none !important;
+  box-shadow: 4px 0 24px 0 rgba(0,0,0,0.1);
+}
+
+.sidebar-brand-full {
+  filter: brightness(0) invert(1); // Make logo white if it's an image
+}
+
+.sidebar-nav .nav-link {
+  border-radius: 0.75rem; // More rounded
+  margin: 0.25rem 0.75rem;
+  width: auto;
+  font-weight: 500;
+  
+  &:hover {
+    background: rgba(255,255,255, 0.15);
+    transform: translateX(4px);
+    transition: all 0.2s ease;
+  }
+  
+  &.active {
+    background: #06b6d4 !important; // Cyan 500
+    box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.4);
+    color: white !important;
+
+    .nav-icon {
+      color: white !important;
+    }
+  }
+}
+
+// Adjust container padding
+.container-lg, .container-md, .container-sm, .container-xl, .container-fluid {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+// Button Overrides
+.btn-primary {
+  background-color: #0891b2;
+  border-color: #0891b2;
+  box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.3);
+  
+  &:hover, &:focus, &:active {
+    background-color: #0e7490 !important;
+    border-color: #0e7490 !important;
+    box-shadow: 0 10px 15px -3px rgba(8, 145, 178, 0.4);
+  }
+}
+
+// Global Font & Variables
+:root {
+  --cui-body-font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+  --cui-primary: #0891b2;
+  --cui-primary-rgb: 8, 145, 178;
+}
+
+body {
+  font-family: var(--cui-body-font-family);
+  background-color: #ecfeff !important; // Cyan 50
+}

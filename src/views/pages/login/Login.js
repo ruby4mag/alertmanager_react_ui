@@ -90,8 +90,8 @@ const Login = () => {
                   <div>
                     <h2>Sign up</h2>
                     <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                      tempor incididunt ut labore et dolore magna aliqua.
+                      Join us today to manage your alerts with ease and efficiency.
+                      Streamline your workflow starting now.
                     </p>
                     <Link to="/register">
                       <CButton color="primary" className="mt-3" active tabIndex={-1}>
@@ -105,7 +105,7 @@ const Login = () => {
           </CCol>
         </CRow>
       </CContainer>
-    </div>
+    </div >
   )
 }
 
