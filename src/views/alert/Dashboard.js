@@ -84,7 +84,23 @@ const DataTable = () => {
     try {
       const response = await api.get(url.href);
       const json = response.data;
-      setData(json.data);
+
+      const enrichedData = await Promise.all(json.data.map(async (row) => {
+        if (row.groupalerts && row.groupalerts.length > 0) {
+          try {
+            const detailRes = await api.get(`/api/alerts/${row._id}`);
+            const childAlerts = detailRes.data.childalerts || [];
+            const openCount = childAlerts.filter(c => c.alertstatus === 'OPEN').length;
+            return { ...row, openGroupCount: openCount };
+          } catch (e) {
+            console.error('Error fetching group details', e);
+            return row;
+          }
+        }
+        return row;
+      }));
+
+      setData(enrichedData);
       setRowCount(json.totalRowCount);
     } catch (error) {
       setIsError(true);
@@ -119,7 +135,7 @@ const DataTable = () => {
         accessorKey: 'entity', header: 'Entity', Cell: ({ cell }) => (
           <Link className="link" to={`/alert/details/${cell.row.original._id}`} >
             {cell.row.original.groupalerts && (cell.row.original.groupalerts).length > 0 ?
-              <div><span className="badge text-bg-warning" style={{ marginRight: '5px' }}>{cell.row.original.groupalerts.length}</span>{cell.getValue()}</div>
+              <div><span className="badge text-bg-warning" style={{ marginRight: '5px' }}>{cell.row.original.openGroupCount ?? cell.row.original.groupalerts.length}</span>{cell.getValue()}</div>
               : cell.getValue()}
           </Link>
         ),

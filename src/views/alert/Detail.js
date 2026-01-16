@@ -286,6 +286,7 @@ const Detail = () => {
                                             <CTableHeaderCell scope="col">Entity</CTableHeaderCell>
                                             <CTableHeaderCell scope="col">Alert Time</CTableHeaderCell>
                                             <CTableHeaderCell scope="col">Severity</CTableHeaderCell>
+                                            <CTableHeaderCell scope="col">Alert Status</CTableHeaderCell>
                                             <CTableHeaderCell scope="col">Alert Summary</CTableHeaderCell>
                                         </CTableRow>
                                     </CTableHead>
@@ -294,7 +295,20 @@ const Detail = () => {
                                             <CTableRow>
                                                 <CTableDataCell><Link className="link" to={`/alert/details/${alert._id}`} > {alert.entity}</Link></CTableDataCell>
                                                 <CTableDataCell>{alert.alertfirsttime}</CTableDataCell>
-                                                <CTableDataCell>{alert.entity}</CTableDataCell>
+                                                <CTableDataCell>
+                                                    {(() => {
+                                                        const sev = alert.severity ? alert.severity.toUpperCase() : '';
+                                                        if (sev === 'CRITICAL') return <span className="badge text-bg-danger">{alert.severity}</span>;
+                                                        if (sev === 'WARN' || sev === 'WARNING') return <span className="badge text-bg-warning">{alert.severity}</span>;
+                                                        return <span>{alert.severity}</span>;
+                                                    })()}
+                                                </CTableDataCell>
+                                                <CTableDataCell>
+                                                    {alert.alertstatus === 'OPEN' ?
+                                                        <span className="badge text-bg-warning">OPEN</span> :
+                                                        <span className="badge text-bg-success">CLOSED</span>
+                                                    }
+                                                </CTableDataCell>
                                                 <CTableDataCell>{alert.alertsummary}</CTableDataCell>
                                             </CTableRow>
                                         ))}
