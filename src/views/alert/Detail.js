@@ -14,6 +14,7 @@ import 'react-vertical-timeline-component/style.min.css';
 import CIcon from '@coreui/icons-react';
 import { cilUser, cilShieldAlt } from '@coreui/icons';
 import * as icon from '@coreui/icons';
+import ChatBot from '../../components/ChatBot';
 
 
 
@@ -470,6 +471,7 @@ const Detail = () => {
                     </CRow>
                 </CCol>
             </CContainer >
+            <ChatBot alertData={data} />
         </>
     )
 }

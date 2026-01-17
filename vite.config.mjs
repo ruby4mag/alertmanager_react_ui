@@ -42,7 +42,12 @@ export default defineConfig(() => {
     server: {
       port: 3000,
       proxy: {
-        // https://vitejs.dev/config/server-options.html
+        '/n8n-webhook': {
+          target: 'http:192.168.1.201:5678',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/n8n-webhook/, ''),
+          secure: false,
+        },
       },
     },
   }
