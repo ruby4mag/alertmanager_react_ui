@@ -148,6 +148,8 @@
   --cui-body-font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
   --cui-primary: #0891b2;
   --cui-primary-rgb: 8, 145, 178;
+  --cui-body-bg: #ffffff;
+  --cui-sidebar-bg: #120112; 
 }
 
 // Custom Dark/Light Mode Handling
@@ -216,4 +218,11 @@ input, textarea, select {
     --cui-sidebar-bg: #0f172a; // Darker shade for sidebar in dark mode
     background-color: var(--cui-sidebar-bg) !important;
   }
+}
+
+// Disable card hover effect on Alert Detail page
+.alert-detail-view .card:hover {
+  transform: none;
+  box-shadow: none;
+  transition: none;
 }

@@ -10,9 +10,11 @@ import {
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilChatBubble, cilX, cilSend } from '@coreui/icons';
-import axios from 'axios';
 
-const ChatBot = ({ alertData }) => {
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+const ChatBot = ({ alertData, graphData }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
@@ -44,26 +46,90 @@ const ChatBot = ({ alertData }) => {
         hasInitialized.current = true;
         console.log("Initializing chat. Alert Data:", alertData); // Debug log
 
+        // Add a placeholder message for the streaming response
+        setMessages([
+            { sender: 'ai', text: 'Hello, I am your AI assistant. I will help you analyse this incident. Let me start with gathering some insights.' },
+            { sender: 'ai', text: '' }
+        ]);
+
         try {
-            // Send alert data to n8n to get a summary
-            const response = await axios.post(N8N_WEBHOOK_URL, {
-                action: 'init',
-                alert: alertData,
+            const alertPayload = { ...alertData };
+            if (graphData && graphData.nodes && graphData.nodes.length > 0) {
+                alertPayload.graph_data = graphData;
+            }
+
+            // Use fetch for streaming support
+            const response = await fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'init',
+                    alert: alertPayload,
+                }),
             });
 
-            if (response.data && response.data.output) {
-                setMessages([
-                    { sender: 'ai', text: response.data.output },
-                ]);
-            } else if (typeof response.data === 'string') {
-                setMessages([
-                    { sender: 'ai', text: response.data },
-                ]);
-            } else {
-                setMessages([
-                    { sender: 'ai', text: "Hello! I'm ready to help you with this alert." },
-                ]);
+            if (!response.body) throw new Error('ReadableStream not supported.');
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let aiResponseText = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                // N8N streams JSON objects separated by newlines.
+                // We need to parse each line to extract the 'content' field.
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    try {
+                        const json = JSON.parse(line);
+                        // Access 'content' field based on node output structure
+                        if (json.type === 'item' && json.content) {
+                            aiResponseText += json.content;
+                        } else if (json.type === 'end') {
+                            // Stream ended
+                        }
+                    } catch (e) {
+                        // If not JSON, append as raw text (fallback)
+                        if (!line.trim().startsWith('{')) {
+                            aiResponseText += line;
+                        }
+                    }
+                }
+
+                setMessages((prev) => {
+                    const newMessages = [...prev];
+                    const lastMsg = newMessages[newMessages.length - 1];
+                    if (lastMsg?.sender === 'ai') {
+                        lastMsg.text = aiResponseText;
+                    }
+                    return newMessages;
+                });
             }
+
+            // Backward compatibility checks: If response was valid JSON {output: ...}, use that.
+            try {
+                if (aiResponseText.trim().startsWith('{') && aiResponseText.trim().endsWith('}')) {
+                    const json = JSON.parse(aiResponseText);
+                    if (json?.output) {
+                        setMessages((prev) => {
+                            const newMessages = [...prev];
+                            const lastMsg = newMessages[newMessages.length - 1];
+                            if (lastMsg?.sender === 'ai') {
+                                lastMsg.text = json.output;
+                            }
+                            return newMessages;
+                        });
+                    }
+                }
+            } catch (e) {
+                // Not JSON, keep raw text which is the expected behavior for streaming
+            }
+
         } catch (error) {
             console.error('Failed to initialize chat:', error);
             setMessages([
@@ -82,33 +148,99 @@ const ChatBot = ({ alertData }) => {
         setInputText('');
         setLoading(true);
 
+        // Add a placeholder message for the streaming response
+        setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
+
         try {
-            // Send message + history + alert context to n8n
-            const response = await axios.post(N8N_WEBHOOK_URL, {
-                action: 'chat',
-                message: userMessage.text,
-                chatHistory: messages.concat(userMessage),
-                alertId: alertData?._id,
-                alert: alertData, // Include full alert data for context
+            // Use fetch for streaming support
+            const response = await fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'chat',
+                    message: userMessage.text,
+                    chatHistory: messages.concat(userMessage),
+                    alertId: alertData?._id,
+                    alert: alertData,
+                }),
             });
 
-            let aiResponseText = "I didn't get a response.";
-            if (response.data && response.data.output) {
-                aiResponseText = response.data.output
-            } else if (typeof response.data === 'string') {
-                aiResponseText = response.data
+            if (!response.body) throw new Error('ReadableStream not supported.');
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let aiResponseText = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                // N8N streams JSON objects separated by newlines.
+                // We need to parse each line to extract the 'content' field.
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    try {
+                        const json = JSON.parse(line);
+                        // Access 'content' field based on node output structure
+                        if (json.type === 'item' && json.content) {
+                            aiResponseText += json.content;
+                        } else if (json.type === 'end') {
+                            // Stream ended
+                        }
+                    } catch (e) {
+                        // If not JSON, append as raw text (fallback)
+                        if (!line.trim().startsWith('{')) {
+                            aiResponseText += line;
+                        }
+                    }
+                }
+
+                setMessages((prev) => {
+                    const newMessages = [...prev];
+                    const lastMsg = newMessages[newMessages.length - 1];
+                    if (lastMsg?.sender === 'ai') {
+                        lastMsg.text = aiResponseText;
+                    }
+                    return newMessages;
+                });
             }
 
-            setMessages((prev) => [
-                ...prev,
-                { sender: 'ai', text: aiResponseText },
-            ]);
+            // Backward compatibility checks: If response was valid JSON {output: ...}, use that.
+            // This prevents breaking existing N8N workflows that return strictly JSON.
+            try {
+                // Only attempt if it looks like JSON starts/ends
+                if (aiResponseText.trim().startsWith('{') && aiResponseText.trim().endsWith('}')) {
+                    const json = JSON.parse(aiResponseText);
+                    if (json?.output) {
+                        setMessages((prev) => {
+                            const newMessages = [...prev];
+                            const lastMsg = newMessages[newMessages.length - 1];
+                            if (lastMsg?.sender === 'ai') {
+                                lastMsg.text = json.output;
+                            }
+                            return newMessages;
+                        });
+                    }
+                }
+            } catch (e) {
+                // Not JSON, keep raw text which is the expected behavior for streaming
+            }
+
         } catch (error) {
             console.error('Error sending message:', error);
-            setMessages((prev) => [
-                ...prev,
-                { sender: 'ai', text: 'Sorry, something went wrong processing your request.' },
-            ]);
+            setMessages((prev) => {
+                const newMessages = [...prev];
+                const lastMsg = newMessages[newMessages.length - 1];
+                if (lastMsg?.sender === 'ai') {
+                    lastMsg.text += '\n\n(Error: Request failed)';
+                } else {
+                    newMessages.push({ sender: 'ai', text: 'Sorry, something went wrong processing your request.' });
+                }
+                return newMessages;
+            });
         } finally {
             setLoading(false);
         }
@@ -151,10 +283,10 @@ const ChatBot = ({ alertData }) => {
                 <CCard
                     style={{
                         position: 'fixed',
+                        top: '20px',
                         bottom: '20px',
                         right: '20px',
-                        width: '350px',
-                        height: '500px',
+                        width: '700px',
                         zIndex: 1050,
                         boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                         display: 'flex',
@@ -194,7 +326,13 @@ const ChatBot = ({ alertData }) => {
                                         wordWrap: 'break-word',
                                     }}
                                 >
-                                    {msg.text}
+                                    <ReactMarkdown
+                                        children={msg.text}
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            a: ({ node, ...props }) => <a style={{ color: msg.sender === 'user' ? '#fff' : 'blue' }} target="_blank" rel="noopener noreferrer" {...props} />
+                                        }}
+                                    />
                                 </div>
                             </div>
                         ))}
