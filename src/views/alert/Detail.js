@@ -18,6 +18,7 @@ import { cilUser, cilShieldAlt } from '@coreui/icons';
 import * as icon from '@coreui/icons';
 import * as d3 from 'd3'
 import ChatBot from '../../components/ChatBot';
+import IncidentFeedback from '../../components/IncidentFeedback';
 
 
 
@@ -581,6 +582,18 @@ const Detail = () => {
                     </CDropdown>
 
                 </CContainer >
+                {data && (
+                    <CContainer fluid>
+                        <IncidentFeedback
+                            incidentId={id}
+                            incidentStatus={data.alertstatus}
+                            topologyNodes={graphData?.nodes || []}
+                            aiRootCause={data.additionaldetails?.['Root Cause'] || data.entity}
+                            aiConfidence={data.additionaldetails?.['Confidence'] || 0.85}
+                            existingSymptoms={data.childalerts?.map(a => a.entity) || []}
+                        />
+                    </CContainer>
+                )}
                 {(data && data['parent'] == true) ? (
                     <div>
                         <CCard className='mb-4'>
