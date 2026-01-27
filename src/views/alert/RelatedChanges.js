@@ -143,7 +143,7 @@ const NeighborChangesList = ({ changes }) => {
     )
 }
 
-const RelatedChanges = ({ alertId }) => {
+const RelatedChanges = ({ alertId, onDataLoaded }) => {
     const api = useAxios()
     const [data, setData] = useState({ direct_changes: [], neighbor_changes: [] })
     const [loading, setLoading] = useState(true)
@@ -166,6 +166,13 @@ const RelatedChanges = ({ alertId }) => {
                     // Provide backward compatibility or fallback
                     payload.direct_changes = payload.related_changes
                     payload.neighbor_changes = []
+                }
+
+                if (onDataLoaded) {
+                    onDataLoaded({
+                        direct_changes: payload.direct_changes || [],
+                        neighbor_changes: payload.neighbor_changes || []
+                    })
                 }
 
                 setData({

@@ -129,6 +129,31 @@ const Detail = () => {
                     .attr('width', width)
                     .attr('height', height)
 
+                // Add definitions for gradients
+                const defs = svg.append('defs');
+
+                // Gradient for Warn/Change (Orange/Purple)
+                const splitGradient = defs.append('linearGradient')
+                    .attr('id', 'grad-warn-change')
+                    .attr('x1', '0%')
+                    .attr('y1', '0%')
+                    .attr('x2', '100%')
+                    .attr('y2', '0%');
+
+                splitGradient.append('stop').attr('offset', '50%').style('stop-color', '#f0ad4e'); // Orange (Warn)
+                splitGradient.append('stop').attr('offset', '50%').style('stop-color', '#6f42c1'); // Purple (Change)
+
+                // Gradient for Crit/Change (Red/Purple) - assuming default has_alert is red if not warn
+                const splitGradientCrit = defs.append('linearGradient')
+                    .attr('id', 'grad-crit-change')
+                    .attr('x1', '0%')
+                    .attr('y1', '0%')
+                    .attr('x2', '100%')
+                    .attr('y2', '0%');
+
+                splitGradientCrit.append('stop').attr('offset', '50%').style('stop-color', '#d9534f'); // Red (Crit)
+                splitGradientCrit.append('stop').attr('offset', '50%').style('stop-color', '#6f42c1'); // Purple (Change)
+
                 // add a container group that will be zoomed/panned
                 const g = svg.append('g')
 
@@ -271,8 +296,26 @@ const Detail = () => {
                     .selectAll('circle')
                     .data(nodesFiltered)
                     .join('circle')
-                    .attr('r', (d) => (d.has_alert ? 8 : 6))
-                    .attr('fill', (d) => (d.severity === 'WARN' || d.severity === 'WARNING' ? '#f0ad4e' : '#69b3a2'))
+                    .attr('r', (d) => (d.has_alert || (d.changes && d.changes.length > 0) ? 12 : 8)) // Increased size
+                    .attr('fill', (d) => {
+                        const hasChange = d.changes && d.changes.length > 0;
+                        const hasAlert = d.has_alert || (d.alerts && d.alerts.length > 0) || (d.alertsList && d.alertsList.length > 0);
+                        const isWarn = d.severity === 'WARN' || d.severity === 'WARNING';
+
+                        // Mixed State: Has Alert AND Has Change -> Split Gradient
+                        if (hasChange && hasAlert) {
+                            return isWarn ? 'url(#grad-warn-change)' : 'url(#grad-crit-change)';
+                        }
+
+                        // Single States
+                        if (hasChange) return '#6f42c1'; // Purple for Change only
+                        if (hasAlert) {
+                            return isWarn ? '#f0ad4e' : '#d9534f'; // Alert color
+                        }
+                        return '#69b3a2'; // Teal (Healthy)
+                    })
+                    .attr('stroke', (d) => (d.changes && d.changes.length > 0 ? '#4a2c85' : '#fff')) // Darker stroke for change nodes
+                    .attr('stroke-width', 1.5)
                     .call(drag())
 
                 const label = g
@@ -308,6 +351,16 @@ const Detail = () => {
                         alerts.forEach((a) => {
                             const summary = a.alertsummary || a.summary || a.message || a.title || a.text || a.body || JSON.stringify(a)
                             html += `<li style="margin-bottom:4px">${escapeHtml(summary)}</li>`
+                        })
+                        html += '</ul></div>'
+                    }
+
+                    if (Array.isArray(d.changes) && d.changes.length > 0) {
+                        html += '<div style="margin-top:6px; color: #a5d8ff;"><strong>Changes:</strong><ul style="margin:6px 0 0 16px;padding:0">'
+                        d.changes.forEach((c) => {
+                            const changeInfo = c.name || c.change_id || JSON.stringify(c)
+                            const timeInfo = c.start_time ? ` (${c.start_time.split('T')[0]})` : ''
+                            html += `<li style="margin-bottom:4px">${escapeHtml(changeInfo)}${escapeHtml(timeInfo)}</li>`
                         })
                         html += '</ul></div>'
                     }
