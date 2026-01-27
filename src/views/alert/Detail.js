@@ -6,12 +6,11 @@ import {
     CForm, CFormLabel, CButtonGroup, CButton, CFormTextarea, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer, CToaster,
     CCardBody, CCard, CRow, CCol, CCardTitle, CCardText, CCardHeader,
     CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem,
-    CModal, CModalHeader, CModalTitle, CModalBody
+    CModal, CModalHeader, CModalTitle, CModalBody, CBadge
 } from '@coreui/react';
 import MyToast from '../../components/Toast'
 import useAxios from '../../services/useAxios';
-import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
-import 'react-vertical-timeline-component/style.min.css';
+// VerticalTimeline imports removed
 import CIcon from '@coreui/icons-react';
 import { cilUser, cilShieldAlt } from '@coreui/icons';
 
@@ -543,17 +542,28 @@ const Detail = () => {
             addComment()
         }
         return (
-            <>
-
-                <CContainer fluid>
-                    <CForm>
-                        <div className="mb-3">
-                            <CFormTextarea id="exampleFormControlTextarea12" rows={3} placeholder="Add Comment" value={comment} onChange={(e) => setComment(e.target.value)}></CFormTextarea>
-                        </div>
-                    </CForm>
-                    <CButton disabled={comment == "" ? true : false} variant="outline" onClick={handleCommentSubmit} color="primary">Add Comment</CButton>
-                </CContainer>
-            </>
+            <div className="mb-3">
+                <CForm className="mb-2">
+                    <CFormTextarea
+                        id="comment-input"
+                        rows={2}
+                        placeholder="Type a comment..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        style={{ fontSize: '0.9rem' }}
+                    />
+                </CForm>
+                <div className="d-flex justify-content-end">
+                    <CButton
+                        disabled={!comment.trim()}
+                        size="sm"
+                        onClick={handleCommentSubmit}
+                        color="primary"
+                    >
+                        Post
+                    </CButton>
+                </div>
+            </div>
         )
     }
 
@@ -595,49 +605,57 @@ const Detail = () => {
                         />
                     </CContainer>
                 )}
-                {(data && data['parent'] == true) ? (
-                    <div>
-                        <CCard className='mb-4'>
-                            <CCardHeader>Related events</CCardHeader>
-                            <CCardBody>
-                                <CTable align="middle" responsive>
-                                    <CTableHead>
-                                        <CTableRow>
-                                            <CTableHeaderCell scope="col">Entity</CTableHeaderCell>
-                                            <CTableHeaderCell scope="col">Alert Time</CTableHeaderCell>
-                                            <CTableHeaderCell scope="col">Severity</CTableHeaderCell>
-                                            <CTableHeaderCell scope="col">Alert Status</CTableHeaderCell>
-                                            <CTableHeaderCell scope="col">Alert Summary</CTableHeaderCell>
-                                        </CTableRow>
-                                    </CTableHead>
-                                    <CTableBody>
-                                        {data && data['childalerts'] && data['childalerts'].map((alert) => (
-                                            <CTableRow key={alert._id}>
-                                                <CTableDataCell><Link className="link" to={`/alert/details/${alert._id}`} > {alert.entity}</Link></CTableDataCell>
-                                                <CTableDataCell>{alert.alertfirsttime}</CTableDataCell>
-                                                <CTableDataCell>
-                                                    {(() => {
-                                                        const sev = alert.severity ? alert.severity.toUpperCase() : '';
-                                                        if (sev === 'CRITICAL') return <span className="badge text-bg-danger">{alert.severity}</span>;
-                                                        if (sev === 'WARN' || sev === 'WARNING') return <span className="badge text-bg-warning">{alert.severity}</span>;
-                                                        return <span>{alert.severity}</span>;
-                                                    })()}
-                                                </CTableDataCell>
-                                                <CTableDataCell>
-                                                    {alert.alertstatus === 'OPEN' ?
-                                                        <span className="badge text-bg-warning">OPEN</span> :
-                                                        <span className="badge text-bg-success">CLOSED</span>
-                                                    }
-                                                </CTableDataCell>
-                                                <CTableDataCell>{alert.alertsummary}</CTableDataCell>
+                <CRow className="mb-4">
+                    {(data && data['parent'] == true) && (
+                        <CCol md={6}>
+                            <CCard className='h-100'>
+                                <CCardHeader className="d-flex justify-content-between align-items-center py-2">
+                                    <span className="fw-semibold">Related events</span>
+                                    <CBadge color="primary" shape="rounded-pill" size="sm">
+                                        {data['childalerts'] ? data['childalerts'].length : 0}
+                                    </CBadge>
+                                </CCardHeader>
+                                <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
+                                    <CTable align="middle" responsive>
+                                        <CTableHead>
+                                            <CTableRow>
+                                                <CTableHeaderCell scope="col">Entity</CTableHeaderCell>
+                                                <CTableHeaderCell scope="col">Severity</CTableHeaderCell>
+                                                <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+                                                <CTableHeaderCell scope="col">Summary</CTableHeaderCell>
                                             </CTableRow>
-                                        ))}
-                                    </CTableBody>
-                                </CTable>
-                            </CCardBody>
-                        </CCard>
-                    </div>
-                ) : ""}
+                                        </CTableHead>
+                                        <CTableBody>
+                                            {data && data['childalerts'] && data['childalerts'].map((alert) => (
+                                                <CTableRow key={alert._id}>
+                                                    <CTableDataCell><Link className="link" to={`/alert/details/${alert._id}`} > {alert.entity}</Link></CTableDataCell>
+                                                    <CTableDataCell>
+                                                        {(() => {
+                                                            const sev = alert.severity ? alert.severity.toUpperCase() : '';
+                                                            if (sev === 'CRITICAL') return <span className="badge text-bg-danger">{alert.severity}</span>;
+                                                            if (sev === 'WARN' || sev === 'WARNING') return <span className="badge text-bg-warning">{alert.severity}</span>;
+                                                            return <span>{alert.severity}</span>;
+                                                        })()}
+                                                    </CTableDataCell>
+                                                    <CTableDataCell>
+                                                        {alert.alertstatus === 'OPEN' ?
+                                                            <span className="badge text-bg-warning">OPEN</span> :
+                                                            <span className="badge text-bg-success">CLOSED</span>
+                                                        }
+                                                    </CTableDataCell>
+                                                    <CTableDataCell>{alert.alertsummary}</CTableDataCell>
+                                                </CTableRow>
+                                            ))}
+                                        </CTableBody>
+                                    </CTable>
+                                </CCardBody>
+                            </CCard>
+                        </CCol>
+                    )}
+                    <CCol md={data && data['parent'] == true ? 6 : 12}>
+                        <RelatedChanges alertId={id} />
+                    </CCol>
+                </CRow>
 
                 {(data && data['parent'] == true && data['grouping_reason']) ? (
                     <div className="mb-4">
@@ -747,7 +765,7 @@ const Detail = () => {
                                     </CTable>
                                 </CCardBody>
                             </CCard>
-                            <RelatedChanges alertId={id} />
+
                             <CCard className='mt-4'>
                                 <CCardHeader>Alert Notes</CCardHeader>
                                 <CCardBody style={{ height: '140px', overflowY: 'auto' }}>
@@ -759,26 +777,31 @@ const Detail = () => {
                     <CCol>
                         <CContainer fluid>
                             <CCard>
-                                <CCardHeader>Comments</CCardHeader>
-                                <CCardBody style={{ height: '788px', overflowY: 'auto' }}>
-                                    <CCol >
-                                        <CommentComponent ></CommentComponent>
-                                        {data && data['worklogs'] && data['worklogs'].length > 0 && (
-                                            <VerticalTimeline layout={'1-column-left'} className="mt-4">
-                                                {[...data['worklogs']].reverse().map((comment, index) => (
-                                                    <VerticalTimelineElement
-                                                        key={index}
-                                                        contentStyle={{ background: 'rgb(244, 244, 253)', color: 'rgb(6, 3, 29)' }}
-                                                        contentArrowStyle={{ borderRight: '7px solid rgb(244, 244, 253)' }}
-                                                        date={comment['createdAt']}
-                                                        icon={<CIcon icon={cilUser} size="xl" />}
-                                                        iconStyle={{ background: 'rgb(244, 244, 253)', color: 'rgb(6, 3, 29)' }}
-                                                    >
-                                                        {comment['author']}<br></br>
-                                                        {comment['comment']}<br></br>
-                                                    </VerticalTimelineElement>
+                                <CCardHeader className="py-2">Comments</CCardHeader>
+                                <CCardBody style={{ height: '500px', overflowY: 'auto' }} className="p-3">
+                                    <CCol>
+                                        <CommentComponent />
+                                        {data && data['worklogs'] && data['worklogs'].length > 0 ? (
+                                            <div className="mt-3 d-flex flex-column gap-2">
+                                                {[...data['worklogs']].reverse().map((log, index) => (
+                                                    <div key={index} className="d-flex align-items-start">
+                                                        <div className="me-2 mt-1">
+                                                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border" style={{ width: '30px', height: '30px' }}>
+                                                                <CIcon icon={cilUser} size="sm" className="text-secondary" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex-grow-1 bg-light p-2 rounded" style={{ fontSize: '0.9rem' }}>
+                                                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                                                <span className="fw-bold">{log.author}</span>
+                                                                <span className="text-muted small" style={{ fontSize: '0.75rem' }}>{log.createdAt}</span>
+                                                            </div>
+                                                            <div className="text-break text-dark">{log.comment}</div>
+                                                        </div>
+                                                    </div>
                                                 ))}
-                                            </VerticalTimeline>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center text-muted mt-4 small">No comments yet.</div>
                                         )}
                                     </CCol>
                                 </CCardBody>
