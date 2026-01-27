@@ -19,6 +19,7 @@ import * as icon from '@coreui/icons';
 import * as d3 from 'd3'
 import ChatBot from '../../components/ChatBot';
 import IncidentFeedback from '../../components/IncidentFeedback';
+import RelatedChanges from './RelatedChanges';
 
 
 
@@ -746,6 +747,7 @@ const Detail = () => {
                                     </CTable>
                                 </CCardBody>
                             </CCard>
+                            <RelatedChanges alertId={id} />
                             <CCard className='mt-4'>
                                 <CCardHeader>Alert Notes</CCardHeader>
                                 <CCardBody style={{ height: '140px', overflowY: 'auto' }}>
