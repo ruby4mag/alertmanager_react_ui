@@ -27,6 +27,12 @@ const _nav = {
         to: '/alert/dashboard',
         icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
       },
+      {
+        component: CNavItem,
+        name: 'Change Risks',
+        to: '/risk/changes',
+        icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
+      },
 
       {
         component: CNavTitle,
@@ -81,6 +87,12 @@ const _nav = {
         name: 'Alert Dashboard',
         to: '/alert/dashboard',
         icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Change Risks',
+        to: '/risk/changes',
+        icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
       },
 
       {

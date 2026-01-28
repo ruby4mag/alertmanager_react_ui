@@ -80,6 +80,8 @@ const Badges = React.lazy(() => import('./views/notifications/badges/Badges'))
 const Modals = React.lazy(() => import('./views/notifications/modals/Modals'))
 const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 
+const ChangeRiskList = React.lazy(() => import('./views/risk/ChangeRiskList'))
+
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
 const routes = [
@@ -127,6 +129,7 @@ const routes = [
   { path: '/notifications/badges', name: 'Badges', element: Badges },
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
+  { path: '/risk/changes', name: 'Change Risk', element: ChangeRiskList },
   { path: '/widgets', name: 'Widgets', element: Widgets },
   { path: '/alert', name: 'Base', element: Cards, exact: true },
   { path: '/alert/dashboard', name: 'AlertDashboard', element: AlertDashboard },
