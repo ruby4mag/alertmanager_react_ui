@@ -15,7 +15,6 @@ import {
 import useAxios from '../../services/useAxios'
 import CIcon from '@coreui/icons-react'
 import { cilClock, cilChevronBottom, cilChevronTop, cilGraph } from '@coreui/icons'
-import ChangeRiskDetail from '../risk/ChangeRiskDetail'
 
 const ChangeCard = ({ change, onClick }) => {
     const getBadgeColor = (type) => {
@@ -144,13 +143,11 @@ const NeighborChangesList = ({ changes, onCardClick }) => {
     )
 }
 
-const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFetch }) => {
+const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFetch, onCardClick }) => {
     const api = useAxios()
     const [data, setData] = useState({ direct_changes: [], neighbor_changes: [] })
     const [loading, setLoading] = useState(skipInternalFetch ? !prefetchedData : !prefetchedData)
     const [error, setError] = useState(null)
-    const [selectedChange, setSelectedChange] = useState(null)
-    const [modalVisible, setModalVisible] = useState(false)
 
     useEffect(() => {
         if (prefetchedData) {
@@ -202,11 +199,6 @@ const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFet
         fetchChanges()
     }, [alertId, prefetchedData, skipInternalFetch])
 
-    const handleCardClick = (change) => {
-        setSelectedChange(change)
-        setModalVisible(true)
-    }
-
     if (loading) return (
         <CCard className="h-100">
             <CCardHeader className="py-2">
@@ -230,27 +222,20 @@ const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFet
     )
 
     return (
-        <>
-            <CCard className="h-100">
-                <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
-                    <div className="mb-2">
-                        <span className="fw-semibold text-body-secondary small text-uppercase d-block mb-2 bg-light p-2 rounded">
-                            Changes on This Entity
-                        </span>
-                        <DirectChangesList changes={data.direct_changes} onCardClick={handleCardClick} />
-                    </div>
+        <CCard className="h-100">
+            <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
+                <div className="mb-2">
+                    <span className="fw-semibold text-body-secondary small text-uppercase d-block mb-2 bg-light p-2 rounded">
+                        Changes on This Entity
+                    </span>
+                    <DirectChangesList changes={data.direct_changes} onCardClick={onCardClick} />
+                </div>
 
-                    {data.neighbor_changes && data.neighbor_changes.length > 0 && (
-                        <NeighborChangesList changes={data.neighbor_changes} onCardClick={handleCardClick} />
-                    )}
-                </CCardBody>
-            </CCard>
-            <ChangeRiskDetail
-                visible={modalVisible}
-                onClose={() => setModalVisible(false)}
-                change={selectedChange}
-            />
-        </>
+                {data.neighbor_changes && data.neighbor_changes.length > 0 && (
+                    <NeighborChangesList changes={data.neighbor_changes} onCardClick={onCardClick} />
+                )}
+            </CCardBody>
+        </CCard>
     )
 }
 

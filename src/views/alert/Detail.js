@@ -11,6 +11,7 @@ import {
 } from '@coreui/react';
 import MyToast from '../../components/Toast'
 import useAxios from '../../services/useAxios';
+import ChangeRiskDetail from '../risk/ChangeRiskDetail';
 // VerticalTimeline imports removed
 import CIcon from '@coreui/icons-react';
 import { cilUser, cilShieldAlt } from '@coreui/icons';
@@ -48,6 +49,9 @@ const Detail = () => {
             setHasChatStarted(true);
         }
     }, [activeTab]);
+
+    const [changeRiskModalVisible, setChangeRiskModalVisible] = useState(false)
+    const [selectedChangeRisk, setSelectedChangeRisk] = useState(null)
 
     useEffect(() => {
         if (!id) return;
@@ -447,14 +451,32 @@ const Detail = () => {
             })()
     }, [graphData, visibleGraphModal])
 
+    // Track modal state in ref for event listener to avoid stale state/race conditions
+    const modalsStateRef = useRef({ graph: false, changeRisk: false });
+
+    useEffect(() => {
+        modalsStateRef.current = {
+            graph: visibleGraphModal,
+            changeRisk: changeRiskModalVisible
+        };
+    }, [visibleGraphModal, changeRiskModalVisible]);
+
     // Go back to alerts page
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.key === 'Escape') {
-                if (visibleGraphModal) {
+                console.log('Escape pressed. Modal states:', modalsStateRef.current);
+                if (modalsStateRef.current.graph) {
+                    console.log('Closing graph modal');
                     setVisibleGraphModal(false);
                     return;
                 }
+                if (modalsStateRef.current.changeRisk) {
+                    console.log('Closing change risk modal');
+                    setChangeRiskModalVisible(false);
+                    return;
+                }
+                console.log('Navigating back');
                 navigate(-1); // Equivalent to history.goBack()
             }
         };
@@ -465,7 +487,7 @@ const Detail = () => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [navigate, visibleGraphModal]);
+    }, [navigate]);
 
     const UrlLink = ({ url, text }) => {
         return (
@@ -897,7 +919,15 @@ const Detail = () => {
                                     </CTabPane>
                                     <CTabPane visible={activeTab === 2}>
                                         <div style={{ height: '700px', overflowY: 'auto' }}>
-                                            <RelatedChanges alertId={id} prefetchedData={relatedChangesData} skipInternalFetch={true} />
+                                            <RelatedChanges
+                                                alertId={id}
+                                                prefetchedData={relatedChangesData}
+                                                skipInternalFetch={true}
+                                                onCardClick={(change) => {
+                                                    setSelectedChangeRisk(change)
+                                                    setChangeRiskModalVisible(true)
+                                                }}
+                                            />
                                         </div>
                                     </CTabPane>
                                     <CTabPane visible={activeTab === 3}>
@@ -958,6 +988,12 @@ const Detail = () => {
                     )}
                 </CModalBody>
             </CModal>
+
+            <ChangeRiskDetail
+                visible={changeRiskModalVisible}
+                onClose={() => setChangeRiskModalVisible(false)}
+                change={selectedChangeRisk}
+            />
         </>
     )
 }

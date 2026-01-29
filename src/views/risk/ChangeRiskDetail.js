@@ -89,7 +89,7 @@ const ChangeRiskDetail = ({ visible, onClose, change }) => {
     const risk_breakdown = displayData.risk_details?.risk_breakdown
 
     return (
-        <CModal visible={visible} onClose={onClose} size="lg">
+        <CModal visible={visible} onClose={onClose} size="lg" keyboard={false}>
             <CModalHeader onClose={onClose}>
                 <CModalTitle>Change Risk Details: {displayData.change_id}</CModalTitle>
             </CModalHeader>
