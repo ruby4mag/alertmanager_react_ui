@@ -14,18 +14,26 @@ import { cilChatBubble, cilX, cilSend } from '@coreui/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle }) => {
+const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded = false }) => {
     const [internalIsOpen, setInternalIsOpen] = useState(false);
 
     // Determine if controlled or uncontrolled
+    // If embedded, it is alwys "open"
     const isControlled = propIsOpen !== undefined;
-    const isOpen = isControlled ? propIsOpen : internalIsOpen;
+    const isOpen = embedded ? true : (isControlled ? propIsOpen : internalIsOpen);
 
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
     const hasInitialized = useRef(false);
+
+    // Initial load for embedded: only once when data is available
+    useEffect(() => {
+        if (embedded && !hasInitialized.current && alertData) {
+            initializeChat();
+        }
+    }, [embedded, alertData]);
 
     // Replace this with your actual n8n webhook URL
     // Use the proxy path defined in vite.config.mjs
@@ -266,8 +274,8 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle }) => {
 
     return (
         <>
-            {/* Floating Chat Button */}
-            {!isOpen && (
+            {/* Floating Chat Button - Only show if NOT embedded and NOT open */}
+            {!embedded && !isOpen && (
                 <CButton
                     color="primary"
                     shape="rounded-pill"
@@ -294,7 +302,15 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle }) => {
             {/* Chat Window */}
             {isOpen && (
                 <CCard
-                    style={{
+                    style={embedded ? {
+                        position: 'relative',
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        border: 'none',
+                        boxShadow: 'none'
+                    } : {
                         position: 'fixed',
                         top: '20px',
                         bottom: '20px',
@@ -308,9 +324,11 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle }) => {
                 >
                     <CCardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#321fdb', color: '#fff' }}>
                         <span><strong>OpsGenie AI</strong></span>
-                        <CButton size="sm" color="transparent" style={{ color: '#fff' }} onClick={handleToggle}>
-                            <CIcon icon={cilX} />
-                        </CButton>
+                        {!embedded && (
+                            <CButton size="sm" color="transparent" style={{ color: '#fff' }} onClick={handleToggle}>
+                                <CIcon icon={cilX} />
+                            </CButton>
+                        )}
                     </CCardHeader>
 
                     <CCardBody style={{

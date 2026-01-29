@@ -41,7 +41,13 @@ const Detail = () => {
     const [activeTab, setActiveTab] = useState(1)
     const [changesCount, setChangesCount] = useState(0)
     const [relatedChangesData, setRelatedChangesData] = useState(null)
-    const [isChatBotOpen, setIsChatBotOpen] = useState(false)
+    const [hasChatStarted, setHasChatStarted] = useState(false)
+
+    useEffect(() => {
+        if (activeTab === 4 && !hasChatStarted) {
+            setHasChatStarted(true);
+        }
+    }, [activeTab]);
 
     useEffect(() => {
         if (!id) return;
@@ -449,10 +455,6 @@ const Detail = () => {
                     setVisibleGraphModal(false);
                     return;
                 }
-                if (isChatBotOpen) {
-                    setIsChatBotOpen(false);
-                    return;
-                }
                 navigate(-1); // Equivalent to history.goBack()
             }
         };
@@ -463,7 +465,7 @@ const Detail = () => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [navigate, visibleGraphModal, isChatBotOpen]);
+    }, [navigate, visibleGraphModal]);
 
     const UrlLink = ({ url, text }) => {
         return (
@@ -828,6 +830,12 @@ const Detail = () => {
                                     <CNavItem>
                                         <CNavLink active={activeTab === 3} onClick={() => setActiveTab(3)} style={{ cursor: 'pointer' }}>
                                             Comments
+                                            {data && data['worklogs'] && data['worklogs'].length > 0 && <CBadge color="primary" shape="rounded-pill" className="ms-2">{data['worklogs'].length}</CBadge>}
+                                        </CNavLink>
+                                    </CNavItem>
+                                    <CNavItem>
+                                        <CNavLink active={activeTab === 4} onClick={() => setActiveTab(4)} style={{ cursor: 'pointer' }}>
+                                            OpsGenie AI
                                         </CNavLink>
                                     </CNavItem>
                                 </CNav>
@@ -908,6 +916,17 @@ const Detail = () => {
                                             </CCol>
                                         </div>
                                     </CTabPane>
+                                    <CTabPane visible={activeTab === 4}>
+                                        <div style={{ height: '700px' }}>
+                                            {(activeTab === 4 || hasChatStarted) && (
+                                                <ChatBot
+                                                    alertData={data}
+                                                    graphData={graphData}
+                                                    embedded={true}
+                                                />
+                                            )}
+                                        </div>
+                                    </CTabPane>
                                 </CTabContent>
                             </CCardBody>
                         </CCard>
@@ -926,12 +945,6 @@ const Detail = () => {
                     )}
                 </CModalBody>
             </CModal>
-            <ChatBot
-                alertData={data}
-                graphData={graphData}
-                isOpen={isChatBotOpen}
-                onToggle={() => setIsChatBotOpen(!isChatBotOpen)}
-            />
         </>
     )
 }
