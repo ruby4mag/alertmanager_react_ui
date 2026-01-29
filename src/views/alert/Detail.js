@@ -41,6 +41,7 @@ const Detail = () => {
     const [activeTab, setActiveTab] = useState(1)
     const [changesCount, setChangesCount] = useState(0)
     const [relatedChangesData, setRelatedChangesData] = useState(null)
+    const [isChatBotOpen, setIsChatBotOpen] = useState(false)
 
     useEffect(() => {
         if (!id) return;
@@ -444,6 +445,14 @@ const Detail = () => {
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.key === 'Escape') {
+                if (visibleGraphModal) {
+                    setVisibleGraphModal(false);
+                    return;
+                }
+                if (isChatBotOpen) {
+                    setIsChatBotOpen(false);
+                    return;
+                }
                 navigate(-1); // Equivalent to history.goBack()
             }
         };
@@ -454,7 +463,7 @@ const Detail = () => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [navigate]);
+    }, [navigate, visibleGraphModal, isChatBotOpen]);
 
     const UrlLink = ({ url, text }) => {
         return (
@@ -905,7 +914,7 @@ const Detail = () => {
                     </CCol>
                 </CRow>
             </CContainer >
-            <CModal visible={visibleGraphModal} onClose={() => setVisibleGraphModal(false)} size="xl" fullscreen>
+            <CModal visible={visibleGraphModal} onClose={() => setVisibleGraphModal(false)} size="xl" fullscreen keyboard={false}>
                 <CModalHeader onClose={() => setVisibleGraphModal(false)}>
                     <CModalTitle>{graphTitle}</CModalTitle>
                 </CModalHeader>
@@ -917,7 +926,12 @@ const Detail = () => {
                     )}
                 </CModalBody>
             </CModal>
-            <ChatBot alertData={data} graphData={graphData} />
+            <ChatBot
+                alertData={data}
+                graphData={graphData}
+                isOpen={isChatBotOpen}
+                onToggle={() => setIsChatBotOpen(!isChatBotOpen)}
+            />
         </>
     )
 }

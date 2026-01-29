@@ -231,12 +231,6 @@ const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFet
 
     return (
         <CCard className="h-100">
-            <CCardHeader className="d-flex justify-content-between align-items-center py-2">
-                <span className="fw-semibold">Recent Changes</span>
-                <CBadge color="primary" shape="rounded-pill" size="sm">
-                    {totalCount}
-                </CBadge>
-            </CCardHeader>
             <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
                 <div className="mb-2">
                     <span className="fw-semibold text-body-secondary small text-uppercase d-block mb-2 bg-light p-2 rounded">

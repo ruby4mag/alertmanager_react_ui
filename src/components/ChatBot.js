@@ -14,8 +14,13 @@ import { cilChatBubble, cilX, cilSend } from '@coreui/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-const ChatBot = ({ alertData, graphData }) => {
-    const [isOpen, setIsOpen] = useState(false);
+const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle }) => {
+    const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+    // Determine if controlled or uncontrolled
+    const isControlled = propIsOpen !== undefined;
+    const isOpen = isControlled ? propIsOpen : internalIsOpen;
+
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(false);
@@ -34,9 +39,16 @@ const ChatBot = ({ alertData, graphData }) => {
         scrollToBottom();
     }, [messages, isOpen]);
 
-    const toggleChat = () => {
-        setIsOpen(!isOpen);
-        if (!isOpen && !hasInitialized.current && alertData) {
+    const handleToggle = () => {
+        if (isControlled) {
+            onToggle && onToggle();
+        } else {
+            setInternalIsOpen(!internalIsOpen);
+        }
+
+        // Initialize on open if not done
+        const nextState = isControlled ? !propIsOpen : !internalIsOpen;
+        if (nextState && !hasInitialized.current && alertData) {
             initializeChat();
         }
     };
@@ -48,7 +60,7 @@ const ChatBot = ({ alertData, graphData }) => {
 
         // Add a placeholder message for the streaming response
         setMessages([
-            { sender: 'ai', text: 'Hello, I am your AI assistant. I will help you analyse this incident. Let me start with gathering some insights.' },
+            { sender: 'ai', text: 'Hello, I am your OpsGenie AI assistant. I will help you analyse this incident. Let me start with gathering some insights.' },
             { sender: 'ai', text: '' }
         ]);
 
@@ -259,6 +271,7 @@ const ChatBot = ({ alertData, graphData }) => {
                 <CButton
                     color="primary"
                     shape="rounded-pill"
+                    title="OpsGenie"
                     style={{
                         position: 'fixed',
                         bottom: '20px',
@@ -272,7 +285,7 @@ const ChatBot = ({ alertData, graphData }) => {
                         zIndex: 1050,
                         boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
                     }}
-                    onClick={toggleChat}
+                    onClick={handleToggle}
                 >
                     <CIcon icon={cilChatBubble} size="xl" />
                 </CButton>
@@ -294,8 +307,8 @@ const ChatBot = ({ alertData, graphData }) => {
                     }}
                 >
                     <CCardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#321fdb', color: '#fff' }}>
-                        <span><strong>AI Assistant</strong></span>
-                        <CButton size="sm" color="transparent" style={{ color: '#fff' }} onClick={toggleChat}>
+                        <span><strong>OpsGenie AI</strong></span>
+                        <CButton size="sm" color="transparent" style={{ color: '#fff' }} onClick={handleToggle}>
                             <CIcon icon={cilX} />
                         </CButton>
                     </CCardHeader>
