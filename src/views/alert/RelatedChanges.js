@@ -15,8 +15,9 @@ import {
 import useAxios from '../../services/useAxios'
 import CIcon from '@coreui/icons-react'
 import { cilClock, cilChevronBottom, cilChevronTop, cilGraph } from '@coreui/icons'
+import ChangeRiskDetail from '../risk/ChangeRiskDetail'
 
-const ChangeCard = ({ change }) => {
+const ChangeCard = ({ change, onClick }) => {
     const getBadgeColor = (type) => {
         const t = type?.toLowerCase() || ''
         if (t.includes('config')) return 'info'
@@ -53,7 +54,11 @@ const ChangeCard = ({ change }) => {
     const opacity = isNeighbor && change.hop_distance > 3 ? 0.75 : 1
 
     return (
-        <div className="border-bottom py-2" style={{ opacity }}>
+        <div
+            className="border-bottom py-2"
+            style={{ opacity, cursor: 'pointer' }}
+            onClick={() => onClick(change)}
+        >
             <div className="d-flex justify-content-between align-items-start mb-1">
                 <div>
                     <CBadge color={getBadgeColor(change.change_type)} className="me-2">
@@ -90,7 +95,7 @@ const ChangeCard = ({ change }) => {
     )
 }
 
-const DirectChangesList = ({ changes }) => {
+const DirectChangesList = ({ changes, onCardClick }) => {
     if (!changes || changes.length === 0) {
         return <p className="text-muted mb-0 fst-italic p-2">No changes detected directly on this entity</p>
     }
@@ -98,13 +103,13 @@ const DirectChangesList = ({ changes }) => {
     return (
         <div className="d-flex flex-column gap-2">
             {changes.map((change, index) => (
-                <ChangeCard key={change.change_id || `d-${index}`} change={change} />
+                <ChangeCard key={change.change_id || `d-${index}`} change={change} onClick={onCardClick} />
             ))}
         </div>
     )
 }
 
-const NeighborChangesList = ({ changes }) => {
+const NeighborChangesList = ({ changes, onCardClick }) => {
     const [visible, setVisible] = useState(changes.length <= 3)
 
     if (!changes || changes.length === 0) {
@@ -116,9 +121,6 @@ const NeighborChangesList = ({ changes }) => {
         if (a.hop_distance !== b.hop_distance) return a.hop_distance - b.hop_distance
         return new Date(b.start_time) - new Date(a.start_time)
     })
-
-    // Future: rank changes by likelihood
-    // Future: filter neighbor depth (1–6)
 
     return (
         <div className="mt-3">
@@ -134,10 +136,9 @@ const NeighborChangesList = ({ changes }) => {
             <CCollapse visible={visible}>
                 <div className="d-flex flex-column gap-2 px-1">
                     {sortedChanges.map((change, index) => (
-                        <ChangeCard key={change.change_id || `n-${index}`} change={change} />
+                        <ChangeCard key={change.change_id || `n-${index}`} change={change} onClick={onCardClick} />
                     ))}
                 </div>
-                {/* Future: highlight suspected change based on RCA */}
             </CCollapse>
         </div>
     )
@@ -148,6 +149,8 @@ const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFet
     const [data, setData] = useState({ direct_changes: [], neighbor_changes: [] })
     const [loading, setLoading] = useState(skipInternalFetch ? !prefetchedData : !prefetchedData)
     const [error, setError] = useState(null)
+    const [selectedChange, setSelectedChange] = useState(null)
+    const [modalVisible, setModalVisible] = useState(false)
 
     useEffect(() => {
         if (prefetchedData) {
@@ -170,14 +173,8 @@ const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFet
             setLoading(true)
             try {
                 const response = await api.get(`/api/v1/alerts/${alertId}/related-changes`)
-                // Handle payload format change gracefully
-                // If old format (flat related_changes), try to map it to direct if needed, 
-                // but Requirement implies we expect new format.
-                // Fallback: if 'related_changes' exists but keys missing, put all in direct.
-
                 let payload = response.data
                 if (payload.related_changes && !payload.direct_changes) {
-                    // Provide backward compatibility or fallback
                     payload.direct_changes = payload.related_changes
                     payload.neighbor_changes = []
                 }
@@ -203,7 +200,12 @@ const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFet
         }
 
         fetchChanges()
-    }, [alertId, prefetchedData, skipInternalFetch]) // Removed 'api' dep to avoid infinite loop
+    }, [alertId, prefetchedData, skipInternalFetch])
+
+    const handleCardClick = (change) => {
+        setSelectedChange(change)
+        setModalVisible(true)
+    }
 
     if (loading) return (
         <CCard className="h-100">
@@ -227,23 +229,28 @@ const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFet
         </CCard>
     )
 
-    const totalCount = (data.direct_changes?.length || 0) + (data.neighbor_changes?.length || 0)
-
     return (
-        <CCard className="h-100">
-            <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
-                <div className="mb-2">
-                    <span className="fw-semibold text-body-secondary small text-uppercase d-block mb-2 bg-light p-2 rounded">
-                        Changes on This Entity
-                    </span>
-                    <DirectChangesList changes={data.direct_changes} />
-                </div>
+        <>
+            <CCard className="h-100">
+                <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
+                    <div className="mb-2">
+                        <span className="fw-semibold text-body-secondary small text-uppercase d-block mb-2 bg-light p-2 rounded">
+                            Changes on This Entity
+                        </span>
+                        <DirectChangesList changes={data.direct_changes} onCardClick={handleCardClick} />
+                    </div>
 
-                {data.neighbor_changes && data.neighbor_changes.length > 0 && (
-                    <NeighborChangesList changes={data.neighbor_changes} />
-                )}
-            </CCardBody>
-        </CCard>
+                    {data.neighbor_changes && data.neighbor_changes.length > 0 && (
+                        <NeighborChangesList changes={data.neighbor_changes} onCardClick={handleCardClick} />
+                    )}
+                </CCardBody>
+            </CCard>
+            <ChangeRiskDetail
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                change={selectedChange}
+            />
+        </>
     )
 }
 
