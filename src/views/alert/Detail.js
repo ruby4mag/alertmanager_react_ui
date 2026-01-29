@@ -6,7 +6,8 @@ import {
     CForm, CFormLabel, CButtonGroup, CButton, CFormTextarea, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CContainer, CToaster,
     CCardBody, CCard, CRow, CCol, CCardTitle, CCardText, CCardHeader,
     CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem,
-    CModal, CModalHeader, CModalTitle, CModalBody, CBadge
+    CModal, CModalHeader, CModalTitle, CModalBody, CBadge,
+    CNav, CNavItem, CNavLink, CTabContent, CTabPane
 } from '@coreui/react';
 import MyToast from '../../components/Toast'
 import useAxios from '../../services/useAxios';
@@ -37,6 +38,30 @@ const Detail = () => {
     const [graphTitle, setGraphTitle] = useState('')
     const [visibleGraphModal, setVisibleGraphModal] = useState(false)
     const graphRef = useRef(null)
+    const [activeTab, setActiveTab] = useState(1)
+    const [changesCount, setChangesCount] = useState(0)
+    const [relatedChangesData, setRelatedChangesData] = useState(null)
+
+    useEffect(() => {
+        if (!id) return;
+        const fetchRelatedChanges = async () => {
+            try {
+                const response = await api.get(`/api/v1/alerts/${id}/related-changes`)
+                let payload = response.data
+                // Fallback logic matching RelatedChanges.js
+                if (payload.related_changes && !payload.direct_changes) {
+                    payload.direct_changes = payload.related_changes
+                    payload.neighbor_changes = []
+                }
+                const total = (payload.direct_changes?.length || 0) + (payload.neighbor_changes?.length || 0)
+                setChangesCount(total)
+                setRelatedChangesData(payload)
+            } catch (e) {
+                console.error("Failed to fetch related changes", e)
+            }
+        }
+        fetchRelatedChanges()
+    }, [id])
 
     const fetchData = async () => {
         try {
@@ -658,208 +683,225 @@ const Detail = () => {
                         />
                     </CContainer>
                 )}
-                <CRow className="mb-4">
-                    {(data && data['parent'] == true) && (
-                        <CCol md={6}>
-                            <CCard className='h-100'>
-                                <CCardHeader className="d-flex justify-content-between align-items-center py-2">
-                                    <span className="fw-semibold">Related events</span>
-                                    <CBadge color="primary" shape="rounded-pill" size="sm">
-                                        {data['childalerts'] ? data['childalerts'].length : 0}
-                                    </CBadge>
-                                </CCardHeader>
-                                <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
-                                    <CTable align="middle" responsive>
-                                        <CTableHead>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="col">Entity</CTableHeaderCell>
-                                                <CTableHeaderCell scope="col">Severity</CTableHeaderCell>
-                                                <CTableHeaderCell scope="col">Status</CTableHeaderCell>
-                                                <CTableHeaderCell scope="col">Summary</CTableHeaderCell>
-                                            </CTableRow>
-                                        </CTableHead>
-                                        <CTableBody>
-                                            {data && data['childalerts'] && data['childalerts'].map((alert) => (
-                                                <CTableRow key={alert._id}>
-                                                    <CTableDataCell><Link className="link" to={`/alert/details/${alert._id}`} > {alert.entity}</Link></CTableDataCell>
-                                                    <CTableDataCell>
-                                                        {(() => {
-                                                            const sev = alert.severity ? alert.severity.toUpperCase() : '';
-                                                            if (sev === 'CRITICAL') return <span className="badge text-bg-danger">{alert.severity}</span>;
-                                                            if (sev === 'WARN' || sev === 'WARNING') return <span className="badge text-bg-warning">{alert.severity}</span>;
-                                                            return <span>{alert.severity}</span>;
-                                                        })()}
-                                                    </CTableDataCell>
-                                                    <CTableDataCell>
-                                                        {alert.alertstatus === 'OPEN' ?
-                                                            <span className="badge text-bg-warning">OPEN</span> :
-                                                            <span className="badge text-bg-success">CLOSED</span>
-                                                        }
-                                                    </CTableDataCell>
-                                                    <CTableDataCell>{alert.alertsummary}</CTableDataCell>
-                                                </CTableRow>
-                                            ))}
-                                        </CTableBody>
-                                    </CTable>
-                                </CCardBody>
-                            </CCard>
-                        </CCol>
-                    )}
-                    <CCol md={data && data['parent'] == true ? 6 : 12}>
-                        <RelatedChanges alertId={id} />
-                    </CCol>
-                </CRow>
-
-                {(data && data['parent'] == true && data['grouping_reason']) ? (
-                    <div className="mb-4">
-                        <CCard>
-                            <CCardHeader>Why grouped?</CCardHeader>
-                            <CCardBody>
-                                {data['grouping_reason'].type === 'SIMILARITY' ? (
-                                    <>
-                                        <p className="mb-2"><strong>Grouped by similarity:</strong></p>
-                                        <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
-                                            {data['grouping_reason'].reasons && data['grouping_reason'].reasons.map((reason, idx) => (
-                                                <li key={idx} className="mb-1">
-                                                    <span className="text-success me-2">✔</span>
-                                                    {reason}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </>
-                                ) : (
-                                    <p>{data['grouping_reason'].description || "Grouped based on correlation rules."}</p>
-                                )}
+                <CRow>
+                    {/* Left Column: Details & Notes */}
+                    <CCol md={6}>
+                        <CCard style={{ backgroundColor: '#f2f7f8' }} className="mb-4">
+                            <CCardHeader>Event Details</CCardHeader>
+                            <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
+                                <CTable small >
+                                    <CTableBody>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Entity</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['entity']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Time</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertfirsttime']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Latest Time</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertlasttime']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Clear Time</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertcleartime']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Source</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertsource']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Service Name</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['servicename']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Summary</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertsummary']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Status</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertstatus']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Acknowledged</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertacked']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Severity</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['severity']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Id</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertid']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Priority</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertpriority']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Ip Addess</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['ipaddress']}</CTableDataCell>
+                                        </CTableRow>
+                                        <CTableRow>
+                                            <CTableHeaderCell scope="row">Alert Count</CTableHeaderCell>
+                                            <CTableDataCell>{data && data['alertcount']}</CTableDataCell>
+                                        </CTableRow>
+                                    </CTableBody>
+                                </CTable>
                             </CCardBody>
                         </CCard>
-                    </div>
-                ) : null}
 
-                <CRow>
-                    <CCol>
-                        <CContainer>
-                            <CCard>
-                                <CCardHeader>Event Details</CCardHeader>
-                                <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
-                                    <CTable small >
-                                        <CTableBody>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Entity</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['entity']}</CTableDataCell>
+                        <CCard className='mb-4' style={{ backgroundColor: '#f2f7f8' }}>
+                            <CCardHeader>Additional Details</CCardHeader>
+                            <CCardBody style={{ height: '200px', overflowY: 'auto' }}>
+                                <CTable small >
+                                    <CTableBody>
+                                        {data && data['additionaldetails'] && Object.entries(data['additionaldetails']).map(([key, value]) => (
+                                            <CTableRow key={key}>
+                                                <CTableHeaderCell scope="row">{key}</CTableHeaderCell>
+                                                {key == 'ticket' ? <CTableDataCell> <UrlLink url={value} text="Ticket" /></CTableDataCell> : <CTableDataCell> {value}</CTableDataCell>}
                                             </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Time</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertfirsttime']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Latest Time</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertlasttime']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Clear Time</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertcleartime']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Source</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertsource']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Service Name</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['servicename']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Summary</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertsummary']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Status</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertstatus']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Acknowledged</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertacked']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Severity</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['severity']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Id</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertid']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Priority</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertpriority']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Ip Addess</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['ipaddress']}</CTableDataCell>
-                                            </CTableRow>
-                                            <CTableRow>
-                                                <CTableHeaderCell scope="row">Alert Count</CTableHeaderCell>
-                                                <CTableDataCell>{data && data['alertcount']}</CTableDataCell>
-                                            </CTableRow>
-                                        </CTableBody>
-                                    </CTable>
-                                </CCardBody>
-                            </CCard>
-                            <CCard className='mt-4'>
-                                <CCardHeader>Additional Details</CCardHeader>
-                                <CCardBody style={{ height: '200px', overflowY: 'auto' }}>
-                                    <CTable small >
-                                        <CTableBody>
-                                            {data && data['additionaldetails'] && Object.entries(data['additionaldetails']).map(([key, value]) => (
-                                                <CTableRow key={key}>
-                                                    <CTableHeaderCell scope="row">{key}</CTableHeaderCell>
-                                                    {key == 'ticket' ? <CTableDataCell> <UrlLink url={value} text="Ticket" /></CTableDataCell> : <CTableDataCell> {value}</CTableDataCell>}
-                                                </CTableRow>
-                                            ))}
-                                        </CTableBody>
-                                    </CTable>
-                                </CCardBody>
-                            </CCard>
+                                        ))}
+                                    </CTableBody>
+                                </CTable>
+                            </CCardBody>
+                        </CCard>
 
-                            <CCard className='mt-4'>
-                                <CCardHeader>Alert Notes</CCardHeader>
-                                <CCardBody style={{ height: '140px', overflowY: 'auto' }}>
-                                    <p className="mb-0">{data && data['alertnotes']}</p>
-                                </CCardBody>
-                            </CCard>
-                        </CContainer>
-                    </CCol>
-                    <CCol>
-                        <CContainer fluid>
-                            <CCard>
-                                <CCardHeader className="py-2">Comments</CCardHeader>
-                                <CCardBody style={{ height: '500px', overflowY: 'auto' }} className="p-3">
-                                    <CCol>
-                                        <CommentComponent />
-                                        {data && data['worklogs'] && data['worklogs'].length > 0 ? (
-                                            <div className="mt-3 d-flex flex-column gap-2">
-                                                {[...data['worklogs']].reverse().map((log, index) => (
-                                                    <div key={index} className="d-flex align-items-start">
-                                                        <div className="me-2 mt-1">
-                                                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border" style={{ width: '30px', height: '30px' }}>
-                                                                <CIcon icon={cilUser} size="sm" className="text-secondary" />
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex-grow-1 bg-light p-2 rounded" style={{ fontSize: '0.9rem' }}>
-                                                            <div className="d-flex justify-content-between align-items-center mb-1">
-                                                                <span className="fw-bold">{log.author}</span>
-                                                                <span className="text-muted small" style={{ fontSize: '0.75rem' }}>{log.createdAt}</span>
-                                                            </div>
-                                                            <div className="text-break text-dark">{log.comment}</div>
-                                                        </div>
-                                                    </div>
+                        <CCard className='mb-4' style={{ backgroundColor: '#f2f7f8' }}>
+                            <CCardHeader>Alert Notes</CCardHeader>
+                            <CCardBody style={{ height: '140px', overflowY: 'auto' }}>
+                                <p className="mb-0">{data && data['alertnotes']}</p>
+                            </CCardBody>
+                        </CCard>
+
+                        {(data && data['parent'] == true && data['grouping_reason']) ? (
+                            <CCard className="mb-4" style={{ backgroundColor: '#f2f7f8' }}>
+                                <CCardHeader>Why grouped?</CCardHeader>
+                                <CCardBody>
+                                    {data['grouping_reason'].type === 'SIMILARITY' ? (
+                                        <>
+                                            <p className="mb-2"><strong>Grouped by similarity:</strong></p>
+                                            <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
+                                                {data['grouping_reason'].reasons && data['grouping_reason'].reasons.map((reason, idx) => (
+                                                    <li key={idx} className="mb-1">
+                                                        <span className="text-success me-2">✔</span>
+                                                        {reason}
+                                                    </li>
                                                 ))}
-                                            </div>
-                                        ) : (
-                                            <div className="text-center text-muted mt-4 small">No comments yet.</div>
-                                        )}
-                                    </CCol>
+                                            </ul>
+                                        </>
+                                    ) : (
+                                        <p>{data['grouping_reason'].description || "Grouped based on correlation rules."}</p>
+                                    )}
                                 </CCardBody>
                             </CCard>
-                        </CContainer>
+                        ) : null}
+                    </CCol>
+
+                    {/* Right Column: Key Info Tabs */}
+                    <CCol md={6}>
+                        <CCard style={{ backgroundColor: '#f2f7f8' }} className="h-100">
+                            <CCardHeader>
+                                <CNav variant="tabs" className="card-header-tabs">
+                                    <CNavItem>
+                                        <CNavLink active={activeTab === 1} onClick={() => setActiveTab(1)} style={{ cursor: 'pointer' }}>
+                                            Related Events
+                                            {data && data['childalerts'] && <CBadge color="primary" shape="rounded-pill" className="ms-2">{data['childalerts'].length}</CBadge>}
+                                        </CNavLink>
+                                    </CNavItem>
+                                    <CNavItem>
+                                        <CNavLink active={activeTab === 2} onClick={() => setActiveTab(2)} style={{ cursor: 'pointer' }}>
+                                            Recent Changes
+                                            {changesCount > 0 && <CBadge color="primary" shape="rounded-pill" className="ms-2">{changesCount}</CBadge>}
+                                        </CNavLink>
+                                    </CNavItem>
+                                    <CNavItem>
+                                        <CNavLink active={activeTab === 3} onClick={() => setActiveTab(3)} style={{ cursor: 'pointer' }}>
+                                            Comments
+                                        </CNavLink>
+                                    </CNavItem>
+                                </CNav>
+                            </CCardHeader>
+                            <CCardBody>
+                                <CTabContent>
+                                    <CTabPane visible={activeTab === 1}>
+                                        <div style={{ height: '700px', overflowY: 'auto' }}>
+                                            {data && data['parent'] == true ? (
+                                                <CTable align="middle" responsive>
+                                                    <CTableHead>
+                                                        <CTableRow>
+                                                            <CTableHeaderCell scope="col">Entity</CTableHeaderCell>
+                                                            <CTableHeaderCell scope="col">Severity</CTableHeaderCell>
+                                                            <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+                                                            <CTableHeaderCell scope="col">Summary</CTableHeaderCell>
+                                                        </CTableRow>
+                                                    </CTableHead>
+                                                    <CTableBody>
+                                                        {data && data['childalerts'] && data['childalerts'].map((alert) => (
+                                                            <CTableRow key={alert._id}>
+                                                                <CTableDataCell><Link className="link" to={`/alert/details/${alert._id}`} > {alert.entity}</Link></CTableDataCell>
+                                                                <CTableDataCell>
+                                                                    {(() => {
+                                                                        const sev = alert.severity ? alert.severity.toUpperCase() : '';
+                                                                        if (sev === 'CRITICAL') return <span className="badge text-bg-danger">{alert.severity}</span>;
+                                                                        if (sev === 'WARN' || sev === 'WARNING') return <span className="badge text-bg-warning">{alert.severity}</span>;
+                                                                        return <span>{alert.severity}</span>;
+                                                                    })()}
+                                                                </CTableDataCell>
+                                                                <CTableDataCell>
+                                                                    {alert.alertstatus === 'OPEN' ?
+                                                                        <span className="badge text-bg-warning">OPEN</span> :
+                                                                        <span className="badge text-bg-success">CLOSED</span>
+                                                                    }
+                                                                </CTableDataCell>
+                                                                <CTableDataCell>{alert.alertsummary}</CTableDataCell>
+                                                            </CTableRow>
+                                                        ))}
+                                                    </CTableBody>
+                                                </CTable>
+                                            ) : (
+                                                <div className="text-center p-3 text-muted">No related events (Leaf Node).</div>
+                                            )}
+                                        </div>
+                                    </CTabPane>
+                                    <CTabPane visible={activeTab === 2}>
+                                        <div style={{ height: '700px', overflowY: 'auto' }}>
+                                            <RelatedChanges alertId={id} prefetchedData={relatedChangesData} skipInternalFetch={true} />
+                                        </div>
+                                    </CTabPane>
+                                    <CTabPane visible={activeTab === 3}>
+                                        <div style={{ height: '700px', overflowY: 'auto' }}>
+                                            <CCol>
+                                                <CommentComponent />
+                                                {data && data['worklogs'] && data['worklogs'].length > 0 ? (
+                                                    <div className="mt-3 d-flex flex-column gap-2">
+                                                        {[...data['worklogs']].reverse().map((log, index) => (
+                                                            <div key={index} className="d-flex align-items-start">
+                                                                <div className="me-2 mt-1">
+                                                                    <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border" style={{ width: '30px', height: '30px' }}>
+                                                                        <CIcon icon={cilUser} size="sm" className="text-secondary" />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex-grow-1 bg-light p-2 rounded" style={{ fontSize: '0.9rem' }}>
+                                                                    <div className="d-flex justify-content-between align-items-center mb-1">
+                                                                        <span className="fw-bold">{log.author}</span>
+                                                                        <span className="text-muted small" style={{ fontSize: '0.75rem' }}>{log.createdAt}</span>
+                                                                    </div>
+                                                                    <div className="text-break text-dark">{log.comment}</div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-center text-muted mt-4 small">No comments yet.</div>
+                                                )}
+                                            </CCol>
+                                        </div>
+                                    </CTabPane>
+                                </CTabContent>
+                            </CCardBody>
+                        </CCard>
                     </CCol>
                 </CRow>
             </CContainer >

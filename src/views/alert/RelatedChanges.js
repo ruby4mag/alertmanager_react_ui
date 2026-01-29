@@ -143,13 +143,27 @@ const NeighborChangesList = ({ changes }) => {
     )
 }
 
-const RelatedChanges = ({ alertId, onDataLoaded }) => {
+const RelatedChanges = ({ alertId, onDataLoaded, prefetchedData, skipInternalFetch }) => {
     const api = useAxios()
     const [data, setData] = useState({ direct_changes: [], neighbor_changes: [] })
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(skipInternalFetch ? !prefetchedData : !prefetchedData)
     const [error, setError] = useState(null)
 
     useEffect(() => {
+        if (prefetchedData) {
+            setData({
+                direct_changes: prefetchedData.direct_changes || [],
+                neighbor_changes: prefetchedData.neighbor_changes || []
+            })
+            setLoading(false)
+            return
+        }
+
+        if (skipInternalFetch) {
+            setLoading(true)
+            return
+        }
+
         if (!alertId) return
 
         const fetchChanges = async () => {
@@ -189,7 +203,7 @@ const RelatedChanges = ({ alertId, onDataLoaded }) => {
         }
 
         fetchChanges()
-    }, [alertId]) // Removed 'api' dep to avoid infinite loop
+    }, [alertId, prefetchedData, skipInternalFetch]) // Removed 'api' dep to avoid infinite loop
 
     if (loading) return (
         <CCard className="h-100">

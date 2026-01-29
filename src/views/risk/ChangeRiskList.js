@@ -77,6 +77,20 @@ const ChangeDetailRow = ({ change }) => {
                     <div className="small text-muted text-uppercase fw-semibold mb-1">End Time</div>
                     <div>{change.end_time ? new Date(change.end_time).toLocaleString() : 'Ongoing'}</div>
                 </div>
+                <div className="col-md-12">
+                    <div className="small text-muted text-uppercase fw-semibold mb-1">Affected Entities</div>
+                    <div>
+                        {change.affected_entities && Array.isArray(change.affected_entities) && change.affected_entities.length > 0 ? (
+                            change.affected_entities.map((entity, idx) => (
+                                <CBadge color="secondary" shape="rounded-pill" className="me-1" key={idx}>{entity}</CBadge>
+                            ))
+                        ) : change.affected_entity_id ? (
+                            <CBadge color="secondary" shape="rounded-pill">{change.affected_entity_id}</CBadge>
+                        ) : (
+                            <span className="text-muted fst-italic">No specific entities recorded</span>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <div className="fw-bold mb-2">Risk Breakdown</div>
