@@ -993,6 +993,7 @@ const Detail = () => {
                 visible={changeRiskModalVisible}
                 onClose={() => setChangeRiskModalVisible(false)}
                 change={selectedChangeRisk}
+                disableKeyboard={true}
             />
         </>
     )

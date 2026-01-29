@@ -68,7 +68,15 @@ const ChangeRiskList = () => {
 
     return (
         <>
-            <CCard className="mb-4">
+            <style>
+                {`
+                    .no-hover-effect:hover {
+                        transform: none !important;
+                        box-shadow: var(--cui-box-shadow) !important;
+                    }
+                `}
+            </style>
+            <CCard className="mb-4 no-hover-effect">
                 <CCardHeader>
                     <strong>Change Risk Assessment</strong>
                 </CCardHeader>
