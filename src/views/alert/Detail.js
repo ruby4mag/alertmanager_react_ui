@@ -7,7 +7,7 @@ import {
     CCardBody, CCard, CRow, CCol, CCardTitle, CCardText, CCardHeader,
     CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem,
     CModal, CModalHeader, CModalTitle, CModalBody, CBadge,
-    CNav, CNavItem, CNavLink, CTabContent, CTabPane
+    CNav, CNavItem, CNavLink, CTabContent, CTabPane, CSpinner
 } from '@coreui/react';
 import MyToast from '../../components/Toast'
 import useAxios from '../../services/useAxios';
@@ -667,8 +667,15 @@ const Detail = () => {
                         <CButton onClick={() => handleActionButtonClick('ack')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilUserFollow} size="lg" /></CButton>
                         <CButton onClick={() => handleActionButtonClick('unack')} color="primary" variant="outline"><CIcon className='text-warning' icon={icon.cilUserUnfollow} size="lg" /></CButton>
                         <CButton onClick={() => handleActionButtonClick('clear')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilCheckCircle} size="lg" /></CButton>
-                        {graphData && graphData.nodes && graphData.nodes.length > 0 && (
-                            <CButton onClick={() => setVisibleGraphModal(true)} color="info" variant="outline">Show topology</CButton>
+                        {graphLoading ? (
+                            <CButton disabled color="info" variant="outline">
+                                <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
+                                Analysing relationships...
+                            </CButton>
+                        ) : (
+                            graphData && graphData.nodes && graphData.nodes.length > 0 && (
+                                <CButton onClick={() => setVisibleGraphModal(true)} color="info" variant="outline">Show topology</CButton>
+                            )
                         )}
                     </CButtonGroup>
                     <CDropdown>
@@ -834,8 +841,14 @@ const Detail = () => {
                                         </CNavLink>
                                     </CNavItem>
                                     <CNavItem>
-                                        <CNavLink active={activeTab === 4} onClick={() => setActiveTab(4)} style={{ cursor: 'pointer' }}>
+                                        <CNavLink
+                                            active={activeTab === 4}
+                                            disabled={graphLoading}
+                                            onClick={() => !graphLoading && setActiveTab(4)}
+                                            style={{ cursor: graphLoading ? 'not-allowed' : 'pointer' }}
+                                        >
                                             OpsGenie AI
+                                            {graphLoading && <CSpinner size="sm" className="ms-2" />}
                                         </CNavLink>
                                     </CNavItem>
                                 </CNav>
