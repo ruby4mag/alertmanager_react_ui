@@ -13,6 +13,7 @@ import { cilChatBubble, cilX, cilSend } from '@coreui/icons';
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import opsgenieIcon from '../assets/opsgenie-icon.png';
 
 const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded = false }) => {
     const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -323,7 +324,10 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                     }}
                 >
                     <CCardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#321fdb', color: '#fff' }}>
-                        <span><strong>OpsGenie AI</strong></span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <img src={opsgenieIcon} alt="OpsGenie" style={{ width: '20px', height: '20px' }} />
+                            <strong>OpsGenie AI</strong>
+                        </span>
                         {!embedded && (
                             <CButton size="sm" color="transparent" style={{ color: '#fff' }} onClick={handleToggle}>
                                 <CIcon icon={cilX} />

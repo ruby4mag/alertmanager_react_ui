@@ -21,6 +21,7 @@ import * as d3 from 'd3'
 import ChatBot from '../../components/ChatBot';
 import IncidentFeedback from '../../components/IncidentFeedback';
 import RelatedChanges from './RelatedChanges';
+import opsgenieIcon from '../../assets/opsgenie-icon.png';
 
 
 
@@ -808,6 +809,69 @@ const Detail = () => {
                             </CCardBody>
                         </CCard>
 
+                        {/* PagerDuty Section */}
+                        {data && (data['pagerduty_incident_id'] || data['pagerduty_service'] || data['pagerduty_escalation_policy']) && (
+                            <CCard className='mb-4' style={{ backgroundColor: '#f2f7f8' }}>
+                                <CCardHeader>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span>PagerDuty Incident</span>
+                                        {data['pagerduty_priority'] && (
+                                            <CBadge color={
+                                                data['pagerduty_priority'] === 'P1' ? 'danger' :
+                                                    data['pagerduty_priority'] === 'P2' ? 'warning' :
+                                                        data['pagerduty_priority'] === 'P3' ? 'info' : 'secondary'
+                                            }>
+                                                {data['pagerduty_priority']}
+                                            </CBadge>
+                                        )}
+                                        {data['pagerduty_urgency'] && (
+                                            <CBadge color={data['pagerduty_urgency'] === 'high' ? 'danger' : 'secondary'}>
+                                                {data['pagerduty_urgency']}
+                                            </CBadge>
+                                        )}
+                                    </div>
+                                </CCardHeader>
+                                <CCardBody style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                                    <CTable small>
+                                        <CTableBody>
+                                            {data['pagerduty_incident_number'] && (
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Incident Number</CTableHeaderCell>
+                                                    <CTableDataCell>#{data['pagerduty_incident_number']}</CTableDataCell>
+                                                </CTableRow>
+                                            )}
+                                            {data['pagerduty_incident_id'] && (
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Incident ID</CTableHeaderCell>
+                                                    <CTableDataCell>{data['pagerduty_incident_id']}</CTableDataCell>
+                                                </CTableRow>
+                                            )}
+                                            {data['pagerduty_service'] && (
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Service</CTableHeaderCell>
+                                                    <CTableDataCell>{data['pagerduty_service']}</CTableDataCell>
+                                                </CTableRow>
+                                            )}
+                                            {data['pagerduty_escalation_policy'] && (
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Escalation Policy</CTableHeaderCell>
+                                                    <CTableDataCell>{data['pagerduty_escalation_policy']}</CTableDataCell>
+                                                </CTableRow>
+                                            )}
+                                            {data['pagerduty_html_url'] && (
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Incident Link</CTableHeaderCell>
+                                                    <CTableDataCell>
+                                                        <UrlLink url={data['pagerduty_html_url']} text="View in PagerDuty" />
+                                                    </CTableDataCell>
+                                                </CTableRow>
+                                            )}
+                                        </CTableBody>
+                                    </CTable>
+                                </CCardBody>
+                            </CCard>
+                        )}
+
                         <CCard className='mb-4' style={{ backgroundColor: '#f2f7f8' }}>
                             <CCardHeader>Alert Notes</CCardHeader>
                             <CCardBody style={{ height: '140px', overflowY: 'auto' }}>
@@ -869,7 +933,10 @@ const Detail = () => {
                                             onClick={() => !graphLoading && setActiveTab(4)}
                                             style={{ cursor: graphLoading ? 'not-allowed' : 'pointer' }}
                                         >
-                                            OpsGenie AI
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                                <img src={opsgenieIcon} alt="OpsGenie" style={{ width: '16px', height: '16px' }} />
+                                                OpsGenie AI
+                                            </span>
                                             {graphLoading && <CSpinner size="sm" className="ms-2" />}
                                         </CNavLink>
                                     </CNavItem>

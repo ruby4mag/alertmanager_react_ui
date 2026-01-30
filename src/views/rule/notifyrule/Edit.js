@@ -6,7 +6,7 @@ import useCheckPermission from '../../../services/useCheckPermission';
 
 
 import {
-    CForm, CFormLabel, CFormInput, CFormTextarea, CButton, CToaster
+    CForm, CFormLabel, CFormInput, CFormTextarea, CButton, CToaster, CFormSelect
 } from '@coreui/react';
 import { QueryBuilder, formatQuery } from 'react-querybuilder';
 import 'react-querybuilder/dist/query-builder.css';
@@ -34,6 +34,11 @@ function EditPage(roles) {
     const [description, setDescription] = useState("")
     const [payload, setPayload] = useState('');
     const [endpoint, setEndpoint] = useState('');
+    const [pagerdutyService, setPagerdutyService] = useState('');
+    const [pagerdutyEscalationPolicy, setPagerdutyEscalationPolicy] = useState('');
+
+    const [pagerdutyServices, setPagerdutyServices] = useState([]);
+    const [pagerdutyEscalationPolicies, setPagerdutyEscalationPolicies] = useState([]);
 
     const [formattedQuery, setFormattedQuery] = useState(null);
     const fields = [
@@ -72,6 +77,27 @@ function EditPage(roles) {
         fetchData(id);
     }, [id]);
 
+    // Fetch PagerDuty Services and Escalation Policies
+    useEffect(() => {
+        const fetchPagerDutyData = async () => {
+            try {
+                const servicesResponse = await api.get('/api/pagerduty/services');
+                setPagerdutyServices(servicesResponse.data);
+            } catch (error) {
+                console.error('Error fetching PagerDuty services:', error);
+            }
+
+            try {
+                const policiesResponse = await api.get('/api/pagerduty/escalation-policies');
+                setPagerdutyEscalationPolicies(policiesResponse.data);
+            } catch (error) {
+                console.error('Error fetching PagerDuty escalation policies:', error);
+            }
+        };
+
+        fetchPagerDutyData();
+    }, []);
+
     // Go back to list page
 
     useEffect(() => {
@@ -100,6 +126,8 @@ function EditPage(roles) {
             setDescription(response.data['ruledescription'])
             setPayload(response.data['payload'])
             setEndpoint(response.data['endpoint'])
+            setPagerdutyService(response.data['pagerduty_service'] || '')
+            setPagerdutyEscalationPolicy(response.data['pagerduty_escalation_policy'] || '')
             setQuery(JSON.parse(response.data['ruleobject']))
 
         } catch (error) {
@@ -112,7 +140,15 @@ function EditPage(roles) {
         console.log(JSON.stringify(formattedQuery));
         const fetchData = async () => {
             try {
-                const response = await api.put(`/api/notifyrules/${id}`, { rulename: name, ruledescription: description, ruleobject: formattedQuery.toString(), payload: payload, endpoint: endpoint });
+                const response = await api.put(`/api/notifyrules/${id}`, {
+                    rulename: name,
+                    ruledescription: description,
+                    ruleobject: formattedQuery.toString(),
+                    payload: payload,
+                    endpoint: endpoint,
+                    pagerduty_service: pagerdutyService,
+                    pagerduty_escalation_policy: pagerdutyEscalationPolicy
+                });
                 console.log(response.data);
                 addToast(MyToast({
                     title: "Alert Rule",
@@ -162,6 +198,38 @@ function EditPage(roles) {
                 <div className="mb-3">
                     <CFormLabel htmlFor="exampleFormControlTextarea1">Rule Description</CFormLabel>
                     <CFormTextarea id="exampleFormControlTextarea1" rows={3} placeholder="Alert Rule description" value={description} onChange={(e) => setDescription(e.target.value)}></CFormTextarea>
+                </div>
+
+                <div className="mb-3">
+                    <CFormLabel htmlFor="pagerdutyService">PagerDuty Service</CFormLabel>
+                    <CFormSelect
+                        id="pagerdutyService"
+                        value={pagerdutyService}
+                        onChange={(e) => setPagerdutyService(e.target.value)}
+                    >
+                        <option value="">Select a service</option>
+                        {pagerdutyServices.map((service) => (
+                            <option key={service.id} value={service.id}>
+                                {service.name}
+                            </option>
+                        ))}
+                    </CFormSelect>
+                </div>
+
+                <div className="mb-3">
+                    <CFormLabel htmlFor="pagerdutyEscalationPolicy">PagerDuty Escalation Policy</CFormLabel>
+                    <CFormSelect
+                        id="pagerdutyEscalationPolicy"
+                        value={pagerdutyEscalationPolicy}
+                        onChange={(e) => setPagerdutyEscalationPolicy(e.target.value)}
+                    >
+                        <option value="">Select an escalation policy</option>
+                        {pagerdutyEscalationPolicies.map((policy) => (
+                            <option key={policy.id} value={policy.id}>
+                                {policy.name}
+                            </option>
+                        ))}
+                    </CFormSelect>
                 </div>
 
                 <div className="mb-3">
