@@ -27,7 +27,9 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
+    const chatBodyRef = useRef(null);
     const hasInitialized = useRef(false);
+    const userScrolledUp = useRef(false);
 
     // Initial load for embedded: only once when data is available
     useEffect(() => {
@@ -40,13 +42,31 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     // Use the proxy path defined in vite.config.mjs
     const N8N_WEBHOOK_URL = 'http://192.168.1.201:5678/webhook/alert-chat';
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const scrollToBottom = (force = false) => {
+        if (!chatBodyRef.current) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = chatBodyRef.current;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+
+        // Only auto-scroll if user is near bottom or forced
+        if (force || isNearBottom || !userScrolledUp.current) {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            userScrolledUp.current = false;
+        }
+    };
+
+    // Track user scroll behavior
+    const handleScroll = () => {
+        if (!chatBodyRef.current) return;
+        const { scrollTop, scrollHeight, clientHeight } = chatBodyRef.current;
+        const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+        userScrolledUp.current = !isAtBottom;
     };
 
     useEffect(() => {
+        // Only scroll on new messages if user hasn't scrolled up
         scrollToBottom();
-    }, [messages, isOpen]);
+    }, [messages]);
 
     const handleToggle = () => {
         if (isControlled) {
@@ -335,12 +355,16 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                         )}
                     </CCardHeader>
 
-                    <CCardBody style={{
-                        flex: 1,
-                        overflowY: 'auto',
-                        backgroundColor: '#f8f9fa',
-                        padding: '10px'
-                    }}>
+                    <CCardBody
+                        ref={chatBodyRef}
+                        onScroll={handleScroll}
+                        style={{
+                            flex: 1,
+                            overflowY: 'auto',
+                            backgroundColor: '#f8f9fa',
+                            padding: '10px'
+                        }}
+                    >
                         {messages.map((msg, index) => (
                             <div
                                 key={index}

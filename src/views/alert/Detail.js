@@ -683,7 +683,7 @@ const Detail = () => {
         <>
 
             <CContainer fluid className="alert-detail-view">
-                <CContainer fluid className='mb-4'>
+                <CContainer fluid className='mb-2'>
 
                     <CToaster ref={toaster} push={toast} placement="top-end" />
                     <CButtonGroup size="sm" role="group" aria-label="Small button group" className='me-4'>
@@ -727,9 +727,9 @@ const Detail = () => {
                 <CRow>
                     {/* Left Column: Details & Notes */}
                     <CCol md={6}>
-                        <CCard style={{ backgroundColor: '#f2f7f8' }} className="mb-4">
+                        <CCard style={{ backgroundColor: '#f2f7f8' }} className="mb-2">
                             <CCardHeader>Event Details</CCardHeader>
-                            <CCardBody style={{ height: '300px', overflowY: 'auto' }}>
+                            <CCardBody style={{ height: '300px', overflowY: 'auto', padding: '0.75rem' }}>
                                 <CTable small >
                                     <CTableBody>
                                         <CTableRow>
@@ -793,9 +793,9 @@ const Detail = () => {
                             </CCardBody>
                         </CCard>
 
-                        <CCard className='mb-4' style={{ backgroundColor: '#f2f7f8' }}>
+                        <CCard className='mb-2' style={{ backgroundColor: '#f2f7f8' }}>
                             <CCardHeader>Additional Details</CCardHeader>
-                            <CCardBody style={{ height: '200px', overflowY: 'auto' }}>
+                            <CCardBody style={{ height: '200px', overflowY: 'auto', padding: '0.75rem' }}>
                                 <CTable small >
                                     <CTableBody>
                                         {data && data['additionaldetails'] && Object.entries(data['additionaldetails']).map(([key, value]) => (
@@ -811,7 +811,7 @@ const Detail = () => {
 
                         {/* PagerDuty Section */}
                         {data && (data['pagerduty_incident_id'] || data['pagerduty_service'] || data['pagerduty_escalation_policy']) && (
-                            <CCard className='mb-4' style={{ backgroundColor: '#f2f7f8' }}>
+                            <CCard className='mb-2' style={{ backgroundColor: '#f2f7f8' }}>
                                 <CCardHeader>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <span>PagerDuty Incident</span>
@@ -831,7 +831,7 @@ const Detail = () => {
                                         )}
                                     </div>
                                 </CCardHeader>
-                                <CCardBody style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                                <CCardBody style={{ maxHeight: '250px', overflowY: 'auto', padding: '0.75rem' }}>
                                     <CTable small>
                                         <CTableBody>
                                             {data['pagerduty_incident_number'] && (
@@ -872,17 +872,17 @@ const Detail = () => {
                             </CCard>
                         )}
 
-                        <CCard className='mb-4' style={{ backgroundColor: '#f2f7f8' }}>
+                        <CCard className='mb-2' style={{ backgroundColor: '#f2f7f8' }}>
                             <CCardHeader>Alert Notes</CCardHeader>
-                            <CCardBody style={{ height: '140px', overflowY: 'auto' }}>
+                            <CCardBody style={{ height: '140px', overflowY: 'auto', padding: '0.75rem' }}>
                                 <p className="mb-0">{data && data['alertnotes']}</p>
                             </CCardBody>
                         </CCard>
 
                         {(data && data['parent'] == true && data['grouping_reason']) ? (
-                            <CCard className="mb-4" style={{ backgroundColor: '#f2f7f8' }}>
+                            <CCard className="mb-2" style={{ backgroundColor: '#f2f7f8' }}>
                                 <CCardHeader>Why grouped?</CCardHeader>
-                                <CCardBody>
+                                <CCardBody style={{ padding: '0.75rem' }}>
                                     {data['grouping_reason'].type === 'SIMILARITY' ? (
                                         <>
                                             <p className="mb-2"><strong>Grouped by similarity:</strong></p>
@@ -905,7 +905,7 @@ const Detail = () => {
 
                     {/* Right Column: Key Info Tabs */}
                     <CCol md={6}>
-                        <CCard style={{ backgroundColor: '#f2f7f8' }} className="h-100">
+                        <CCard style={{ backgroundColor: '#f2f7f8' }}>
                             <CCardHeader>
                                 <CNav variant="tabs" className="card-header-tabs">
                                     <CNavItem>
@@ -942,10 +942,10 @@ const Detail = () => {
                                     </CNavItem>
                                 </CNav>
                             </CCardHeader>
-                            <CCardBody>
+                            <CCardBody style={{ padding: '0.75rem' }}>
                                 <CTabContent>
                                     <CTabPane visible={activeTab === 1}>
-                                        <div style={{ height: '700px', overflowY: 'auto' }}>
+                                        <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
                                             {data && data['parent'] == true ? (
                                                 <CTable align="middle" responsive>
                                                     <CTableHead>
@@ -985,7 +985,7 @@ const Detail = () => {
                                         </div>
                                     </CTabPane>
                                     <CTabPane visible={activeTab === 2}>
-                                        <div style={{ height: '700px', overflowY: 'auto' }}>
+                                        <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
                                             <RelatedChanges
                                                 alertId={id}
                                                 prefetchedData={relatedChangesData}
@@ -998,7 +998,7 @@ const Detail = () => {
                                         </div>
                                     </CTabPane>
                                     <CTabPane visible={activeTab === 3}>
-                                        <div style={{ height: '700px', overflowY: 'auto' }}>
+                                        <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
                                             <CCol>
                                                 <CommentComponent />
                                                 {data && data['worklogs'] && data['worklogs'].length > 0 ? (
