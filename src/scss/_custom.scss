@@ -91,7 +91,7 @@
 
 // Sidebar modifications for modern look
 .sidebar {
-  --cui-sidebar-bg: #164e63; // Cyan 900
+  --cui-sidebar-bg: #151847; // User requested color
   background-color: var(--cui-sidebar-bg) !important;
   border-right: none !important;
   box-shadow: 4px 0 24px 0 rgba(0,0,0,0.1);
@@ -150,7 +150,7 @@
   --cui-primary: #0891b2;
   --cui-primary-rgb: 8, 145, 178;
   --cui-body-bg: #ffffff;
-  --cui-sidebar-bg: #120112; 
+  --cui-sidebar-bg: #151847; 
 }
 
 // Custom Dark/Light Mode Handling
@@ -216,7 +216,7 @@ input, textarea, select {
   }
 
   .sidebar {
-    --cui-sidebar-bg: #0f172a; // Darker shade for sidebar in dark mode
+    --cui-sidebar-bg: #151847; // User requested color
     background-color: var(--cui-sidebar-bg) !important;
   }
 }

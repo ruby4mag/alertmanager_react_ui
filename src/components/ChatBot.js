@@ -459,7 +459,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                         flexDirection: 'column',
                     }}
                 >
-                    <CCardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#321fdb', color: '#fff' }}>
+                    <CCardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgb(94, 83, 167)', color: '#fff' }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <img src={opsgenieIcon} alt="OpsGenie" style={{ width: '20px', height: '20px' }} />
                             <strong>OpsGenie AI</strong>
@@ -492,11 +492,11 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                             >
                                 <div
                                     style={{
-                                        maxWidth: '80%',
+                                        maxWidth: '100%',
                                         padding: '8px 12px',
                                         borderRadius: '12px',
-                                        backgroundColor: msg.sender === 'user' ? '#321fdb' : '#e9ecef',
-                                        color: msg.sender === 'user' ? '#fff' : '#212529',
+                                        backgroundColor: msg.sender === 'user' ? 'rgb(198, 210, 255)' : '#e9ecef',
+                                        color: msg.sender === 'user' ? 'rgb(0, 0, 0)' : '#212529',
                                         fontSize: '0.9rem',
                                         wordWrap: 'break-word',
                                     }}
@@ -505,7 +505,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                                         children={msg.text}
                                         remarkPlugins={[remarkGfm]}
                                         components={{
-                                            a: ({ node, ...props }) => <a style={{ color: msg.sender === 'user' ? '#fff' : 'blue' }} target="_blank" rel="noopener noreferrer" {...props} />
+                                            a: ({ node, ...props }) => <a style={{ color: 'blue' }} target="_blank" rel="noopener noreferrer" {...props} />
                                         }}
                                     />
                                 </div>

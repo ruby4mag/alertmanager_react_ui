@@ -123,11 +123,6 @@ const _nav = {
           },
           {
             component: CNavItem,
-            name: 'Users',
-            to: '/rule/notifyrule/list',
-          },
-          {
-            component: CNavItem,
             name: 'Correlation Rules',
             to: '/rule/correlationrule/list',
           },
@@ -137,7 +132,7 @@ const _nav = {
       {
         component: CNavItem,
         name: 'Docs',
-        href: 'https://spogworks.com',
+        href: 'https://westerndigital.com',
         icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
       },
     ],

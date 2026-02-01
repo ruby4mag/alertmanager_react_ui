@@ -150,7 +150,7 @@ const DataTable = () => {
       { accessorKey: 'alertacked', header: 'alertacked' },
       {
         accessorKey: 'severity', header: 'severity', Cell: ({ cell }) => (
-          cell.getValue() == "WARNING" ? <CIcon icon={cilWarning} className="me-2 text-warning" size="lg" /> : <CIcon icon={cilWarning} className="me-2 text-danger" size="lg" />
+          cell.getValue() == "WARNING" ? <span className="badge text-bg-warning">{cell.getValue()}</span> : <span className="badge text-bg-danger">{cell.getValue()}</span>
         ),
       },
       { accessorKey: 'alertid', header: 'alertid' },
