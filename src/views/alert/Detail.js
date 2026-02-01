@@ -682,7 +682,7 @@ const Detail = () => {
     return (
         <>
 
-            <CContainer fluid className="alert-detail-view">
+            <div fluid className="alert-detail-view">
                 <CContainer fluid className='mb-2'>
 
                     <CToaster ref={toaster} push={toast} placement="top-end" />
@@ -729,7 +729,7 @@ const Detail = () => {
                     <CCol md={6}>
                         <CCard style={{ backgroundColor: '#f2f7f8' }} className="mb-2">
                             <CCardHeader>Event Details</CCardHeader>
-                            <CCardBody style={{ height: '300px', overflowY: 'auto', padding: '0.75rem' }}>
+                            <CCardBody style={{ maxHeight: '700px', overflowY: 'auto', padding: '0.75rem' }}>
                                 <CTable small >
                                     <CTableBody>
                                         <CTableRow>
@@ -788,16 +788,16 @@ const Detail = () => {
                                             <CTableHeaderCell scope="row">Alert Count</CTableHeaderCell>
                                             <CTableDataCell>{data && data['alertcount']}</CTableDataCell>
                                         </CTableRow>
-                                    </CTableBody>
-                                </CTable>
-                            </CCardBody>
-                        </CCard>
 
-                        <CCard className='mb-2' style={{ backgroundColor: '#f2f7f8' }}>
-                            <CCardHeader>Additional Details</CCardHeader>
-                            <CCardBody style={{ height: '200px', overflowY: 'auto', padding: '0.75rem' }}>
-                                <CTable small >
-                                    <CTableBody>
+                                        {/* Alert Notes Section */}
+                                        {data && data['alertnotes'] && (
+                                            <CTableRow>
+                                                <CTableHeaderCell scope="row">Alert Notes</CTableHeaderCell>
+                                                <CTableDataCell>{data['alertnotes']}</CTableDataCell>
+                                            </CTableRow>
+                                        )}
+
+                                        {/* Additional Details Section */}
                                         {data && data['additionaldetails'] && Object.entries(data['additionaldetails']).map(([key, value]) => (
                                             <CTableRow key={key}>
                                                 <CTableHeaderCell scope="row">{key}</CTableHeaderCell>
@@ -872,13 +872,6 @@ const Detail = () => {
                             </CCard>
                         )}
 
-                        <CCard className='mb-2' style={{ backgroundColor: '#f2f7f8' }}>
-                            <CCardHeader>Alert Notes</CCardHeader>
-                            <CCardBody style={{ height: '140px', overflowY: 'auto', padding: '0.75rem' }}>
-                                <p className="mb-0">{data && data['alertnotes']}</p>
-                            </CCardBody>
-                        </CCard>
-
                         {(data && data['parent'] == true && data['grouping_reason']) ? (
                             <CCard className="mb-2" style={{ backgroundColor: '#f2f7f8' }}>
                                 <CCardHeader>Why grouped?</CCardHeader>
@@ -909,19 +902,19 @@ const Detail = () => {
                             <CCardHeader>
                                 <CNav variant="tabs" className="card-header-tabs">
                                     <CNavItem>
-                                        <CNavLink active={activeTab === 1} onClick={() => setActiveTab(1)} style={{ cursor: 'pointer' }}>
+                                        <CNavLink active={activeTab === 1} onClick={() => setActiveTab(1)} style={{ cursor: 'pointer', fontSize: '0.875rem' }}>
                                             Related Events
                                             {data && data['childalerts'] && <CBadge color="primary" shape="rounded-pill" className="ms-2">{data['childalerts'].length}</CBadge>}
                                         </CNavLink>
                                     </CNavItem>
                                     <CNavItem>
-                                        <CNavLink active={activeTab === 2} onClick={() => setActiveTab(2)} style={{ cursor: 'pointer' }}>
+                                        <CNavLink active={activeTab === 2} onClick={() => setActiveTab(2)} style={{ cursor: 'pointer', fontSize: '0.875rem' }}>
                                             Recent Changes
                                             {changesCount > 0 && <CBadge color="primary" shape="rounded-pill" className="ms-2">{changesCount}</CBadge>}
                                         </CNavLink>
                                     </CNavItem>
                                     <CNavItem>
-                                        <CNavLink active={activeTab === 3} onClick={() => setActiveTab(3)} style={{ cursor: 'pointer' }}>
+                                        <CNavLink active={activeTab === 3} onClick={() => setActiveTab(3)} style={{ cursor: 'pointer', fontSize: '0.875rem' }}>
                                             Comments
                                             {data && data['worklogs'] && data['worklogs'].length > 0 && <CBadge color="primary" shape="rounded-pill" className="ms-2">{data['worklogs'].length}</CBadge>}
                                         </CNavLink>
@@ -931,7 +924,7 @@ const Detail = () => {
                                             active={activeTab === 4}
                                             disabled={graphLoading}
                                             onClick={() => !graphLoading && setActiveTab(4)}
-                                            style={{ cursor: graphLoading ? 'not-allowed' : 'pointer' }}
+                                            style={{ cursor: graphLoading ? 'not-allowed' : 'pointer', fontSize: '0.875rem' }}
                                         >
                                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                                                 <img src={opsgenieIcon} alt="OpsGenie" style={{ width: '16px', height: '16px' }} />
@@ -1042,7 +1035,7 @@ const Detail = () => {
                         </CCard>
                     </CCol>
                 </CRow>
-            </CContainer >
+            </div >
             <CModal visible={visibleGraphModal} onClose={() => setVisibleGraphModal(false)} size="xl" fullscreen keyboard={false}>
                 <CModalHeader onClose={() => setVisibleGraphModal(false)}>
                     <CModalTitle>{graphTitle}</CModalTitle>

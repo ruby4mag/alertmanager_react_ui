@@ -14,8 +14,10 @@ import { cilChatBubble, cilX, cilSend } from '@coreui/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import opsgenieIcon from '../assets/opsgenie-icon.png';
+import { useAuth } from '../auth/AuthContext';
 
 const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded = false }) => {
+    const { getToken } = useAuth();
     const [internalIsOpen, setInternalIsOpen] = useState(false);
 
     // Determine if controlled or uncontrolled
@@ -38,9 +40,8 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
         }
     }, [embedded, alertData]);
 
-    // Replace this with your actual n8n webhook URL
-    // Use the proxy path defined in vite.config.mjs
-    const N8N_WEBHOOK_URL = 'http://192.168.1.201:5678/webhook/alert-chat';
+    // Use the backend proxy endpoint which injects sessionId before forwarding to n8n
+    const CHATBOT_API_URL = 'http://192.168.1.201:8080/api/v1/chatbot';
 
     const scrollToBottom = (force = false) => {
         if (!chatBodyRef.current) return;
@@ -94,24 +95,77 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
         ]);
 
         try {
-            const alertPayload = { ...alertData };
+            const payload = {
+                action: 'init',
+                alert: alertData,
+            };
+
             if (graphData && graphData.nodes && graphData.nodes.length > 0) {
-                alertPayload.graph_data = graphData;
+                payload.graph_data = graphData;
             }
 
-            // Use fetch for streaming support
-            const response = await fetch(N8N_WEBHOOK_URL, {
+            // Use fetch for streaming support via backend proxy
+            const token = getToken();
+            const response = await fetch(CHATBOT_API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'init',
-                    alert: alertPayload,
-                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            console.log('Backend response status:', response.status);
+            console.log('Backend response headers:', {
+                contentType: response.headers.get('content-type'),
+                contentEncoding: response.headers.get('content-encoding'),
             });
 
             if (!response.body) throw new Error('ReadableStream not supported.');
 
-            const reader = response.body.getReader();
+            // Handle gzip-compressed responses
+            // Backend sends gzipped data but doesn't set Content-Encoding header
+            const contentEncoding = response.headers.get('content-encoding');
+
+            // Read first chunk to detect if it's gzipped (magic bytes: 0x1f 0x8b)
+            const tempReader = response.body.getReader();
+            const { value: firstChunk, done: firstDone } = await tempReader.read();
+
+            let isGzipped = contentEncoding === 'gzip';
+
+            // Check for gzip magic bytes
+            if (!isGzipped && firstChunk && firstChunk.length >= 2) {
+                isGzipped = firstChunk[0] === 0x1f && firstChunk[1] === 0x8b;
+                console.log('Detected gzip by magic bytes:', isGzipped, 'First bytes:', firstChunk[0], firstChunk[1]);
+            }
+
+            // Recreate stream with first chunk included
+            let stream = new ReadableStream({
+                async start(controller) {
+                    if (!firstDone) {
+                        controller.enqueue(firstChunk);
+                        try {
+                            while (true) {
+                                const { done, value } = await tempReader.read();
+                                if (done) break;
+                                controller.enqueue(value);
+                            }
+                        } finally {
+                            controller.close();
+                        }
+                    } else {
+                        controller.close();
+                    }
+                }
+            });
+
+            // Decompress if gzipped
+            if (isGzipped) {
+                console.log('Decompressing gzip stream...');
+                stream = stream.pipeThrough(new DecompressionStream('gzip'));
+            }
+
+            const reader = stream.getReader();
             const decoder = new TextDecoder();
             let aiResponseText = '';
 
@@ -120,6 +174,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                 if (done) break;
 
                 const chunk = decoder.decode(value, { stream: true });
+                console.log('[INIT] Chunk:', chunk.substring(0, 200));
                 // N8N streams JSON objects separated by newlines.
                 // We need to parse each line to extract the 'content' field.
                 const lines = chunk.split('\n');
@@ -128,6 +183,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                     if (!line.trim()) continue;
                     try {
                         const json = JSON.parse(line);
+                        console.log('[INIT] Parsed JSON:', json);
                         // Access 'content' field based on node output structure
                         if (json.type === 'item' && json.content) {
                             aiResponseText += json.content;
@@ -193,10 +249,14 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
         setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
 
         try {
-            // Use fetch for streaming support
-            const response = await fetch(N8N_WEBHOOK_URL, {
+            // Use fetch for streaming support via backend proxy
+            const token = getToken();
+            const response = await fetch(CHATBOT_API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token,
+                },
                 body: JSON.stringify({
                     action: 'chat',
                     message: userMessage.text,
@@ -208,7 +268,49 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
 
             if (!response.body) throw new Error('ReadableStream not supported.');
 
-            const reader = response.body.getReader();
+            // Handle gzip-compressed responses
+            // Backend sends gzipped data but doesn't set Content-Encoding header
+            const contentEncoding = response.headers.get('content-encoding');
+
+            // Read first chunk to detect if it's gzipped (magic bytes: 0x1f 0x8b)
+            const tempReader = response.body.getReader();
+            const { value: firstChunk, done: firstDone } = await tempReader.read();
+
+            let isGzipped = contentEncoding === 'gzip';
+
+            // Check for gzip magic bytes
+            if (!isGzipped && firstChunk && firstChunk.length >= 2) {
+                isGzipped = firstChunk[0] === 0x1f && firstChunk[1] === 0x8b;
+                console.log('[CHAT] Detected gzip by magic bytes:', isGzipped);
+            }
+
+            // Recreate stream with first chunk included
+            let stream = new ReadableStream({
+                async start(controller) {
+                    if (!firstDone) {
+                        controller.enqueue(firstChunk);
+                        try {
+                            while (true) {
+                                const { done, value } = await tempReader.read();
+                                if (done) break;
+                                controller.enqueue(value);
+                            }
+                        } finally {
+                            controller.close();
+                        }
+                    } else {
+                        controller.close();
+                    }
+                }
+            });
+
+            // Decompress if gzipped
+            if (isGzipped) {
+                console.log('[CHAT] Decompressing gzip stream...');
+                stream = stream.pipeThrough(new DecompressionStream('gzip'));
+            }
+
+            const reader = stream.getReader();
             const decoder = new TextDecoder();
             let aiResponseText = '';
 
