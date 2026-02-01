@@ -115,11 +115,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                 body: JSON.stringify(payload),
             });
 
-            console.log('Backend response status:', response.status);
-            console.log('Backend response headers:', {
-                contentType: response.headers.get('content-type'),
-                contentEncoding: response.headers.get('content-encoding'),
-            });
+
 
             if (!response.body) throw new Error('ReadableStream not supported.');
 
@@ -136,7 +132,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
             // Check for gzip magic bytes
             if (!isGzipped && firstChunk && firstChunk.length >= 2) {
                 isGzipped = firstChunk[0] === 0x1f && firstChunk[1] === 0x8b;
-                console.log('Detected gzip by magic bytes:', isGzipped, 'First bytes:', firstChunk[0], firstChunk[1]);
+
             }
 
             // Recreate stream with first chunk included
@@ -161,7 +157,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
 
             // Decompress if gzipped
             if (isGzipped) {
-                console.log('Decompressing gzip stream...');
+
                 stream = stream.pipeThrough(new DecompressionStream('gzip'));
             }
 
@@ -174,7 +170,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                 if (done) break;
 
                 const chunk = decoder.decode(value, { stream: true });
-                console.log('[INIT] Chunk:', chunk.substring(0, 200));
+
                 // N8N streams JSON objects separated by newlines.
                 // We need to parse each line to extract the 'content' field.
                 const lines = chunk.split('\n');
@@ -183,10 +179,19 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                     if (!line.trim()) continue;
                     try {
                         const json = JSON.parse(line);
-                        console.log('[INIT] Parsed JSON:', json);
+
                         // Access 'content' field based on node output structure
                         if (json.type === 'item' && json.content) {
                             aiResponseText += json.content;
+                            // Update UI immediately for smooth streaming effect
+                            setMessages((prev) => {
+                                const newMessages = [...prev];
+                                const lastMsg = newMessages[newMessages.length - 1];
+                                if (lastMsg?.sender === 'ai') {
+                                    lastMsg.text = aiResponseText;
+                                }
+                                return newMessages;
+                            });
                         } else if (json.type === 'end') {
                             // Stream ended
                         }
@@ -281,7 +286,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
             // Check for gzip magic bytes
             if (!isGzipped && firstChunk && firstChunk.length >= 2) {
                 isGzipped = firstChunk[0] === 0x1f && firstChunk[1] === 0x8b;
-                console.log('[CHAT] Detected gzip by magic bytes:', isGzipped);
+
             }
 
             // Recreate stream with first chunk included
@@ -306,7 +311,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
 
             // Decompress if gzipped
             if (isGzipped) {
-                console.log('[CHAT] Decompressing gzip stream...');
+
                 stream = stream.pipeThrough(new DecompressionStream('gzip'));
             }
 
@@ -330,6 +335,15 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                         // Access 'content' field based on node output structure
                         if (json.type === 'item' && json.content) {
                             aiResponseText += json.content;
+                            // Update UI immediately for smooth streaming effect
+                            setMessages((prev) => {
+                                const newMessages = [...prev];
+                                const lastMsg = newMessages[newMessages.length - 1];
+                                if (lastMsg?.sender === 'ai') {
+                                    lastMsg.text = aiResponseText;
+                                }
+                                return newMessages;
+                            });
                         } else if (json.type === 'end') {
                             // Stream ended
                         }
