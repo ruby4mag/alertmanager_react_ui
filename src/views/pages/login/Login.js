@@ -25,7 +25,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://192.168.1.201:8080/login', { username, password })
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/login`, { username, password })
       const { token, role } = response.data
       login(token, role)
       navigate('/dashboard')

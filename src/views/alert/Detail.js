@@ -111,7 +111,7 @@ const Detail = () => {
 
         const fetchGraph = async () => {
             const entity = data.entity;
-            const url = `http://192.168.1.201:8080/entity/${encodeURIComponent(entity)}`
+            const url = `${import.meta.env.VITE_API_BASE_URL}/entity/${encodeURIComponent(entity)}`
             try {
                 setGraphLoading(true)
                 setGraphError(null)

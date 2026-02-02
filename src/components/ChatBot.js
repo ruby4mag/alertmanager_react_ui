@@ -41,7 +41,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     }, [embedded, alertData]);
 
     // Use the backend proxy endpoint which injects sessionId before forwarding to n8n
-    const CHATBOT_API_URL = 'http://192.168.1.201:8080/api/v1/chatbot';
+    const CHATBOT_API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1/chatbot`;
 
     const scrollToBottom = (force = false) => {
         if (!chatBodyRef.current) return;

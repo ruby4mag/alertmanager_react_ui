@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuth } from '../auth/AuthContext';
 
 const api = axios.create({
-    baseURL: 'http://192.168.1.201:8080',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },

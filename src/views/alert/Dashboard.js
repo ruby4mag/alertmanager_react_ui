@@ -65,9 +65,7 @@ const DataTable = () => {
     }
     const url = new URL(
       '/api/alerts',
-      process.env.NODE_ENV === 'production'
-        ? 'http://192.168.1.201:8080'
-        : 'http://192.168.1.201:8080',
+      import.meta.env.VITE_API_BASE_URL
     );
 
     url.searchParams.set('start', `${pagination.pageIndex * pagination.pageSize}`);
