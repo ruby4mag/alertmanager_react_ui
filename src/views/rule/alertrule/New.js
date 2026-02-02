@@ -114,6 +114,7 @@ const New = () => {
                         <option value="Entity">Entity</option>
                         <option value="Severity">Severity</option>
                         <option value="AlertSummary">Alert Summary</option>
+                        <option value="AlertPriority">Alert Priority</option>
                     </select>
                 </div>
                 <div className="mb-3">

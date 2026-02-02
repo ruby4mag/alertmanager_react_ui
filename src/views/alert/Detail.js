@@ -762,7 +762,13 @@ const Detail = () => {
                                         </CTableRow>
                                         <CTableRow>
                                             <CTableHeaderCell scope="row">Alert Status</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertstatus']}</CTableDataCell>
+                                            <CTableDataCell>
+                                                {data && (
+                                                    data['alertstatus'] === 'OPEN' ?
+                                                        <span className="badge text-bg-warning" style={{ fontSize: '0.9rem' }}>OPEN</span> :
+                                                        <span className="badge text-bg-success" style={{ fontSize: '0.9rem' }}>CLOSED</span>
+                                                )}
+                                            </CTableDataCell>
                                         </CTableRow>
                                         <CTableRow>
                                             <CTableHeaderCell scope="row">Alert Acknowledged</CTableHeaderCell>
@@ -770,7 +776,15 @@ const Detail = () => {
                                         </CTableRow>
                                         <CTableRow>
                                             <CTableHeaderCell scope="row">Severity</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['severity']}</CTableDataCell>
+                                            <CTableDataCell>
+                                                {data && (() => {
+                                                    const sev = data['severity'] ? data['severity'].toUpperCase() : '';
+                                                    if (sev === 'CRITICAL') return <span className="badge text-bg-danger" style={{ fontSize: '0.9rem' }}>{data['severity']}</span>;
+                                                    if (sev === 'WARN' || sev === 'WARNING') return <span className="badge text-bg-warning" style={{ fontSize: '0.9rem' }}>{data['severity']}</span>;
+                                                    if (sev === 'INFO') return <span className="badge text-bg-info text-dark" style={{ fontSize: '0.9rem' }}>{data['severity']}</span>;
+                                                    return <span className="badge text-bg-secondary" style={{ fontSize: '0.9rem' }}>{data['severity']}</span>;
+                                                })()}
+                                            </CTableDataCell>
                                         </CTableRow>
                                         <CTableRow>
                                             <CTableHeaderCell scope="row">Alert Id</CTableHeaderCell>
@@ -778,7 +792,17 @@ const Detail = () => {
                                         </CTableRow>
                                         <CTableRow>
                                             <CTableHeaderCell scope="row">Alert Priority</CTableHeaderCell>
-                                            <CTableDataCell>{data && data['alertpriority']}</CTableDataCell>
+                                            <CTableDataCell>
+                                                {data && data['alertpriority'] && (() => {
+                                                    const prio = data['alertpriority'];
+                                                    let badgeColor = 'secondary';
+                                                    if (prio === 'P0') badgeColor = 'danger';
+                                                    else if (prio === 'P1') badgeColor = 'warning';
+                                                    else if (prio === 'P2') badgeColor = 'info';
+                                                    else if (prio === 'P3') badgeColor = 'light';
+                                                    return <span className={`badge text-bg-${badgeColor}`} style={{ fontSize: '0.9rem' }}>{prio}</span>
+                                                })()}
+                                            </CTableDataCell>
                                         </CTableRow>
                                         <CTableRow>
                                             <CTableHeaderCell scope="row">Ip Addess</CTableHeaderCell>
@@ -938,40 +962,54 @@ const Detail = () => {
                             <CCardBody style={{ padding: '0.75rem' }}>
                                 <CTabContent>
                                     <CTabPane visible={activeTab === 1}>
-                                        <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+                                        <div style={{ maxHeight: '700px', overflowY: 'auto', overflowX: 'auto' }}>
                                             {data && data['parent'] == true ? (
-                                                <CTable align="middle" responsive>
-                                                    <CTableHead>
-                                                        <CTableRow>
-                                                            <CTableHeaderCell scope="col">Entity</CTableHeaderCell>
-                                                            <CTableHeaderCell scope="col">Severity</CTableHeaderCell>
-                                                            <CTableHeaderCell scope="col">Status</CTableHeaderCell>
-                                                            <CTableHeaderCell scope="col">Summary</CTableHeaderCell>
-                                                        </CTableRow>
-                                                    </CTableHead>
-                                                    <CTableBody>
-                                                        {data && data['childalerts'] && data['childalerts'].map((alert) => (
-                                                            <CTableRow key={alert._id}>
-                                                                <CTableDataCell><Link className="link" to={`/alert/details/${alert._id}`} > {alert.entity}</Link></CTableDataCell>
-                                                                <CTableDataCell>
-                                                                    {(() => {
-                                                                        const sev = alert.severity ? alert.severity.toUpperCase() : '';
-                                                                        if (sev === 'CRITICAL') return <span className="badge text-bg-danger">{alert.severity}</span>;
-                                                                        if (sev === 'WARN' || sev === 'WARNING') return <span className="badge text-bg-warning">{alert.severity}</span>;
-                                                                        return <span>{alert.severity}</span>;
-                                                                    })()}
-                                                                </CTableDataCell>
-                                                                <CTableDataCell>
-                                                                    {alert.alertstatus === 'OPEN' ?
-                                                                        <span className="badge text-bg-warning">OPEN</span> :
-                                                                        <span className="badge text-bg-success">CLOSED</span>
-                                                                    }
-                                                                </CTableDataCell>
-                                                                <CTableDataCell>{alert.alertsummary}</CTableDataCell>
+                                                <div style={{ overflowX: 'auto' }}>
+                                                    <CTable align="middle" responsive>
+                                                        <CTableHead>
+                                                            <CTableRow>
+                                                                <CTableHeaderCell scope="col">Entity</CTableHeaderCell>
+                                                                <CTableHeaderCell scope="col">Severity</CTableHeaderCell>
+                                                                <CTableHeaderCell scope="col">Priority</CTableHeaderCell>
+                                                                <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+                                                                <CTableHeaderCell scope="col">Summary</CTableHeaderCell>
                                                             </CTableRow>
-                                                        ))}
-                                                    </CTableBody>
-                                                </CTable>
+                                                        </CTableHead>
+                                                        <CTableBody>
+                                                            {data && data['childalerts'] && data['childalerts'].map((alert) => (
+                                                                <CTableRow key={alert._id}>
+                                                                    <CTableDataCell><Link className="link" to={`/alert/details/${alert._id}`} > {alert.entity}</Link></CTableDataCell>
+                                                                    <CTableDataCell>
+                                                                        {(() => {
+                                                                            const sev = alert.severity ? alert.severity.toUpperCase() : '';
+                                                                            if (sev === 'CRITICAL') return <span className="badge text-bg-danger">{alert.severity}</span>;
+                                                                            if (sev === 'WARN' || sev === 'WARNING') return <span className="badge text-bg-warning">{alert.severity}</span>;
+                                                                            return <span>{alert.severity}</span>;
+                                                                        })()}
+                                                                    </CTableDataCell>
+                                                                    <CTableDataCell>
+                                                                        {alert.alertpriority && (() => {
+                                                                            const prio = alert.alertpriority;
+                                                                            let badgeColor = 'secondary';
+                                                                            if (prio === 'P0') badgeColor = 'danger';
+                                                                            else if (prio === 'P1') badgeColor = 'warning';
+                                                                            else if (prio === 'P2') badgeColor = 'info';
+                                                                            else if (prio === 'P3') badgeColor = 'light';
+                                                                            return <span className={`badge text-bg-${badgeColor}`}>{prio}</span>
+                                                                        })()}
+                                                                    </CTableDataCell>
+                                                                    <CTableDataCell>
+                                                                        {alert.alertstatus === 'OPEN' ?
+                                                                            <span className="badge text-bg-warning">OPEN</span> :
+                                                                            <span className="badge text-bg-success">CLOSED</span>
+                                                                        }
+                                                                    </CTableDataCell>
+                                                                    <CTableDataCell>{alert.alertsummary}</CTableDataCell>
+                                                                </CTableRow>
+                                                            ))}
+                                                        </CTableBody>
+                                                    </CTable>
+                                                </div>
                                             ) : (
                                                 <div className="text-center p-3 text-muted">No related events (Leaf Node).</div>
                                             )}

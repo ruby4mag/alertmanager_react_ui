@@ -159,9 +159,13 @@ const DataTable = () => {
         header: 'alertpriority',
         Cell: ({ cell }) => {
           const value = cell.getValue()
-          const entity = cell.row.original && cell.row.original.entity
+          let badgeColor = 'secondary';
+          if (value === 'P0') badgeColor = 'danger';
+          else if (value === 'P1') badgeColor = 'warning';
+          else if (value === 'P2') badgeColor = 'info';
+          else if (value === 'P3') badgeColor = 'light';
 
-          return value
+          return value ? <span className={`badge text-bg-${badgeColor}`}>{value}</span> : null
         },
       },
       { accessorKey: 'ipaddress', header: 'ipaddress' },
