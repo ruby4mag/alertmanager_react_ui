@@ -15,9 +15,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import opsgenieIcon from '../assets/opsgenie-icon.png';
 import { useAuth } from '../auth/AuthContext';
+import useAxios from '../services/useAxios';
 
 const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded = false }) => {
     const { getToken } = useAuth();
+    const api = useAxios();
     const [internalIsOpen, setInternalIsOpen] = useState(false);
 
     // Determine if controlled or uncontrolled
@@ -28,10 +30,35 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState('OpsGenie is thinking...');
     const messagesEndRef = useRef(null);
     const chatBodyRef = useRef(null);
     const hasInitialized = useRef(false);
     const userScrolledUp = useRef(false);
+
+    const loadingMessages = [
+        "OpsGenie is thinking...",
+        "OpsGenie is finding root cause...",
+        "Analyzing topology relationships...",
+        "Checking historical alert patterns...",
+        "Identifying relevant changes...",
+        "Correlating events...",
+        "Gathering incident insights...",
+        "Evaluating infrastructure health..."
+    ];
+
+    useEffect(() => {
+        let interval;
+        if (loading) {
+            setLoadingMessage(loadingMessages[0]);
+            let index = 0;
+            interval = setInterval(() => {
+                index = (index + 1) % loadingMessages.length;
+                setLoadingMessage(loadingMessages[index]);
+            }, 3000);
+        }
+        return () => clearInterval(interval);
+    }, [loading]);
 
     // Initial load for embedded: only once when data is available
     useEffect(() => {
@@ -90,7 +117,10 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
 
         // Add a placeholder message for the streaming response
         setMessages([
-            { sender: 'ai', text: 'Hello, I am your OpsGenie AI assistant. I will help you analyse this incident. Let me start with gathering some insights.' },
+            {
+                sender: 'ai',
+                text: 'Hello, I am your OpsGenie AI assistant. I will help you analyse this incident. Let me start with gathering some insights.'
+            },
             { sender: 'ai', text: '' }
         ]);
 
@@ -180,20 +210,36 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                     try {
                         const json = JSON.parse(line);
 
-                        // Access 'content' field based on node output structure
+                        let updatedText = false;
+                        let updatedActions = false;
+
+                        // 1. Handle streaming content
                         if (json.type === 'item' && json.content) {
                             aiResponseText += json.content;
-                            // Update UI immediately for smooth streaming effect
+                            updatedText = true;
+                        }
+
+                        // 2. Handle non-streaming output (entire message at once)
+                        if (json.output) {
+                            aiResponseText = json.output;
+                            updatedText = true;
+                        }
+
+                        // 3. Handle actions
+                        if (json.actions || json.type === 'actions') {
+                            updatedActions = true;
+                        }
+
+                        if (updatedText || updatedActions) {
                             setMessages((prev) => {
                                 const newMessages = [...prev];
                                 const lastMsg = newMessages[newMessages.length - 1];
                                 if (lastMsg?.sender === 'ai') {
-                                    lastMsg.text = aiResponseText;
+                                    if (updatedText) lastMsg.text = aiResponseText;
+                                    if (updatedActions) lastMsg.actions = json.actions || json.data || [];
                                 }
                                 return newMessages;
                             });
-                        } else if (json.type === 'end') {
-                            // Stream ended
                         }
                     } catch (e) {
                         // If not JSON, append as raw text (fallback)
@@ -223,6 +269,9 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                             const lastMsg = newMessages[newMessages.length - 1];
                             if (lastMsg?.sender === 'ai') {
                                 lastMsg.text = json.output;
+                                if (json.actions) {
+                                    lastMsg.actions = json.actions;
+                                }
                             }
                             return newMessages;
                         });
@@ -332,20 +381,34 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                     if (!line.trim()) continue;
                     try {
                         const json = JSON.parse(line);
-                        // Access 'content' field based on node output structure
+
+                        let updatedText = false;
+                        let updatedActions = false;
+
                         if (json.type === 'item' && json.content) {
                             aiResponseText += json.content;
-                            // Update UI immediately for smooth streaming effect
+                            updatedText = true;
+                        }
+
+                        if (json.output) {
+                            aiResponseText = json.output;
+                            updatedText = true;
+                        }
+
+                        if (json.actions || json.type === 'actions') {
+                            updatedActions = true;
+                        }
+
+                        if (updatedText || updatedActions) {
                             setMessages((prev) => {
                                 const newMessages = [...prev];
                                 const lastMsg = newMessages[newMessages.length - 1];
                                 if (lastMsg?.sender === 'ai') {
-                                    lastMsg.text = aiResponseText;
+                                    if (updatedText) lastMsg.text = aiResponseText;
+                                    if (updatedActions) lastMsg.actions = json.actions || json.data || [];
                                 }
                                 return newMessages;
                             });
-                        } else if (json.type === 'end') {
-                            // Stream ended
                         }
                     } catch (e) {
                         // If not JSON, append as raw text (fallback)
@@ -377,6 +440,9 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                             const lastMsg = newMessages[newMessages.length - 1];
                             if (lastMsg?.sender === 'ai') {
                                 lastMsg.text = json.output;
+                                if (json.actions) {
+                                    lastMsg.actions = json.actions;
+                                }
                             }
                             return newMessages;
                         });
@@ -400,6 +466,93 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
             });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAction = async (action, messageIndex) => {
+        if (!action) return;
+
+        console.log("Handling action:", action);
+
+        // Map action_id or type to functionality
+        const actionType = action.type;
+        const actionId = action.action_id || action.id;
+
+        if (actionType === 'trigger_notification' || actionId === 'init_pd_creation') {
+            let notificationId = action.data?.notificationId;
+            let notificationName = action.data?.notificationName || action.label;
+
+            // Fallback for demo/known IDs if none provided
+            if (!notificationId && actionId === 'init_pd_creation') {
+                // Try to find a PagerDuty notification rule if we haven't got one
+                try {
+                    const rulesResp = await api.get('/api/notifyrules');
+                    const pdRule = rulesResp.data?.find(r =>
+                        r.rulename.toLowerCase().includes('pagerduty') ||
+                        r.endpoint?.toLowerCase().includes('pagerduty')
+                    );
+                    if (pdRule) {
+                        notificationId = pdRule._id;
+                        notificationName = pdRule.rulename;
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch notification rules for fallback:", e);
+                }
+            }
+
+            if (!notificationId) {
+                setMessages(prev => [...prev, {
+                    sender: 'ai',
+                    text: "I couldn't find a PagerDuty notification rule to trigger. Please ensure a PagerDuty notification rule is configured."
+                }]);
+                return;
+            }
+
+            setLoading(true);
+            try {
+                const newComment = {
+                    comment: `Triggering Notification from AI Chat: ${notificationName}`
+                };
+                const alertId = alertData?._id || alertData?.alertid;
+                await api.post(`/api/alerts/${alertId}/notify/${notificationId}`, newComment);
+
+                setMessages(prev => [...prev, {
+                    sender: 'ai',
+                    text: `✅ Successfully triggered notification: **${notificationName}**`
+                }]);
+            } catch (error) {
+                console.error("Failed to trigger notification:", error);
+                setMessages(prev => [
+                    ...prev,
+                    { sender: 'ai', text: `❌ Failed to trigger notification: ${error.message || 'Unknown error'}` }
+                ]);
+            } finally {
+                setLoading(false);
+            }
+        } else if (actionId === 'resolve_alert') {
+            // Handle resolve alert
+            setLoading(true);
+            try {
+                const alertId = alertData?._id || alertData?.alertid;
+                await api.post(`/api/alerts/${alertId}/clear`, { comment: "Resolved via AI Chat" });
+                setMessages(prev => [...prev, {
+                    sender: 'ai',
+                    text: `✅ Alert has been **Closed** successfully.`
+                }]);
+            } catch (e) {
+                setMessages(prev => [...prev, { sender: 'ai', text: `❌ Failed to resolve alert: ${e.message}` }]);
+            } finally {
+                setLoading(false);
+            }
+        } else if (actionType === 'message' || actionType === 'button') {
+            if (action.data?.text || action.text) {
+                setInputText(action.data?.text || action.text);
+            } else if (action.label) {
+                // Use label as message if no text provided
+                setInputText(action.label);
+            }
+        } else {
+            console.warn("Unknown action type/id:", actionType, actionId);
         }
     };
 
@@ -502,12 +655,29 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                                     }}
                                 >
                                     <ReactMarkdown
-                                        children={msg.text}
+                                        children={msg.text.replace(/([^\n])\n?#{1,6}\s/g, '$1\n\n$&')}
                                         remarkPlugins={[remarkGfm]}
                                         components={{
                                             a: ({ node, ...props }) => <a style={{ color: 'blue' }} target="_blank" rel="noopener noreferrer" {...props} />
                                         }}
                                     />
+                                    {msg.actions && msg.actions.length > 0 && (
+                                        <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                            {msg.actions.map((action, actionIdx) => (
+                                                <CButton
+                                                    key={actionIdx}
+                                                    size="sm"
+                                                    color={action.style === 'danger' ? 'danger' : (action.style === 'success' ? 'success' : 'primary')}
+                                                    variant="outline"
+                                                    onClick={() => handleAction(action, index)}
+                                                    style={{ fontSize: '0.8rem', borderRadius: '15px' }}
+                                                    disabled={loading}
+                                                >
+                                                    {action.label}
+                                                </CButton>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -520,7 +690,10 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                                         backgroundColor: '#e9ecef',
                                     }}
                                 >
-                                    <CSpinner size="sm" color="secondary" />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <CSpinner size="sm" color="secondary" />
+                                        <span style={{ fontSize: '0.85rem', color: '#6c757d', fontStyle: 'italic' }}>{loadingMessage}</span>
+                                    </div>
                                 </div>
                             </div>
                         )}
