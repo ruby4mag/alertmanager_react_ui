@@ -682,7 +682,7 @@ const Detail = () => {
     return (
         <>
 
-            <div fluid className="alert-detail-view">
+            <div className="alert-detail-view">
                 <CContainer fluid className='mb-2'>
 
                     <CToaster ref={toaster} push={toast} placement="top-end" />
@@ -833,12 +833,53 @@ const Detail = () => {
                             </CCardBody>
                         </CCard>
 
-                        {/* PagerDuty Section */}
+                        {/* Major Incident Section - Only shows if created via AI */}
+                        {data && (data['major_incident_id'] || data['major_incident_number']) && (
+                            <CCard className='mb-2' style={{ borderLeft: '4px solid #d9534f', backgroundColor: '#fff9f9' }}>
+                                <CCardHeader className="d-flex justify-content-between align-items-center">
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <CIcon icon={icon.cilShieldAlt} className="text-danger" />
+                                        <span className="fw-bold text-danger">PagerDuty Major Incident</span>
+                                    </div>
+                                    {data['major_incident_status'] && (
+                                        <CBadge color={
+                                            data['major_incident_status'] === 'triggered' ? 'danger' :
+                                                data['major_incident_status'] === 'acknowledged' ? 'warning' :
+                                                    data['major_incident_status'] === 'resolved' ? 'success' : 'secondary'
+                                        }>
+                                            {data['major_incident_status'].toUpperCase()}
+                                        </CBadge>
+                                    )}
+                                </CCardHeader>
+                                <CCardBody style={{ padding: '0.75rem' }}>
+                                    <CTable small borderless className="mb-0">
+                                        <CTableBody>
+                                            {data['major_incident_number'] && (
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row" style={{ width: '40%' }}>Incident Number</CTableHeaderCell>
+                                                    <CTableDataCell><strong>#{data['major_incident_number']}</strong></CTableDataCell>
+                                                </CTableRow>
+                                            )}
+                                            {data['major_incident_url'] && (
+                                                <CTableRow>
+                                                    <CTableHeaderCell scope="row">Dashboard</CTableHeaderCell>
+                                                    <CTableDataCell>
+                                                        <UrlLink url={data['major_incident_url']} text="View Major Incident" />
+                                                    </CTableDataCell>
+                                                </CTableRow>
+                                            )}
+                                        </CTableBody>
+                                    </CTable>
+                                </CCardBody>
+                            </CCard>
+                        )}
+
+                        {/* Standard PagerDuty Section */}
                         {data && (data['pagerduty_incident_id'] || data['pagerduty_service'] || data['pagerduty_escalation_policy']) && (
                             <CCard className='mb-2' style={{ backgroundColor: '#f2f7f8' }}>
                                 <CCardHeader>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span>PagerDuty Incident</span>
+                                        <span>PagerDuty Notification</span>
                                         {data['pagerduty_priority'] && (
                                             <CBadge color={
                                                 data['pagerduty_priority'] === 'P1' ? 'danger' :

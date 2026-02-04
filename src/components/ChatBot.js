@@ -7,6 +7,17 @@ import {
     CCardFooter,
     CFormInput,
     CSpinner,
+    CModal,
+    CModalHeader,
+    CModalTitle,
+    CModalBody,
+    CModalFooter,
+    CForm,
+    CFormLabel,
+    CFormTextarea,
+    CFormSelect,
+    CRow,
+    CCol,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilChatBubble, cilX, cilSend } from '@coreui/icons';
@@ -31,6 +42,19 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('OpsGenie is thinking...');
+
+    // Major Incident Modal States
+    const [showMajorIncidentModal, setShowMajorIncidentModal] = useState(false);
+    const [pagerdutyServices, setPagerdutyServices] = useState([]);
+    const [pagerdutyEscalationPolicies, setPagerdutyEscalationPolicies] = useState([]);
+    const [majorIncidentForm, setMajorIncidentForm] = useState({
+        title: '',
+        description: '',
+        serviceId: '',
+        policyId: ''
+    });
+    const [submittingIncident, setSubmittingIncident] = useState(false);
+
     const messagesEndRef = useRef(null);
     const chatBodyRef = useRef(null);
     const hasInitialized = useRef(false);
@@ -478,12 +502,36 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
         const actionType = action.type;
         const actionId = action.action_id || action.id;
 
-        if (actionType === 'trigger_notification' || actionId === 'init_pd_creation') {
+        if (actionId === 'init_pd_creation') {
+            // Check if we have pre-populated data from the message or previous state
+            const currentMessage = messages[messageIndex];
+
+            // Try to extract title/description from action data or message context
+            const title = action.data?.incident_title || action.incident_title || `Major Incident: ${alertData?.entity || 'Impacted Service'}`;
+            const description = action.data?.description || action.description || currentMessage?.text || '';
+
+            setMajorIncidentForm({
+                title,
+                description,
+                serviceId: '',
+                policyId: ''
+            });
+
+            setShowMajorIncidentModal(true);
+
+            // Fetch PagerDuty data if not already fetched
+            if (pagerdutyServices.length === 0) {
+                fetchPagerDutyOptions();
+            }
+            return;
+        }
+
+        if (actionType === 'trigger_notification') {
             let notificationId = action.data?.notificationId;
             let notificationName = action.data?.notificationName || action.label;
 
             // Fallback for demo/known IDs if none provided
-            if (!notificationId && actionId === 'init_pd_creation') {
+            if (!notificationId && actionId === 'init_pd_creation') { // This condition is now redundant due to the above block, but kept for safety if actionType is also 'trigger_notification'
                 // Try to find a PagerDuty notification rule if we haven't got one
                 try {
                     const rulesResp = await api.get('/api/notifyrules');
@@ -553,6 +601,58 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
             }
         } else {
             console.warn("Unknown action type/id:", actionType, actionId);
+        }
+    };
+
+    const fetchPagerDutyOptions = async () => {
+        try {
+            const [servicesRes, policiesRes] = await Promise.all([
+                api.get('/api/pagerduty/services'),
+                api.get('/api/pagerduty/escalation-policies')
+            ]);
+            setPagerdutyServices(servicesRes.data || []);
+            setPagerdutyEscalationPolicies(policiesRes.data || []);
+        } catch (error) {
+            console.error("Failed to fetch PagerDuty options:", error);
+        }
+    };
+
+    const handleSubmitMajorIncident = async () => {
+        if (!majorIncidentForm.serviceId || !majorIncidentForm.policyId) {
+            alert("Please select both a Service and an Escalation Policy.");
+            return;
+        }
+
+        setSubmittingIncident(true);
+        try {
+            const payload = {
+                action: 'create_major_incident',
+                ...majorIncidentForm,
+                alertId: alertData?._id || alertData?.alertid,
+                triggered_by: 'ai_chatbot'
+            };
+
+            console.log("Submitting Major Incident to backend:", payload);
+
+            // Call the new backend action endpoint which forwards to n8n
+            const response = await api.post('/api/v1/chatbot/action', payload);
+            const result = response.data;
+
+            console.log("Backend response for major incident:", result);
+
+            setShowMajorIncidentModal(false);
+
+            // Display response from backend/n8n if provided, otherwise show default success
+            setMessages(prev => [...prev, {
+                sender: 'ai',
+                text: result.output || `🚀 **Major Incident Created!**\n\n**Title:** ${majorIncidentForm.title}\n**Status:** Successfully triggered the PagerDuty workflow.`,
+                actions: result.actions || []
+            }]);
+        } catch (error) {
+            console.error("Failed to create major incident:", error);
+            alert("Error creating incident: " + (error?.response?.data?.error || error.message || 'Unknown error'));
+        } finally {
+            setSubmittingIncident(false);
         }
     };
 
@@ -717,6 +817,91 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                     </CCardFooter>
                 </CCard>
             )}
+
+            {/* Major Incident Form Modal */}
+            <CModal
+                visible={showMajorIncidentModal}
+                onClose={() => setShowMajorIncidentModal(false)}
+                size="lg"
+                backdrop="static"
+            >
+                <CModalHeader closeButton style={{ backgroundColor: '#d9534f', color: '#fff' }}>
+                    <CModalTitle>🚨 Create Major Incident</CModalTitle>
+                </CModalHeader>
+                <CModalBody>
+                    <p className="text-muted mb-4">
+                        Please review the details below. This will trigger a Major Incident Management workflow in PagerDuty.
+                    </p>
+                    <CForm>
+                        <div className="mb-3">
+                            <CFormLabel htmlFor="incidentTitle">Incident Title</CFormLabel>
+                            <CFormInput
+                                type="text"
+                                id="incidentTitle"
+                                placeholder="Enter a clear title for the incident"
+                                value={majorIncidentForm.title}
+                                onChange={(e) => setMajorIncidentForm({ ...majorIncidentForm, title: e.target.value })}
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <CFormLabel htmlFor="incidentDescription">Description</CFormLabel>
+                            <CFormTextarea
+                                id="incidentDescription"
+                                rows={6}
+                                placeholder="Details about the impact and findings"
+                                value={majorIncidentForm.description}
+                                onChange={(e) => setMajorIncidentForm({ ...majorIncidentForm, description: e.target.value })}
+                            />
+                        </div>
+                        <CRow>
+                            <CCol md={6}>
+                                <div className="mb-3">
+                                    <CFormLabel htmlFor="pdService">Affected Service</CFormLabel>
+                                    <CFormSelect
+                                        id="pdService"
+                                        value={majorIncidentForm.serviceId}
+                                        onChange={(e) => setMajorIncidentForm({ ...majorIncidentForm, serviceId: e.target.value })}
+                                    >
+                                        <option value="">Select PagerDuty Service</option>
+                                        {pagerdutyServices.map(s => (
+                                            <option key={s.id} value={s.id}>{s.name}</option>
+                                        ))}
+                                    </CFormSelect>
+                                </div>
+                            </CCol>
+                            <CCol md={6}>
+                                <div className="mb-3">
+                                    <CFormLabel htmlFor="pdPolicy">Escalation Policy</CFormLabel>
+                                    <CFormSelect
+                                        id="pdPolicy"
+                                        value={majorIncidentForm.policyId}
+                                        onChange={(e) => setMajorIncidentForm({ ...majorIncidentForm, policyId: e.target.value })}
+                                    >
+                                        <option value="">Select Escalation Policy</option>
+                                        {pagerdutyEscalationPolicies.map(p => (
+                                            <option key={p.id} value={p.id}>{p.name}</option>
+                                        ))}
+                                    </CFormSelect>
+                                </div>
+                            </CCol>
+                        </CRow>
+                    </CForm>
+                </CModalBody>
+                <CModalFooter>
+                    <CButton color="secondary" onClick={() => setShowMajorIncidentModal(false)}>
+                        Cancel
+                    </CButton>
+                    <CButton
+                        color="danger"
+                        onClick={handleSubmitMajorIncident}
+                        disabled={submittingIncident || !majorIncidentForm.serviceId || !majorIncidentForm.policyId}
+                    >
+                        {submittingIncident ? (
+                            <><CSpinner size="sm" component="span" className="me-2" /> Triggering Workflow...</>
+                        ) : 'Confirm & Create Incident'}
+                    </CButton>
+                </CModalFooter>
+            </CModal>
         </>
     );
 };
