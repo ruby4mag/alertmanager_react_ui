@@ -28,7 +28,7 @@ import opsgenieIcon from '../assets/opsgenie-icon.png';
 import { useAuth } from '../auth/AuthContext';
 import useAxios from '../services/useAxios';
 
-const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded = false }) => {
+const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded = false, onRefresh }) => {
     const { getToken } = useAuth();
     const api = useAxios();
     const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -583,6 +583,12 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
             try {
                 const alertId = alertData?._id || alertData?.alertid;
                 await api.post(`/api/alerts/${alertId}/clear`, { comment: "Resolved via AI Chat" });
+
+                // Refresh parent state to show CLOSED status
+                if (onRefresh) {
+                    onRefresh();
+                }
+
                 setMessages(prev => [...prev, {
                     sender: 'ai',
                     text: `✅ Alert has been **Closed** successfully.`
@@ -642,7 +648,10 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
 
             setShowMajorIncidentModal(false);
 
-            // Display response from backend/n8n if provided, otherwise show default success
+            // Refresh parent data to show new Major Incident section
+            if (onRefresh) {
+                onRefresh();
+            }
             setMessages(prev => [...prev, {
                 sender: 'ai',
                 text: result.output || `🚀 **Major Incident Created!**\n\n**Title:** ${majorIncidentForm.title}\n**Status:** Successfully triggered the PagerDuty workflow.`,

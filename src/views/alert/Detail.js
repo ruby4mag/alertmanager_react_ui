@@ -687,13 +687,16 @@ const Detail = () => {
 
                     <CToaster ref={toaster} push={toast} placement="top-end" />
                     <CButtonGroup size="sm" role="group" aria-label="Small button group" className='me-4'>
+                        <CButton onClick={() => fetchData()} color="primary" variant="outline" title="Refresh Page Data">
+                            <CIcon icon={icon.cilReload} />
+                        </CButton>
                         <CButton onClick={() => handleActionButtonClick('ack')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilUserFollow} size="lg" /></CButton>
                         <CButton onClick={() => handleActionButtonClick('unack')} color="primary" variant="outline"><CIcon className='text-warning' icon={icon.cilUserUnfollow} size="lg" /></CButton>
                         <CButton onClick={() => handleActionButtonClick('clear')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilCheckCircle} size="lg" /></CButton>
                         {graphLoading ? (
                             <CButton disabled color="info" variant="outline">
                                 <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
-                                Analysing relationships...
+                                Analysing...
                             </CButton>
                         ) : (
                             graphData && graphData.nodes && graphData.nodes.length > 0 && (
@@ -1105,6 +1108,7 @@ const Detail = () => {
                                                     alertData={data}
                                                     graphData={graphData}
                                                     embedded={true}
+                                                    onRefresh={fetchData}
                                                 />
                                             )}
                                         </div>
