@@ -115,7 +115,7 @@ const Detail = () => {
             try {
                 setGraphLoading(true)
                 setGraphError(null)
-                setGraphTitle(`Graph for ${entity}`)
+                setGraphTitle(`Dependency graph for ${entity}`)
                 const response = await api.get(url)
                 setGraphData(response.data)
             } catch (err) {
@@ -481,8 +481,15 @@ const Detail = () => {
                         }
                         return '#69b3a2'; // Teal (Healthy)
                     })
-                    .attr('stroke', (d) => (d.changes && d.changes.length > 0 ? '#4a2c85' : '#fff')) // Darker stroke for change nodes
-                    .attr('stroke-width', 1.5)
+                    .attr('stroke', (d) => {
+                        const isRoot = String(d.id).toLowerCase() === String(graphData.root).toLowerCase();
+                        if (isRoot) return '#00d2ff'; // Cyan/Electric Blue for root highlight
+                        return (d.changes && d.changes.length > 0 ? '#4a2c85' : '#fff');
+                    })
+                    .attr('stroke-width', (d) => {
+                        const isRoot = String(d.id).toLowerCase() === String(graphData.root).toLowerCase();
+                        return isRoot ? 4 : 1.5;
+                    })
 
                 // Add icons inside nodes based on labels or smart inference
                 node.append('text')
@@ -521,6 +528,7 @@ const Detail = () => {
                     .attr('class', 'node-label')
                     .text((d) => d.id || d.name || '')
                     .attr('font-size', 10)
+                    .attr('font-weight', (d) => String(d.id).toLowerCase() === String(graphData.root).toLowerCase() ? 'bold' : 'normal')
                     .attr('dx', 16) // Increased offset to accommodate larger nodes
                     .attr('dy', 4)
 
