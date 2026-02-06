@@ -230,14 +230,27 @@ const Detail = () => {
                     value: l.value || 1,
                 }))
 
-                // Build adjacency for path-finding (undirected)
+                // Build adjacency lists
                 const idToNode = new Map(nodes.map((n) => [n.id, n]))
-                const adj = new Map()
-                nodes.forEach((n) => adj.set(n.id, []))
+                const adj = new Map()      // undirected for path-finding
+                const outAdj = new Map()   // directed (forwards)
+                const inAdj = new Map()    // directed (backwards)
+
+                nodes.forEach((n) => {
+                    adj.set(n.id, [])
+                    outAdj.set(n.id, [])
+                    inAdj.set(n.id, [])
+                })
+
                 links.forEach((l) => {
                     if (l.source && l.target && adj.has(l.source) && adj.has(l.target)) {
+                        // Undirected
                         adj.get(l.source).push(l.target)
                         adj.get(l.target).push(l.source)
+
+                        // Directed
+                        outAdj.get(l.source).push(l.target)
+                        inAdj.get(l.target).push(l.source)
                     }
                 })
 
@@ -302,28 +315,65 @@ const Detail = () => {
                 // eslint-disable-next-line no-console
                 console.log('D3 graph links (filtered):', linksFiltered)
 
-                // Calculate depths for hierarchical layout using BFS from the root
+                // Calculate depths for hierarchical layout using directed relationships
                 const depthMap = new Map()
-                const rootId = graphData.root
-                if (rootId) {
-                    const queue = [{ id: rootId, depth: 0 }]
-                    const visited = new Set()
-                    while (queue.length > 0) {
-                        const { id, depth } = queue.shift()
-                        if (visited.has(id)) continue
-                        visited.add(id)
-                        depthMap.set(id, depth)
-                        // Use adjacency list built earlier
-                        const neighbors = adj.get(id) || []
-                        neighbors.forEach(nb => {
-                            if (!visited.has(nb)) {
-                                queue.push({ id: nb, depth: depth + 1 })
+                const nodesFilteredById = new Set(nodesFiltered.map(n => n.id))
+                let maxDepthUsed = -1
+
+                // Helper to perform bidirectional BFS from a start node
+                const assignDepths = (startNodeId, startDepth) => {
+                    const queue = [startNodeId]
+                    depthMap.set(startNodeId, startDepth)
+
+                    let head = 0
+                    while (head < queue.length) {
+                        const u = queue[head++]
+                        const currDepth = depthMap.get(u)
+
+                        // Forwards
+                        const forwards = outAdj.get(u) || []
+                        forwards.forEach(v => {
+                            if (!depthMap.has(v) && nodesFilteredById.has(v)) {
+                                depthMap.set(v, currDepth + 1)
+                                queue.push(v)
+                            }
+                        })
+
+                        // Backwards
+                        const backwards = inAdj.get(u) || []
+                        backwards.forEach(v => {
+                            if (!depthMap.has(v) && nodesFilteredById.has(v)) {
+                                depthMap.set(v, currDepth - 1)
+                                queue.push(v)
                             }
                         })
                     }
                 }
 
-                // Fallback for nodes not reachable from root
+                // 1. Process from root if available
+                const rootId = graphData.root
+                if (rootId && nodesFilteredById.has(rootId)) {
+                    assignDepths(rootId, 0)
+                }
+
+                // 2. Process any remaining nodes (disconnected components)
+                nodesFiltered.forEach(n => {
+                    if (!depthMap.has(n.id)) {
+                        // Find a base depth that doesn't overlap too much, or just 0
+                        let highest = -1
+                        depthMap.forEach(d => { if (d > highest) highest = d })
+                        assignDepths(n.id, highest + 2)
+                    }
+                })
+
+                // 3. Normalize depths so the minimum is 0
+                let minDepth = 0
+                depthMap.forEach(d => { if (d < minDepth) minDepth = d })
+                depthMap.forEach((d, id) => {
+                    depthMap.set(id, d - minDepth)
+                })
+
+                // Fallback for safety
                 nodesFiltered.forEach(n => {
                     if (!depthMap.has(n.id)) depthMap.set(n.id, 0)
                 })
