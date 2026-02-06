@@ -191,6 +191,21 @@ const Detail = () => {
                 splitGradientCrit.append('stop').attr('offset', '50%').style('stop-color', '#d9534f'); // Red (Crit)
                 splitGradientCrit.append('stop').attr('offset', '50%').style('stop-color', '#6f42c1'); // Purple (Change)
 
+                // Arrowhead marker
+                defs.append('marker')
+                    .attr('id', 'arrowhead')
+                    .attr('viewBox', '-0 -5 10 10')
+                    .attr('refX', 8) // Pivot point
+                    .attr('refY', 0)
+                    .attr('orient', 'auto')
+                    .attr('markerWidth', 6)
+                    .attr('markerHeight', 6)
+                    .attr('xoverflow', 'visible')
+                    .append('svg:path')
+                    .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+                    .attr('fill', '#999')
+                    .style('stroke', 'none');
+
                 // add a container group that will be zoomed/panned
                 const g = svg.append('g')
 
@@ -287,11 +302,57 @@ const Detail = () => {
                 // eslint-disable-next-line no-console
                 console.log('D3 graph links (filtered):', linksFiltered)
 
+                // Calculate depths for hierarchical layout using BFS from the root
+                const depthMap = new Map()
+                const rootId = graphData.root
+                if (rootId) {
+                    const queue = [{ id: rootId, depth: 0 }]
+                    const visited = new Set()
+                    while (queue.length > 0) {
+                        const { id, depth } = queue.shift()
+                        if (visited.has(id)) continue
+                        visited.add(id)
+                        depthMap.set(id, depth)
+                        // Use adjacency list built earlier
+                        const neighbors = adj.get(id) || []
+                        neighbors.forEach(nb => {
+                            if (!visited.has(nb)) {
+                                queue.push({ id: nb, depth: depth + 1 })
+                            }
+                        })
+                    }
+                }
+
+                // Fallback for nodes not reachable from root
+                nodesFiltered.forEach(n => {
+                    if (!depthMap.has(n.id)) depthMap.set(n.id, 0)
+                })
+
+                // Group nodes by depth to distribute them vertically
+                const nodesByDepth = {}
+                nodesFiltered.forEach(n => {
+                    const d = depthMap.get(n.id) || 0
+                    if (!nodesByDepth[d]) nodesByDepth[d] = []
+                    nodesByDepth[d].push(n)
+                })
+
                 const simulation = d3
                     .forceSimulation(nodesFiltered)
-                    .force('link', d3.forceLink(linksFiltered).id((d) => d.id).distance(80))
-                    .force('charge', d3.forceManyBody().strength(-300))
-                    .force('center', d3.forceCenter(width / 2, height / 2))
+                    .force('link', d3.forceLink(linksFiltered).id((d) => d.id).distance(150)) // More distance
+                    .force('charge', d3.forceManyBody().strength(-800)) // Stronger repulsion
+                    .force('collide', d3.forceCollide().radius(40)) // Prevent overlaps
+                    .force('x', d3.forceX((d) => {
+                        const depth = depthMap.get(d.id) || 0
+                        return 120 + depth * 250 // Root at X=120, then 250px per step
+                    }).strength(2.0))
+                    .force('y', d3.forceY((d) => {
+                        const depth = depthMap.get(d.id) || 0
+                        const siblings = nodesByDepth[depth] || []
+                        const index = siblings.indexOf(d)
+                        const total = siblings.length
+                        // Distribute vertically around the center
+                        return height / 2 + (index - (total - 1) / 2) * 100
+                    }).strength(1.2)) // Higher strength to maintain the sorted order
 
                 function drag() {
                     function dragstarted(event, d) {
@@ -310,30 +371,49 @@ const Detail = () => {
 
                     function dragended(event, d) {
                         if (!event.active) simulation.alphaTarget(0)
-                        d.fx = null
-                        d.fy = null
+                        // By not setting d.fx and d.fy to null, the node stays fixed (sticky)
                     }
 
                     return d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended)
                 }
 
-                const link = g
+                const linkGroup = g
                     .append('g')
+                    .selectAll('g.link')
+                    .data(linksFiltered)
+                    .join('g')
+                    .attr('class', 'link')
+
+                const link = linkGroup
+                    .append('line')
                     .attr('stroke', '#999')
                     .attr('stroke-opacity', 0.6)
-                    .selectAll('line')
-                    .data(linksFiltered)
-                    .join('line')
                     .attr('stroke-width', (d) => Math.sqrt(d.value || 1))
+                    .attr('marker-end', 'url(#arrowhead)')
+
+                const linkLabel = linkGroup
+                    .append('text')
+                    .attr('font-size', 8)
+                    .attr('fill', '#888')
+                    .attr('text-anchor', 'middle')
+                    .attr('dy', -4)
+                    .style('pointer-events', 'none')
+                    .style('font-weight', '500')
+                    .text(d => d.type || '')
+                    // Simple "halo" for readability
+                    .style('text-shadow', '1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff')
 
                 const node = g
                     .append('g')
-                    .attr('stroke', '#fff')
-                    .attr('stroke-width', 1.5)
-                    .selectAll('circle')
+                    .selectAll('g.node')
                     .data(nodesFiltered)
-                    .join('circle')
-                    .attr('r', (d) => (d.has_alert || (d.changes && d.changes.length > 0) ? 12 : 8)) // Increased size
+                    .join('g')
+                    .attr('class', 'node')
+                    .style('cursor', 'move') // Cursor hint
+                    .call(drag())
+
+                node.append('circle')
+                    .attr('r', (d) => (d.has_alert || (d.changes && d.changes.length > 0) ? 14 : 10)) // Increased size for icons
                     .attr('fill', (d) => {
                         const hasChange = d.changes && d.changes.length > 0;
                         const hasAlert = d.has_alert || (d.alerts && d.alerts.length > 0) || (d.alertsList && d.alertsList.length > 0);
@@ -353,16 +433,45 @@ const Detail = () => {
                     })
                     .attr('stroke', (d) => (d.changes && d.changes.length > 0 ? '#4a2c85' : '#fff')) // Darker stroke for change nodes
                     .attr('stroke-width', 1.5)
-                    .call(drag())
+
+                // Add icons inside nodes based on labels or smart inference
+                node.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('dy', '0.35em')
+                    .style('font-size', '12px')
+                    .style('pointer-events', 'none')
+                    .text(d => {
+                        const labels = Array.isArray(d.labels) ? d.labels : (Array.isArray(d._labels) ? d._labels : (d.label ? [d.label] : []));
+                        const lowerLabels = labels.map(l => String(l).toLowerCase());
+                        const name = String(d.name || d.id || '').toLowerCase();
+                        const owner = String(d.support_owner || '').toLowerCase();
+
+                        // 1. Check explicit labels (Prioritized as requested)
+                        if (lowerLabels.some(l => l === 'application' || l.includes('application'))) return '📦';
+                        if (lowerLabels.some(l => l === 'vm' || l === 'virtualmachine' || l.includes('vm') || l.includes('virtualmachine'))) return '🖥️';
+                        if (lowerLabels.some(l => l === 'esxihost' || l === 'host' || l.includes('esxihost') || l.includes('esxi') || l.includes('host'))) return '⚙️';
+
+                        // 2. Fallback: Smart inference from Name prefixes
+                        if (name.startsWith('vm-')) return '🖥️';
+                        if (name.startsWith('esx-')) return '⚙️';
+
+                        // 3. Fallback: Smart inference from support_owner
+                        if (owner.includes('app team')) return '📦';
+                        if (owner.includes('virtualization')) return '⚙️';
+                        if (owner.includes('platform ops')) return '🖥️';
+
+                        return '';
+                    })
 
                 const label = g
                     .append('g')
-                    .selectAll('text')
+                    .selectAll('text.node-label')
                     .data(nodesFiltered)
                     .join('text')
+                    .attr('class', 'node-label')
                     .text((d) => d.id || d.name || '')
                     .attr('font-size', 10)
-                    .attr('dx', 8)
+                    .attr('dx', 16) // Increased offset to accommodate larger nodes
                     .attr('dy', 4)
 
                 // add a styled HTML tooltip (better than the default SVG title)
@@ -380,6 +489,10 @@ const Detail = () => {
                     if (d.id) html += `<div><strong>ID:</strong> ${escapeHtml(d.id)}</div>`
                     if (d.name && d.name !== d.id) html += `<div><strong>Name:</strong> ${escapeHtml(d.name)}</div>`
                     if (d.severity) html += `<div><strong>Severity:</strong> ${escapeHtml(d.severity)}</div>`
+
+                    const labels = Array.isArray(d.labels) ? d.labels : (d.label ? [d.label] : []);
+                    if (labels.length > 0) html += `<div><strong>Labels:</strong> ${escapeHtml(labels.join(', '))}</div>`
+
                     if (typeof d.has_alert !== 'undefined') html += `<div><strong>Has alert:</strong> ${escapeHtml(String(d.has_alert))}</div>`
 
                     const alerts = d.alerts || d.alertsList || d.alertList || d.alerts_details
@@ -437,9 +550,30 @@ const Detail = () => {
                     })
 
                 simulation.on('tick', () => {
-                    link.attr('x1', (d) => d.source.x).attr('y1', (d) => d.source.y).attr('x2', (d) => d.target.x).attr('y2', (d) => d.target.y)
+                    link
+                        .attr('x1', (d) => d.source.x)
+                        .attr('y1', (d) => d.source.y)
+                        .attr('x2', (d) => {
+                            // Shorten the line so the arrow is visible outside the node circle
+                            const dx = d.target.x - d.source.x;
+                            const dy = d.target.y - d.source.y;
+                            const gamma = Math.sqrt(dx * dx + dy * dy);
+                            const nodeRadius = (d.target.has_alert || (d.target.changes && d.target.changes.length > 0) ? 20 : 16);
+                            return d.target.x - (dx * nodeRadius / gamma);
+                        })
+                        .attr('y2', (d) => {
+                            const dx = d.target.x - d.source.x;
+                            const dy = d.target.y - d.source.y;
+                            const gamma = Math.sqrt(dx * dx + dy * dy);
+                            const nodeRadius = (d.target.has_alert || (d.target.changes && d.target.changes.length > 0) ? 20 : 16);
+                            return d.target.y - (dy * nodeRadius / gamma);
+                        })
 
-                    node.attr('cx', (d) => d.x).attr('cy', (d) => d.y)
+                    linkLabel
+                        .attr('x', (d) => (d.source.x + d.target.x) / 2)
+                        .attr('y', (d) => (d.source.y + d.target.y) / 2)
+
+                    node.attr('transform', (d) => `translate(${d.x},${d.y})`)
 
                     label.attr('x', (d) => d.x).attr('y', (d) => d.y)
                 })
