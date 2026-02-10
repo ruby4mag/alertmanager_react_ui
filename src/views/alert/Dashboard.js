@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef, act } from 'react';
 import { cilWarning } from '@coreui/icons'
-import { CButtonGroup, CButton, CContainer, CToaster, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter, CFormTextarea, CForm } from '@coreui/react';
+import { CButtonGroup, CButton, CContainer, CToaster, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter, CFormTextarea, CForm, CSpinner } from '@coreui/react';
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -361,8 +361,11 @@ const DataTable = () => {
     renderTopToolbarCustomActions: ({ table }) => (
       <CContainer fluid>
         <Tooltip arrow title="Refresh Data">
-          <IconButton onClick={() => fetchData(columnFilters, globalFilter, sorting, pagination)}>
-            <RefreshIcon />
+          <IconButton
+            onClick={() => fetchData(columnFilters, globalFilter, sorting, pagination)}
+            disabled={isLoading || isRefetching}
+          >
+            {isLoading || isRefetching ? <CSpinner size="sm" /> : <RefreshIcon />}
           </IconButton>
         </Tooltip>
         {Object.keys(selectedRowIds).length > 0 && (
@@ -396,6 +399,7 @@ const DataTable = () => {
       pagination,
       showAlertBanner: isError,
       showProgressBars: isRefetching,
+      isLoading: isLoading,
       sorting,
       rowSelection
     },
