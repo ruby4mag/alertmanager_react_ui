@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => {
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss'],
     },
     server: {
-      allowedHosts: ['uls-op-itesutl1,uls-op-itesutl1.wdc.com'],
+      allowedHosts: ['uls-op-itesutl1','uls-op-itesutl1.wdc.com'],
       port: 3000,
       proxy: {
         '/n8n-webhook': {
