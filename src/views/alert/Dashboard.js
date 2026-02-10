@@ -45,6 +45,7 @@ const DataTable = () => {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
+  const [isAutoRefetching, setIsAutoRefetching] = useState(false);
   const [rowCount, setRowCount] = useState(0);
 
   // Table state
@@ -61,7 +62,7 @@ const DataTable = () => {
     if (!data.length) {
       setIsLoading(true);
     } else {
-      setIsRefetching(true);
+      setIsAutoRefetching(true);
     }
     const url = new URL(
       '/api/alerts',
@@ -103,6 +104,7 @@ const DataTable = () => {
     setIsError(false);
     setIsLoading(false);
     setIsRefetching(false);
+    setIsAutoRefetching(false);
     isFirstRender.current = false;
   };
 
@@ -172,6 +174,7 @@ const DataTable = () => {
       { accessorKey: 'alertdropped', header: 'alertDropped' },
       { accessorKey: 'parent', header: 'Parent' },
     ],
+    []
   );
 
   const handleActionButtonClick = (ModelAction) => {
@@ -350,7 +353,10 @@ const DataTable = () => {
         backgroundColor: row.getValue('parent') === true ? '' : '',
       },
     }),
-    getRowId: (row) => row.id,
+    getRowId: (row) => row._id,
+    autoResetPageIndex: false,
+    autoResetExpanded: false,
+    autoResetSelectedRows: false,
     initialState: {
       //showColumnFilters: true,
     },
@@ -363,9 +369,9 @@ const DataTable = () => {
         <Tooltip arrow title="Refresh Data">
           <IconButton
             onClick={() => fetchData(columnFilters, globalFilter, sorting, pagination)}
-            disabled={isLoading || isRefetching}
+            disabled={isLoading || isAutoRefetching}
           >
-            {isLoading || isRefetching ? <CSpinner size="sm" /> : <RefreshIcon />}
+            {isLoading ? <CSpinner size="sm" /> : <RefreshIcon />}
           </IconButton>
         </Tooltip>
         {Object.keys(selectedRowIds).length > 0 && (
@@ -398,8 +404,8 @@ const DataTable = () => {
       globalFilter,
       pagination,
       showAlertBanner: isError,
-      showProgressBars: isRefetching,
-      isLoading: isLoading,
+      showProgressBars: false,
+      isLoading: false, // Set to false to prevent internal table flickering during background updates
       sorting,
       rowSelection
     },
@@ -410,7 +416,14 @@ const DataTable = () => {
     <>
       <div className={theme == 'light' ? "" : "dark-theme"}>
         <CToaster ref={toaster} push={toast} placement="top-end" />
-        <MaterialReactTable table={table} />
+        {isLoading && data.length === 0 ? (
+          <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
+            <CSpinner color="primary" variant="grow" />
+            <span className="ms-2">Loading Alerts...</span>
+          </div>
+        ) : (
+          <MaterialReactTable table={table} />
+        )}
         <CModal
           visible={visible}
           onClose={() => setVisible(false)}
