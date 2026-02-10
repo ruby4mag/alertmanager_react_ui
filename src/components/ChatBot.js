@@ -67,8 +67,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
         "Checking historical alert patterns...",
         "Identifying relevant changes...",
         "Correlating events...",
-        "Gathering incident insights...",
-        "Evaluating infrastructure health..."
+        "Gathering incident insights..."
     ];
 
     useEffect(() => {

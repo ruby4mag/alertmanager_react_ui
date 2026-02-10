@@ -888,7 +888,7 @@ const Detail = () => {
                         {graphLoading ? (
                             <CButton disabled color="info" variant="outline">
                                 <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
-                                Analysing...
+                                Analyzing...
                             </CButton>
                         ) : (
                             graphData && graphData.nodes && graphData.nodes.length > 0 && (

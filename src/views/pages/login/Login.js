@@ -27,7 +27,7 @@ const Login = () => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/login`, { username, password })
       const { token, role } = response.data
-      login(token, role)
+      login(token, role, username)
       navigate('/dashboard')
     } catch (error) {
       console.error('Login error:', error)

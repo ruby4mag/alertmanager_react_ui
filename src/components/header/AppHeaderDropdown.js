@@ -25,24 +25,28 @@ import CIcon from '@coreui/icons-react'
 import { useAuth } from '../../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-import avatar8 from './../../assets/images/avatars/8.jpg'
 import { Button } from '@coreui/coreui';
 
 const AppHeaderDropdown = () => {
-  const { logout } = useAuth();
+  const { logout, username } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  const initial = username ? username.charAt(0).toUpperCase() : 'U';
+
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0 pe-0" caret={false}>
-        <CAvatar src={avatar8} size="md" />
+        <CAvatar color="primary" textColor="white" size="md" style={{ fontWeight: '600' }}>
+          {initial}
+        </CAvatar>
       </CDropdownToggle>
       <CDropdownMenu className="pt-0" placement="bottom-end">
-        
+
         {/* <CDropdownHeader className="bg-body-secondary fw-semibold mb-2">Account</CDropdownHeader>
         <CDropdownItem href="#">
           <CIcon icon={cilBell} className="me-2" />
