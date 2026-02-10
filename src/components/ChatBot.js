@@ -41,6 +41,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(false);
+    const [loadingType, setLoadingType] = useState('init'); // 'init' or 'chat'
     const [loadingMessage, setLoadingMessage] = useState('OpsGenie is thinking...');
 
     // Major Incident Modal States
@@ -73,15 +74,19 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     useEffect(() => {
         let interval;
         if (loading) {
-            setLoadingMessage(loadingMessages[0]);
-            let index = 0;
-            interval = setInterval(() => {
-                index = (index + 1) % loadingMessages.length;
-                setLoadingMessage(loadingMessages[index]);
-            }, 3000);
+            if (loadingType === 'init') {
+                setLoadingMessage(loadingMessages[0]);
+                let index = 0;
+                interval = setInterval(() => {
+                    index = (index + 1) % loadingMessages.length;
+                    setLoadingMessage(loadingMessages[index]);
+                }, 3000);
+            } else {
+                setLoadingMessage('OpsGenie is thinking.....');
+            }
         }
         return () => clearInterval(interval);
-    }, [loading]);
+    }, [loading, loadingType]);
 
     // Initial load for embedded: only once when data is available
     useEffect(() => {
@@ -134,6 +139,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     };
 
     const initializeChat = async () => {
+        setLoadingType('init');
         setLoading(true);
         hasInitialized.current = true;
         console.log("Initializing chat. Alert Data:", alertData); // Debug log
@@ -320,6 +326,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
         const userMessage = { sender: 'user', text: inputText };
         setMessages((prev) => [...prev, userMessage]);
         setInputText('');
+        setLoadingType('chat');
         setLoading(true);
 
         // Add a placeholder message for the streaming response
@@ -578,6 +585,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
             }
         } else if (actionId === 'resolve_alert') {
             // Handle resolve alert
+            setLoadingType('chat');
             setLoading(true);
             try {
                 const alertId = alertData?._id || alertData?.alertid;
