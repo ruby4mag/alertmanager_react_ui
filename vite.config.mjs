@@ -2,7 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
 import autoprefixer from 'autoprefixer'
-import { all } from 'core-js/fn/promise'
+
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => {
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss'],
     },
     server: {
-      allowedHosts: all,
+      allowedHosts: ['uls-op-itesutl1,uls-op-itesutl1.wdc.com'],
       port: 3000,
       proxy: {
         '/n8n-webhook': {
