@@ -22,6 +22,7 @@ import ChatBot from '../../components/ChatBot';
 import IncidentFeedback from '../../components/IncidentFeedback';
 import RelatedChanges from './RelatedChanges';
 import opsgenieIcon from '../../assets/opsgenie-icon.png';
+import pagerdutyLogo from '../../assets/pagerduty-logo.png';
 
 
 
@@ -875,37 +876,83 @@ const Detail = () => {
         <>
 
             <div className="alert-detail-view">
-                <CContainer fluid className='mb-2'>
-
-                    <CToaster ref={toaster} push={toast} placement="top-end" />
-                    <CButtonGroup size="sm" role="group" aria-label="Small button group" className='me-4'>
-                        <CButton onClick={() => fetchData()} color="primary" variant="outline" title="Refresh Page Data">
-                            <CIcon icon={icon.cilReload} />
-                        </CButton>
-                        <CButton onClick={() => handleActionButtonClick('ack')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilUserFollow} size="lg" /></CButton>
-                        <CButton onClick={() => handleActionButtonClick('unack')} color="primary" variant="outline"><CIcon className='text-warning' icon={icon.cilUserUnfollow} size="lg" /></CButton>
-                        <CButton onClick={() => handleActionButtonClick('clear')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilCheckCircle} size="lg" /></CButton>
-                        {graphLoading ? (
-                            <CButton disabled color="info" variant="outline">
-                                <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
-                                Analyzing...
+                <CContainer fluid className='mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2'>
+                    <div className="d-flex align-items-center flex-wrap gap-2 flex-grow-1">
+                        <CToaster ref={toaster} push={toast} placement="top-end" />
+                        <CButtonGroup size="sm" role="group" aria-label="Small button group">
+                            <CButton onClick={() => fetchData()} color="primary" variant="outline" title="Refresh Page Data">
+                                <CIcon icon={icon.cilReload} />
                             </CButton>
-                        ) : (
-                            graphData && graphData.nodes && graphData.nodes.length > 0 && (
-                                <CButton onClick={() => setVisibleGraphModal(true)} color="info" variant="outline">Show topology</CButton>
-                            )
+                            <CButton onClick={() => handleActionButtonClick('ack')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilUserFollow} size="lg" /></CButton>
+                            <CButton onClick={() => handleActionButtonClick('unack')} color="primary" variant="outline"><CIcon className='text-warning' icon={icon.cilUserUnfollow} size="lg" /></CButton>
+                            <CButton onClick={() => handleActionButtonClick('clear')} color="primary" variant="outline"><CIcon className='text-success' icon={icon.cilCheckCircle} size="lg" /></CButton>
+                            {graphLoading ? (
+                                <CButton disabled color="info" variant="outline">
+                                    <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
+                                    Analyzing...
+                                </CButton>
+                            ) : (
+                                graphData && graphData.nodes && graphData.nodes.length > 0 && (
+                                    <CButton onClick={() => setVisibleGraphModal(true)} color="info" variant="outline">Show topology</CButton>
+                                )
+                            )}
+                        </CButtonGroup>
+                        <CDropdown>
+                            <CDropdownToggle color="primary" variant="outline" size="sm">Actions</CDropdownToggle>
+                            <CDropdownMenu>
+                                {notifications && notifications.map((notification) => (
+                                    <CDropdownItem key={notification['_id']} onClick={() => triggerNotify(notification['_id'], notification['rulename'])}  >{notification['rulename']}</CDropdownItem>
+                                ))}
+                            </CDropdownMenu>
+                        </CDropdown>
+
+                        {data && (data['major_incident_id'] || data['major_incident_number'] || data['pagerduty_incident_id']) && (
+                            <div className="ms-2" style={{ minWidth: '350px' }}>
+                                <CCard className={(data['major_incident_id'] || data['major_incident_number']) ? "border-danger border-start-5" : "border-info border-start-5 shadow-sm"} style={{ borderStartWidth: '5px' }}>
+                                    <CCardBody className="p-1 px-2 d-flex justify-content-between align-items-center">
+                                        <div className="d-flex align-items-center gap-2">
+                                            <img
+                                                src={pagerdutyLogo}
+                                                alt="PagerDuty"
+                                                style={{ width: '24px', height: '24px', borderRadius: '4px' }}
+                                            />
+                                            <div className="lh-1">
+                                                <div className="d-flex align-items-center gap-2 mb-0">
+                                                    <span className="fw-bold" style={{ fontSize: '0.85rem' }}>
+                                                        {(data['major_incident_id'] || data['major_incident_number']) ? "MAJOR INCIDENT" : "PD Incident"}
+                                                        {data['major_incident_number'] ? ` #${data['major_incident_number']}` : (data['pagerduty_incident_number'] ? ` #${data['pagerduty_incident_number']}` : "")}
+                                                    </span>
+                                                    {data['major_incident_status'] && (
+                                                        <CBadge size="sm" color={
+                                                            data['major_incident_status'] === 'triggered' ? 'danger' :
+                                                                data['major_incident_status'] === 'acknowledged' ? 'warning' :
+                                                                    data['major_incident_status'] === 'resolved' ? 'success' : 'secondary'
+                                                        } style={{ fontSize: '0.65rem' }}>
+                                                            {data['major_incident_status'].toUpperCase()}
+                                                        </CBadge>
+                                                    )}
+                                                </div>
+                                                <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                                                    {data['pagerduty_priority'] && <CBadge color="danger" className="me-1" style={{ fontSize: '0.65rem' }}>{data['pagerduty_priority']}</CBadge>}
+                                                    {data['pagerduty_service'] && <span><strong>{data['pagerduty_service']}</strong></span>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <CButton
+                                            color={(data['major_incident_id'] || data['major_incident_number']) ? "success" : "info"}
+                                            size="sm"
+                                            className="fw-bold py-0 ms-3"
+                                            style={{ fontSize: '0.7rem' }}
+                                            href={data['major_incident_url'] || data['pagerduty_html_url']}
+                                            target="_blank"
+                                        >
+                                            View PagerDuty
+                                        </CButton>
+                                    </CCardBody>
+                                </CCard>
+                            </div>
                         )}
-                    </CButtonGroup>
-                    <CDropdown>
-                        <CDropdownToggle color="primary" variant="outline" size="sm">Actions</CDropdownToggle>
-                        <CDropdownMenu>
-                            {notifications && notifications.map((notification) => (
-                                <CDropdownItem key={notification['_id']} onClick={() => triggerNotify(notification['_id'], notification['rulename'])}  >{notification['rulename']}</CDropdownItem>
-                            ))}
-
-                        </CDropdownMenu>
-                    </CDropdown>
-
+                    </div>
                 </CContainer >
                 {data && (
                     <CContainer fluid>
@@ -1028,109 +1075,7 @@ const Detail = () => {
                             </CCardBody>
                         </CCard>
 
-                        {/* Major Incident Section - Only shows if created via AI */}
-                        {data && (data['major_incident_id'] || data['major_incident_number']) && (
-                            <CCard className='mb-2' style={{ borderLeft: '4px solid #d9534f', backgroundColor: '#fff9f9' }}>
-                                <CCardHeader className="d-flex justify-content-between align-items-center">
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <CIcon icon={icon.cilShieldAlt} className="text-danger" />
-                                        <span className="fw-bold text-danger">PagerDuty Major Incident</span>
-                                    </div>
-                                    {data['major_incident_status'] && (
-                                        <CBadge color={
-                                            data['major_incident_status'] === 'triggered' ? 'danger' :
-                                                data['major_incident_status'] === 'acknowledged' ? 'warning' :
-                                                    data['major_incident_status'] === 'resolved' ? 'success' : 'secondary'
-                                        }>
-                                            {data['major_incident_status'].toUpperCase()}
-                                        </CBadge>
-                                    )}
-                                </CCardHeader>
-                                <CCardBody style={{ padding: '0.75rem' }}>
-                                    <CTable small borderless className="mb-0">
-                                        <CTableBody>
-                                            {data['major_incident_number'] && (
-                                                <CTableRow>
-                                                    <CTableHeaderCell scope="row" style={{ width: '40%' }}>Incident Number</CTableHeaderCell>
-                                                    <CTableDataCell><strong>#{data['major_incident_number']}</strong></CTableDataCell>
-                                                </CTableRow>
-                                            )}
-                                            {data['major_incident_url'] && (
-                                                <CTableRow>
-                                                    <CTableHeaderCell scope="row">Dashboard</CTableHeaderCell>
-                                                    <CTableDataCell>
-                                                        <UrlLink url={data['major_incident_url']} text="View Major Incident" />
-                                                    </CTableDataCell>
-                                                </CTableRow>
-                                            )}
-                                        </CTableBody>
-                                    </CTable>
-                                </CCardBody>
-                            </CCard>
-                        )}
 
-                        {/* Standard PagerDuty Section */}
-                        {data && (data['pagerduty_incident_id'] || data['pagerduty_service'] || data['pagerduty_escalation_policy']) && (
-                            <CCard className='mb-2' style={{ backgroundColor: '#f2f7f8' }}>
-                                <CCardHeader>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span>PagerDuty Notification</span>
-                                        {data['pagerduty_priority'] && (
-                                            <CBadge color={
-                                                data['pagerduty_priority'] === 'P1' ? 'danger' :
-                                                    data['pagerduty_priority'] === 'P2' ? 'warning' :
-                                                        data['pagerduty_priority'] === 'P3' ? 'info' : 'secondary'
-                                            }>
-                                                {data['pagerduty_priority']}
-                                            </CBadge>
-                                        )}
-                                        {data['pagerduty_urgency'] && (
-                                            <CBadge color={data['pagerduty_urgency'] === 'high' ? 'danger' : 'secondary'}>
-                                                {data['pagerduty_urgency']}
-                                            </CBadge>
-                                        )}
-                                    </div>
-                                </CCardHeader>
-                                <CCardBody style={{ maxHeight: '250px', overflowY: 'auto', padding: '0.75rem' }}>
-                                    <CTable small>
-                                        <CTableBody>
-                                            {data['pagerduty_incident_number'] && (
-                                                <CTableRow>
-                                                    <CTableHeaderCell scope="row">Incident Number</CTableHeaderCell>
-                                                    <CTableDataCell>#{data['pagerduty_incident_number']}</CTableDataCell>
-                                                </CTableRow>
-                                            )}
-                                            {data['pagerduty_incident_id'] && (
-                                                <CTableRow>
-                                                    <CTableHeaderCell scope="row">Incident ID</CTableHeaderCell>
-                                                    <CTableDataCell>{data['pagerduty_incident_id']}</CTableDataCell>
-                                                </CTableRow>
-                                            )}
-                                            {data['pagerduty_service'] && (
-                                                <CTableRow>
-                                                    <CTableHeaderCell scope="row">Service</CTableHeaderCell>
-                                                    <CTableDataCell>{data['pagerduty_service']}</CTableDataCell>
-                                                </CTableRow>
-                                            )}
-                                            {data['pagerduty_escalation_policy'] && (
-                                                <CTableRow>
-                                                    <CTableHeaderCell scope="row">Escalation Policy</CTableHeaderCell>
-                                                    <CTableDataCell>{data['pagerduty_escalation_policy']}</CTableDataCell>
-                                                </CTableRow>
-                                            )}
-                                            {data['pagerduty_html_url'] && (
-                                                <CTableRow>
-                                                    <CTableHeaderCell scope="row">Incident Link</CTableHeaderCell>
-                                                    <CTableDataCell>
-                                                        <UrlLink url={data['pagerduty_html_url']} text="View in PagerDuty" />
-                                                    </CTableDataCell>
-                                                </CTableRow>
-                                            )}
-                                        </CTableBody>
-                                    </CTable>
-                                </CCardBody>
-                            </CCard>
-                        )}
 
                         {(data && data['parent'] == true && data['grouping_reason']) ? (
                             <CCard className="mb-2" style={{ backgroundColor: '#f2f7f8' }}>
