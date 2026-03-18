@@ -23,6 +23,8 @@ import IncidentFeedback from '../../components/IncidentFeedback';
 import RelatedChanges from './RelatedChanges';
 import opsgenieIcon from '../../assets/opsgenie-icon.png';
 import pagerdutyLogo from '../../assets/pagerduty-logo.png';
+import HorizontalTimeline from './HorizontalTimeline';
+
 
 
 
@@ -47,10 +49,11 @@ const Detail = () => {
     const [hasChatStarted, setHasChatStarted] = useState(false)
 
     useEffect(() => {
-        if (activeTab === 4 && !hasChatStarted) {
+        if (activeTab === 5 && !hasChatStarted) {
             setHasChatStarted(true);
         }
     }, [activeTab]);
+
 
     const [changeRiskModalVisible, setChangeRiskModalVisible] = useState(false)
     const [selectedChangeRisk, setSelectedChangeRisk] = useState(null)
@@ -178,8 +181,9 @@ const Detail = () => {
                     .attr('x2', '100%')
                     .attr('y2', '0%');
 
-                splitGradient.append('stop').attr('offset', '50%').style('stop-color', '#f0ad4e'); // Orange (Warn)
+                splitGradient.append('stop').attr('offset', '50%').style('stop-color', '#f9b115'); // Amber (Warn)
                 splitGradient.append('stop').attr('offset', '50%').style('stop-color', '#6f42c1'); // Purple (Change)
+
 
                 // Gradient for Crit/Change (Red/Purple) - assuming default has_alert is red if not warn
                 const splitGradientCrit = defs.append('linearGradient')
@@ -189,8 +193,9 @@ const Detail = () => {
                     .attr('x2', '100%')
                     .attr('y2', '0%');
 
-                splitGradientCrit.append('stop').attr('offset', '50%').style('stop-color', '#d9534f'); // Red (Crit)
+                splitGradientCrit.append('stop').attr('offset', '50%').style('stop-color', '#e55353'); // Red (Crit)
                 splitGradientCrit.append('stop').attr('offset', '50%').style('stop-color', '#6f42c1'); // Purple (Change)
+
 
                 // Arrowhead marker
                 defs.append('marker')
@@ -467,8 +472,23 @@ const Detail = () => {
                     .attr('r', (d) => (d.has_alert || (d.changes && d.changes.length > 0) ? 14 : 10)) // Increased size for icons
                     .attr('fill', (d) => {
                         const hasChange = d.changes && d.changes.length > 0;
-                        const hasAlert = d.has_alert || (d.alerts && d.alerts.length > 0) || (d.alertsList && d.alertsList.length > 0);
-                        const isWarn = d.severity === 'WARN' || d.severity === 'WARNING';
+                        const alerts = d.alerts || d.alertsList || d.alerts_details || [];
+                        const hasAlert = d.has_alert || alerts.length > 0;
+
+                        // Get highest severity from either the node's severity property or its alerts list
+                        let severity = (d.severity || '').toUpperCase();
+                        if (!severity && alerts.length > 0) {
+                            // Map of severity levels for comparison
+                            const sevOrder = { 'CRITICAL': 4, 'ERROR': 3, 'WARN': 2, 'WARNING': 2, 'INFO': 1 };
+                            const highestAlertSev = alerts.reduce((highest, a) => {
+                                const current = (a.severity || a.alertseverity || '').toUpperCase();
+                                return (sevOrder[current] > (sevOrder[highest] || 0)) ? current : highest;
+                            }, '');
+                            severity = highestAlertSev;
+                        }
+
+                        const isWarn = severity === 'WARNING' || severity === 'WARN' || severity === 'MEDIUM';
+                        const isCrit = severity === 'CRITICAL' || severity === 'ERROR' || severity === 'HIGH';
 
                         // Mixed State: Has Alert AND Has Change -> Split Gradient
                         if (hasChange && hasAlert) {
@@ -478,10 +498,14 @@ const Detail = () => {
                         // Single States
                         if (hasChange) return '#6f42c1'; // Purple for Change only
                         if (hasAlert) {
-                            return isWarn ? '#f0ad4e' : '#d9534f'; // Alert color
+                            if (isCrit) return '#e55353'; // Red for Critical
+                            if (isWarn) return '#f9b115'; // Amber for Warning
+                            return '#39f';              // Info Blue fallback
                         }
-                        return '#69b3a2'; // Teal (Healthy)
+                        return '#2eb851'; // Green (Healthy)
                     })
+
+
                     .attr('stroke', (d) => {
                         const isRoot = String(d.id).toLowerCase() === String(graphData.root).toLowerCase();
                         if (isRoot) return '#00d2ff'; // Cyan/Electric Blue for root highlight
@@ -1114,21 +1138,26 @@ const Detail = () => {
                                     </CNavItem>
                                     <CNavItem>
                                         <CNavLink active={activeTab === 2} onClick={() => setActiveTab(2)} style={{ cursor: 'pointer', fontSize: '0.875rem' }}>
+                                            Timeline
+                                        </CNavLink>
+                                    </CNavItem>
+                                    <CNavItem>
+                                        <CNavLink active={activeTab === 3} onClick={() => setActiveTab(3)} style={{ cursor: 'pointer', fontSize: '0.875rem' }}>
                                             Recent Changes
                                             {changesCount > 0 && <CBadge color="primary" shape="rounded-pill" className="ms-2">{changesCount}</CBadge>}
                                         </CNavLink>
                                     </CNavItem>
                                     <CNavItem>
-                                        <CNavLink active={activeTab === 3} onClick={() => setActiveTab(3)} style={{ cursor: 'pointer', fontSize: '0.875rem' }}>
+                                        <CNavLink active={activeTab === 4} onClick={() => setActiveTab(4)} style={{ cursor: 'pointer', fontSize: '0.875rem' }}>
                                             Comments
                                             {data && data['worklogs'] && data['worklogs'].length > 0 && <CBadge color="primary" shape="rounded-pill" className="ms-2">{data['worklogs'].length}</CBadge>}
                                         </CNavLink>
                                     </CNavItem>
                                     <CNavItem>
                                         <CNavLink
-                                            active={activeTab === 4}
+                                            active={activeTab === 5}
                                             disabled={graphLoading}
-                                            onClick={() => !graphLoading && setActiveTab(4)}
+                                            onClick={() => !graphLoading && setActiveTab(5)}
                                             style={{ cursor: graphLoading ? 'not-allowed' : 'pointer', fontSize: '0.875rem' }}
                                         >
                                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -1138,6 +1167,7 @@ const Detail = () => {
                                             {graphLoading && <CSpinner size="sm" className="ms-2" />}
                                         </CNavLink>
                                     </CNavItem>
+
                                 </CNav>
                             </CCardHeader>
                             <CCardBody style={{ padding: '0.75rem' }}>
@@ -1198,6 +1228,14 @@ const Detail = () => {
                                     </CTabPane>
                                     <CTabPane visible={activeTab === 2}>
                                         <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
+                                            <HorizontalTimeline
+                                                mainAlert={data}
+                                                childAlerts={data?.childalerts}
+                                            />
+                                        </div>
+                                    </CTabPane>
+                                    <CTabPane visible={activeTab === 3}>
+                                        <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
                                             <RelatedChanges
                                                 alertId={id}
                                                 prefetchedData={relatedChangesData}
@@ -1209,7 +1247,7 @@ const Detail = () => {
                                             />
                                         </div>
                                     </CTabPane>
-                                    <CTabPane visible={activeTab === 3}>
+                                    <CTabPane visible={activeTab === 4}>
                                         <div style={{ maxHeight: '700px', overflowY: 'auto' }}>
                                             <CCol>
                                                 <CommentComponent />
@@ -1238,9 +1276,9 @@ const Detail = () => {
                                             </CCol>
                                         </div>
                                     </CTabPane>
-                                    <CTabPane visible={activeTab === 4}>
+                                    <CTabPane visible={activeTab === 5}>
                                         <div style={{ height: '700px' }}>
-                                            {(activeTab === 4 || hasChatStarted) && (
+                                            {(activeTab === 5 || hasChatStarted) && (
                                                 <ChatBot
                                                     alertData={data}
                                                     graphData={graphData}
@@ -1250,6 +1288,7 @@ const Detail = () => {
                                             )}
                                         </div>
                                     </CTabPane>
+
                                 </CTabContent>
                             </CCardBody>
                         </CCard>
@@ -1264,9 +1303,26 @@ const Detail = () => {
                     {graphLoading && <div>Loading graph...</div>}
                     {graphError && <div style={{ color: 'red' }}>{graphError}</div>}
                     {!graphLoading && !graphError && graphData && (
-                        <div ref={graphRef} style={{ width: '100%', height: '85vh', overflow: 'hidden' }} />
+                        <>
+                            <div ref={graphRef} style={{ width: '100%', height: '60vh', overflow: 'hidden' }} />
+                            <div className="mt-2 border-top pt-2">
+                                <h6 className="ms-3 mb-0">Timeline of Events in Topology</h6>
+                                <HorizontalTimeline
+                                    events={graphData.nodes.flatMap(node =>
+                                        (node.alerts || []).map(alert => ({
+                                            ...alert,
+                                            alertsummary: alert.summary, // Map backend 'summary' to 'alertsummary'
+                                            entity: node.name,
+                                            _id: alert.alert_id
+                                        }))
+                                    )}
+                                />
+
+                            </div>
+                        </>
                     )}
                 </CModalBody>
+
             </CModal>
 
             <ChangeRiskDetail

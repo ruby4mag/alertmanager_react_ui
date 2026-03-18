@@ -1,0 +1,158 @@
+/* Timeline.css */
+.timeline-container {
+    padding: 20px;
+    overflow-x: auto;
+    background: transparent;
+    min-height: 250px;
+    display: block; /* Scroller should be a block */
+}
+
+.timeline-horizontal {
+    display: inline-flex;
+    position: relative;
+    padding-bottom: 20px;
+    width: max-content;
+    margin-top: 40px;
+}
+
+
+.timeline-line {
+    position: absolute;
+    top: 15px;
+    left: 90px;
+    right: 90px;
+    height: 3px;
+    background: rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+
+
+
+
+.dark-theme .timeline-line {
+    background: rgba(255,255,255,0.1);
+}
+
+.timeline-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+    flex: 0 0 180px;
+    z-index: 2;
+    transition: transform 0.2s ease-in-out;
+}
+
+
+.timeline-item:hover {
+    transform: translateY(-5px);
+}
+
+.timeline-dot-container {
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 3;
+}
+
+.timeline-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex; /* Centering content */
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: bold;
+    overflow: hidden;
+}
+
+.dark-theme .timeline-dot {
+    border-color: #2c2c2c;
+}
+
+.timeline-dot:hover {
+    transform: scale(1.2);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.dot-time-diff {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+
+.main-dot {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+    position: relative;
+}
+
+.dot-inner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+}
+
+.timeline-content {
+    text-align: center;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.timeline-time {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--cui-text-muted, #6c757d);
+}
+
+.timeline-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--cui-body-color, #333);
+    text-decoration: none;
+    max-width: 160px;
+    margin: 0 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.timeline-label:hover {
+    color: #007bff;
+}
+
+.timeline-status {
+    opacity: 0.9;
+}
+
+
+/* Custom scrollbar for timeline */
+.timeline-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}
