@@ -43,16 +43,24 @@ const Detail = () => {
     const [graphTitle, setGraphTitle] = useState('')
     const [visibleGraphModal, setVisibleGraphModal] = useState(false)
     const graphRef = useRef(null)
+    const chatTabRef = useRef(null)
     const [activeTab, setActiveTab] = useState(1)
     const [changesCount, setChangesCount] = useState(0)
     const [relatedChangesData, setRelatedChangesData] = useState(null)
     const [hasChatStarted, setHasChatStarted] = useState(false)
 
     useEffect(() => {
-        if (activeTab === 5 && !hasChatStarted) {
-            setHasChatStarted(true);
+        if (activeTab === 5) {
+            if (!hasChatStarted) {
+                setHasChatStarted(true);
+            }
+            // Smoothly scroll the chat into view when selected
+            setTimeout(() => {
+                chatTabRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         }
     }, [activeTab]);
+
 
 
     const [changeRiskModalVisible, setChangeRiskModalVisible] = useState(false)
@@ -1276,8 +1284,9 @@ const Detail = () => {
                                             </CCol>
                                         </div>
                                     </CTabPane>
-                                    <CTabPane visible={activeTab === 5}>
+                                    <CTabPane visible={activeTab === 5} ref={chatTabRef}>
                                         <div style={{ height: '700px' }}>
+
                                             {(activeTab === 5 || hasChatStarted) && (
                                                 <ChatBot
                                                     alertData={data}
