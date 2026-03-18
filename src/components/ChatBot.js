@@ -102,14 +102,20 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
         if (!chatBodyRef.current) return;
 
         const { scrollTop, scrollHeight, clientHeight } = chatBodyRef.current;
-        const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
 
         // Only auto-scroll if user is near bottom or forced
         if (force || isNearBottom || !userScrolledUp.current) {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            // Use setTimeout to ensure DOM has updated with the new message
+            setTimeout(() => {
+                if (chatBodyRef.current) {
+                    chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+                }
+            }, 50);
             userScrolledUp.current = false;
         }
     };
+
 
     // Track user scroll behavior
     const handleScroll = () => {
