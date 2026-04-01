@@ -146,7 +146,8 @@
 
 // Global Font & Variables
 :root {
-  --cui-body-font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+  --cui-body-font-family: "Sofia-Pro", Helvetica, Arial, sans-serif;
+  --cui-body-font-size: 14px;
   --cui-primary: #0891b2;
   --cui-primary-rgb: 8, 145, 178;
   --cui-body-bg: #ffffff;
@@ -155,7 +156,8 @@
 
 // Custom Dark/Light Mode Handling
 body {
-  font-family: var(--cui-body-font-family);
+  font-family: var(--cui-body-font-family) !important;
+  font-size: var(--cui-body-font-size) !important;
   // Default (Light Mode) Specifics if variables define them, otherwise fallback
   background-color: var(--cui-body-bg, #ecfeff);
   color: var(--cui-body-color, #1e293b);

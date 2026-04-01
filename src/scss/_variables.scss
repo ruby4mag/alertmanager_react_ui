@@ -19,7 +19,11 @@ $body-bg: #ecfeff; // Cyan 50 - Very light tint
 $body-color: #1e293b; // Slate 800
 
 // Typography
-$font-family-base: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+$font-family-base: "Sofia-Pro", Helvetica, Arial, sans-serif;
+$font-size-base: 14px;
+$spacer: 16px;
+$nav-link-padding-y: 8px;
+$nav-link-padding-x: 16px;
 $headings-font-weight: 700;
 
 // Components
