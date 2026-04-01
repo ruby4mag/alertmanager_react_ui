@@ -13,11 +13,6 @@ const HorizontalTimeline = ({ mainAlert, childAlerts, events }) => {
         }));
     } else if (mainAlert) {
         allEvents = [
-            {
-                ...mainAlert,
-                isMain: true,
-                time: mainAlert.alertfirsttime ? new Date(mainAlert.alertfirsttime) : new Date(),
-            },
             ...(childAlerts || []).map(alert => ({
                 ...alert,
                 isMain: false,
