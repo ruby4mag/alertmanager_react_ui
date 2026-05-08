@@ -174,6 +174,7 @@ function AlertRuleEdit() {
                         <option value="Severity">Severity</option>
                         <option value="AlertSummary">Alert Summary</option>
                         <option value="AlertPriority">Alert Priority</option>
+                        <option value="ServiceName">Service Name</option>
                     </select>
                 </div>
                 <div className="mb-3">
