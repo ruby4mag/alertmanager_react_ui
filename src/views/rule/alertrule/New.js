@@ -27,6 +27,13 @@ const New = () => {
     const fields = [
         { name: 'Entity', label: 'Entity', type: "string" },
         { name: 'Severity', label: 'Severity', type: "string" },
+        { name: 'AlertSummary', label: 'Alert Summary', type: "string" },
+        { name: 'AlertPriority', label: 'Alert Priority', type: "string" },
+        { name: 'AlertSource', label: 'Alert Source', type: "string" },
+        { name: 'AlertStatus', label: 'Alert Status', type: "string" },
+        { name: 'AlertPriority', label: 'Alert Priority', type: "string" },
+
+
     ];
 
     const customProcessor = (rule) => {
