@@ -1169,8 +1169,8 @@ const Detail = () => {
                                             style={{ cursor: graphLoading ? 'not-allowed' : 'pointer', fontSize: '0.875rem' }}
                                         >
                                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                                <img src={opsgenieIcon} alt="OpsGenie" style={{ width: '16px', height: '16px' }} />
-                                                OpsGenie AI
+                                                <img src={opsgenieIcon} alt="OpsLens" style={{ width: '16px', height: '16px' }} />
+                                                OpsLens AI
                                             </span>
                                             {graphLoading && <CSpinner size="sm" className="ms-2" />}
                                         </CNavLink>

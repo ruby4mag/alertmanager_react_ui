@@ -419,7 +419,7 @@ const DataTable = () => {
         {isLoading && data.length === 0 ? (
           <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
             <CSpinner color="primary" variant="grow" />
-            <span className="ms-2">Loading Alerts...</span>
+            <span className="ms-2">Loading Incidents...</span>
           </div>
         ) : (
           <MaterialReactTable table={table} />

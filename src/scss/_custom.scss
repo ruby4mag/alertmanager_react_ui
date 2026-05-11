@@ -125,6 +125,13 @@
   }
 }
 
+// Fix for narrow sidebar icons getting cut in half
+.sidebar-narrow-unfoldable:not(:hover) .sidebar-nav .nav-link,
+.sidebar-narrow .sidebar-nav .nav-link {
+  margin: 0;
+  border-radius: 0;
+}
+
 // Adjust container padding
 .container-lg, .container-md, .container-sm, .container-xl, .container-fluid {
   padding-left: 2rem;

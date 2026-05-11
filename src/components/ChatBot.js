@@ -42,7 +42,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(false);
     const [loadingType, setLoadingType] = useState('init'); // 'init' or 'chat'
-    const [loadingMessage, setLoadingMessage] = useState('OpsGenie is thinking...');
+    const [loadingMessage, setLoadingMessage] = useState('OpsLens AI is thinking...');
 
     // Major Incident Modal States
     const [showMajorIncidentModal, setShowMajorIncidentModal] = useState(false);
@@ -62,8 +62,8 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
     const userScrolledUp = useRef(false);
 
     const loadingMessages = [
-        "OpsGenie is thinking...",
-        "OpsGenie is finding root cause...",
+        "OpsLens AI is thinking...",
+        "OpsLens AI is finding root cause...",
         "Analyzing topology relationships...",
         "Checking historical alert patterns...",
         "Identifying relevant changes...",
@@ -82,7 +82,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                     setLoadingMessage(loadingMessages[index]);
                 }, 3000);
             } else {
-                setLoadingMessage('OpsGenie is thinking.....');
+                setLoadingMessage('OpsLens AI is thinking.....');
             }
         }
         return () => clearInterval(interval);
@@ -154,7 +154,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
         setMessages([
             {
                 sender: 'ai',
-                text: 'Hello, I am your OpsGenie AI assistant. I will help you analyse this incident. Let me start with gathering some insights.'
+                text: 'Hello, I am your OpsLens AI assistant. I will help you analyse this incident. Let me start with gathering some insights.'
             },
             { sender: 'ai', text: '' }
         ]);
@@ -691,7 +691,7 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                 <CButton
                     color="primary"
                     shape="rounded-pill"
-                    title="OpsGenie"
+                    title="OpsLens AI"
                     style={{
                         position: 'fixed',
                         bottom: '20px',
@@ -736,8 +736,8 @@ const ChatBot = ({ alertData, graphData, isOpen: propIsOpen, onToggle, embedded 
                 >
                     <CCardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgb(94, 83, 167)', color: '#fff' }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <img src={opsgenieIcon} alt="OpsGenie" style={{ width: '20px', height: '20px' }} />
-                            <strong>OpsGenie AI</strong>
+                            <img src={opsgenieIcon} alt="OpsLens" style={{ width: '20px', height: '20px' }} />
+                            <strong>OpsLens AI</strong>
                         </span>
                         {!embedded && (
                             <CButton size="sm" color="transparent" style={{ color: '#fff' }} onClick={handleToggle}>
