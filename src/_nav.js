@@ -23,7 +23,7 @@ const _nav = {
       },
       {
         component: CNavItem,
-        name: 'Alert Dashboard',
+        name: 'Incidents',
         to: '/alert/dashboard',
         icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
       },
