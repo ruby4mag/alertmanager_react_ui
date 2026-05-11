@@ -16,7 +16,6 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
-import appLogo from 'src/assets/brand/app_logo.jpg'
 import opslensLogo from 'src/assets/brand/opslens_logo.png'
 
 const Login = () => {
@@ -62,11 +61,6 @@ const Login = () => {
             >
               <CCardBody className="p-5">
                 <div className="text-center mb-5">
-                  <img
-                    src={appLogo}
-                    alt="Logo"
-                    style={{ height: '80px', marginBottom: '1.5rem' }}
-                  />
                   <img
                     src={opslensLogo}
                     alt="OpsLens"
