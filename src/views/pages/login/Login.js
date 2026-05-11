@@ -16,6 +16,8 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
+import appLogo from 'src/assets/brand/app_logo.jpg'
+import opslensLogo from 'src/assets/brand/opslens_logo.png'
 
 const Login = () => {
   const [username, setUsername] = useState('')
@@ -55,18 +57,21 @@ const Login = () => {
               style={{
                 borderRadius: '1.5rem',
                 overflow: 'hidden',
-                background: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(10px)',
+                background: '#ffffff',
               }}
             >
               <CCardBody className="p-5">
                 <div className="text-center mb-5">
                   <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Western_Digital_logo.svg/2560px-Western_Digital_logo.svg.png"
-                    alt="Western Digital"
+                    src={appLogo}
+                    alt="Logo"
                     style={{ height: '80px', marginBottom: '1.5rem' }}
                   />
-                  <h3 className="fw-bold mb-2" style={{ color: 'rgb(94, 83, 167)' }}>WD OpsGenie</h3>
+                  <img
+                    src={opslensLogo}
+                    alt="OpsLens"
+                    style={{ width: '100%', height: 'auto', maxHeight: '140px', objectFit: 'contain', marginBottom: '1.5rem', backgroundColor: 'white' }}
+                  />
                 </div>
 
                 <CForm>
