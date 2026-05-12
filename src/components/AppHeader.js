@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CContainer,
@@ -27,6 +27,7 @@ import {
 
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
+import routes from '../routes'
 
 
 
@@ -36,6 +37,24 @@ const AppHeader = () => {
 
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+
+  const currentLocation = useLocation().pathname;
+  const getPageTitle = (pathname) => {
+    const currentRoute = routes.find((route) => {
+      if (route.path === pathname) return true;
+      if (route.path.includes('/:id') && pathname.startsWith(route.path.split('/:id')[0])) return true;
+      return false;
+    });
+
+    if (currentRoute) {
+      if (currentRoute.name === 'AlertDashboard') return 'Incidents';
+      if (pathname.includes('/alert/details')) return 'Incident Details';
+      if (currentRoute.name === 'Change Risk') return 'Change Risks';
+      return currentRoute.name;
+    }
+    return 'Dashboard';
+  }
+  const pageTitle = getPageTitle(currentLocation);
 
   useEffect(() => {
     document.addEventListener('scroll', () => {
@@ -62,8 +81,8 @@ const AppHeader = () => {
         </CHeaderToggler>
         <CHeaderNav className="d-none d-md-flex">
           <CNavItem>
-            <CNavLink to="/dashboard" as={NavLink}>
-              Dashboard
+            <CNavLink to={currentLocation} as={NavLink} style={{ fontWeight: 600, fontSize: '1.1rem' }}>
+              {pageTitle}
             </CNavLink>
           </CNavItem>
         </CHeaderNav>
