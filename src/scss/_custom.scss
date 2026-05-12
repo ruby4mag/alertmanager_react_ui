@@ -281,3 +281,41 @@ select {
   box-shadow: none;
   transition: none;
 }
+
+// Softer Badge Colors (Modern Pastel/Soft look)
+.badge.text-bg-danger {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca;
+}
+
+.badge.text-bg-warning {
+  background-color: #fde68a !important;
+  color: #78350f !important;
+  border: 1px solid #fcd34d;
+}
+
+.badge.text-bg-success {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+  border: 1px solid #a7f3d0;
+}
+
+.badge.text-bg-info {
+  background-color: #e0f2fe !important;
+  color: #075985 !important;
+  border: 1px solid #bae6fd;
+}
+
+.badge.text-bg-secondary {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0;
+}
+
+// Give badges a smoother rounded pill look across the board if they don't have it
+.badge {
+  font-weight: 600;
+  padding: 0.35em 0.65em;
+  border-radius: 0.5rem;
+}
