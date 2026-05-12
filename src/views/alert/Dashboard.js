@@ -357,6 +357,12 @@ const DataTable = () => {
     autoResetPageIndex: false,
     autoResetExpanded: false,
     autoResetSelectedRows: false,
+    localization: {
+      rowsPerPage: 'Incidents per page',
+    },
+    muiTablePaginationProps: {
+      labelRowsPerPage: 'Incidents per page',
+    },
     initialState: {
       //showColumnFilters: true,
     },
