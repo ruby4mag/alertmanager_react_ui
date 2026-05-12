@@ -1001,7 +1001,7 @@ const Detail = () => {
                 <CRow>
                     {/* Left Column: Details & Notes */}
                     <CCol md={6}>
-                        <CCard style={{ backgroundColor: '#f2f7f8' }} className="mb-2">
+                        <CCard style={{ backgroundColor: '#f8fafc' }} className="mb-2">
                             <CCardHeader>Event Details</CCardHeader>
                             <CCardBody style={{ maxHeight: '700px', overflowY: 'auto', padding: '0.75rem' }}>
                                 <CTable small >
@@ -1110,7 +1110,7 @@ const Detail = () => {
 
 
                         {(data && data['parent'] == true && data['grouping_reason']) ? (
-                            <CCard className="mb-2" style={{ backgroundColor: '#f2f7f8' }}>
+                            <CCard className="mb-2" style={{ backgroundColor: '#f8fafc' }}>
                                 <CCardHeader>Why grouped?</CCardHeader>
                                 <CCardBody style={{ padding: '0.75rem' }}>
                                     {data['grouping_reason'].type === 'SIMILARITY' ? (
@@ -1135,7 +1135,7 @@ const Detail = () => {
 
                     {/* Right Column: Key Info Tabs */}
                     <CCol md={6}>
-                        <CCard style={{ backgroundColor: '#f2f7f8' }}>
+                        <CCard style={{ backgroundColor: '#f8fafc' }}>
                             <CCardHeader>
                                 <CNav variant="tabs" className="card-header-tabs">
                                     <CNavItem>

@@ -4,22 +4,22 @@
 
 $enable-deprecation-messages: false !default;
 
-// Colors - Ocean / Teal Theme
-$primary: #0891b2; // Cyan 600
+// Colors - Indigo / Slate Theme
+$primary: #4f46e5; // Indigo 600
 $secondary: #64748b; // Slate 500
 $success: #10b981; // Emerald 500
-$info: #3b82f6; // Blue 500
+$info: #0ea5e9; // Sky 500
 $warning: #f59e0b; // Amber 500
 $danger: #ef4444; // Red 500
-$light: #f1f5f9; // Slate 100
+$light: #f8fafc; // Slate 50
 $dark: #0f172a; // Slate 900
 
 // Body
-$body-bg: #ecfeff; // Cyan 50 - Very light tint
+$body-bg: #f8fafc; // Slate 50
 $body-color: #1e293b; // Slate 800
 
 // Typography
-$font-family-base: "Sofia-Pro", Helvetica, Arial, sans-serif;
+$font-family-base: "Inter", sans-serif;
 $font-size-base: 14px;
 $spacer: 16px;
 $nav-link-padding-y: 8px;
@@ -47,9 +47,9 @@ $btn-focus-box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
 
 // Sidebar
 $sidebar-width: 14rem; // Narrower width
-$sidebar-bg: #164e63; // Cyan 900 - Deep Rich Teal
-$sidebar-color: #cffafe; // Cyan 100
-$sidebar-nav-link-color: #a5f3fc; // Cyan 200
+$sidebar-bg: #0f172a; // Slate 900
+$sidebar-color: #f1f5f9; // Slate 100
+$sidebar-nav-link-color: #cbd5e1; // Slate 300
 $sidebar-nav-link-active-color: #ffffff;
 $sidebar-nav-link-active-bg: rgba(0, 0, 0, 0.2);
 $sidebar-nav-link-hover-color: #ffffff;

@@ -59,7 +59,7 @@
     text-transform: uppercase;
     font-size: 0.7rem;
     letter-spacing: 0.08em;
-    color: #0e7490; // Dark Cyan
+    color: #475569; // Slate 600
   }
 }
 
@@ -109,7 +109,7 @@
 
 // Sidebar modifications for modern look
 .sidebar {
-  --cui-sidebar-bg: #151847; // User requested color
+  --cui-sidebar-bg: #0f172a; // Slate 900
   background-color: var(--cui-sidebar-bg) !important;
   border-right: none !important;
   box-shadow: 4px 0 24px 0 rgba(0, 0, 0, 0.1);
@@ -133,8 +133,8 @@
   }
 
   &.active {
-    background: #06b6d4 !important; // Cyan 500
-    box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.4);
+    background: #4f46e5 !important; // Indigo 600
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
     color: white !important;
 
     .nav-icon {
@@ -162,27 +162,27 @@
 
 // Button Overrides
 .btn-primary {
-  background-color: #0891b2;
-  border-color: #0891b2;
-  box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.3);
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
 
   &:hover,
   &:focus,
   &:active {
-    background-color: #0e7490 !important;
-    border-color: #0e7490 !important;
-    box-shadow: 0 10px 15px -3px rgba(8, 145, 178, 0.4);
+    background-color: #4338ca !important; // Indigo 700
+    border-color: #4338ca !important;
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
   }
 }
 
 // Global Font & Variables
 :root {
-  --cui-body-font-family: "Sofia-Pro", Helvetica, Arial, sans-serif;
+  --cui-body-font-family: "Inter", sans-serif;
   --cui-body-font-size: 14px;
-  --cui-primary: #0891b2;
-  --cui-primary-rgb: 8, 145, 178;
-  --cui-body-bg: #ffffff;
-  --cui-sidebar-bg: #151847;
+  --cui-primary: #4f46e5;
+  --cui-primary-rgb: 79, 70, 229;
+  --cui-body-bg: #f8fafc;
+  --cui-sidebar-bg: #0f172a;
 }
 
 // Custom Dark/Light Mode Handling
@@ -190,7 +190,7 @@ body {
   font-family: var(--cui-body-font-family) !important;
   font-size: var(--cui-body-font-size) !important;
   // Default (Light Mode) Specifics if variables define them, otherwise fallback
-  background-color: var(--cui-body-bg, #ecfeff);
+  background-color: var(--cui-body-bg, #f8fafc);
   color: var(--cui-body-color, #1e293b);
 }
 
