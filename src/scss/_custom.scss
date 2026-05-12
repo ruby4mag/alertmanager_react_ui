@@ -36,16 +36,17 @@
   background: white;
   color: #1e293b; // Slate 800
   border-radius: 1rem;
-  
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
 
   // Ensure card header/footer text is also visible
-  .card-header, .card-footer {
+  .card-header,
+  .card-footer {
     background-color: transparent;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     font-weight: 600;
     // Color inherits from card
   }
@@ -66,27 +67,44 @@
 // Header glassmorphism
 .header {
   // Override CoreUI variables for header
+  --cui-header-min-height: 1rem; // Reduced from default to save space
   --cui-header-bg: rgba(255, 255, 255, 0.8);
   background: var(--cui-header-bg); // Removed !important to allow override
   backdrop-filter: blur(20px) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
   z-index: 1030;
-  
+  // Specific override for inner containers
+  & > .container-fluid,
+  & > .container-sm,
+  & > .container-md,
+  & > .container-lg,
+  & > .container-xl,
+  & > .container-xxl {
+    min-height: calc(1rem + 1px);
+  }
+
   // Default Text Color (Light Mode)
   color: #1e293b;
-  
-  .nav-link, .header-toggler {
+
+  .nav-link,
+  .header-toggler {
     color: #475569; // Slate 600
-    
-    &:hover, &:focus, &.active {
+
+    &:hover,
+    &:focus,
+    &.active {
       color: #0f172a; // Slate 900
     }
-    
+
     .icon {
       color: currentColor;
     }
   }
+}
+
+.sidebar-header {
+  min-height: calc(1rem + 1px) !important;
 }
 
 // Sidebar modifications for modern look
@@ -94,7 +112,7 @@
   --cui-sidebar-bg: #151847; // User requested color
   background-color: var(--cui-sidebar-bg) !important;
   border-right: none !important;
-  box-shadow: 4px 0 24px 0 rgba(0,0,0,0.1);
+  box-shadow: 4px 0 24px 0 rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-brand-full {
@@ -107,13 +125,13 @@
   width: auto;
   font-weight: 500;
   font-size: 0.875rem; // Smaller font size
-  
+
   &:hover {
-    background: rgba(255,255,255, 0.15);
+    background: rgba(255, 255, 255, 0.15);
     transform: translateX(4px);
     transition: all 0.2s ease;
   }
-  
+
   &.active {
     background: #06b6d4 !important; // Cyan 500
     box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.4);
@@ -133,7 +151,11 @@
 }
 
 // Adjust container padding
-.container-lg, .container-md, .container-sm, .container-xl, .container-fluid {
+.container-lg,
+.container-md,
+.container-sm,
+.container-xl,
+.container-fluid {
   padding-left: 2rem;
   padding-right: 2rem;
 }
@@ -143,8 +165,10 @@
   background-color: #0891b2;
   border-color: #0891b2;
   box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.3);
-  
-  &:hover, &:focus, &:active {
+
+  &:hover,
+  &:focus,
+  &:active {
     background-color: #0e7490 !important;
     border-color: #0e7490 !important;
     box-shadow: 0 10px 15px -3px rgba(8, 145, 178, 0.4);
@@ -158,7 +182,7 @@
   --cui-primary: #0891b2;
   --cui-primary-rgb: 8, 145, 178;
   --cui-body-bg: #ffffff;
-  --cui-sidebar-bg: #151847; 
+  --cui-sidebar-bg: #151847;
 }
 
 // Custom Dark/Light Mode Handling
@@ -171,24 +195,42 @@ body {
 }
 
 // Global Text Visibility Overrides - Conditional on theme
-.dropdown-menu, .modal-content, .popover, .form-control, .form-select {
+.dropdown-menu,
+.modal-content,
+.popover,
+.form-control,
+.form-select {
   // Use CSS variables for colors so they adapt
   color: var(--cui-body-color);
   background-color: var(--cui-body-bg);
   border-color: var(--cui-border-color);
 }
 
-h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
   color: var(--cui-heading-color, inherit);
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   color: var(--cui-input-color, inherit) !important;
   background-color: var(--cui-input-bg, inherit);
 }
 
 // Ensure icons in buttons/navs inherit or are visible
-.nav-icon, .header-toggler-icon {
+.nav-icon,
+.header-toggler-icon {
   color: currentColor;
 }
 
@@ -209,11 +251,14 @@ input, textarea, select {
   .header {
     background: rgba(0, 0, 0, 0.5) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    
-    .nav-link, .header-toggler {
+
+    .nav-link,
+    .header-toggler {
       color: var(--cui-body-color) !important;
-      
-      &:hover, &:focus, &.active {
+
+      &:hover,
+      &:focus,
+      &.active {
         color: var(--cui-high-emphasis-color, #fff) !important;
       }
     }
