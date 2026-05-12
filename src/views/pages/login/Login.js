@@ -16,7 +16,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
-import opslensLogo from 'src/assets/brand/opslens_logo.png'
+import opslensLogo from 'src/assets/brand/sidebar_opslens_logo.png'
 
 const Login = () => {
   const [username, setUsername] = useState('')
@@ -56,7 +56,7 @@ const Login = () => {
               style={{
                 borderRadius: '1.5rem',
                 overflow: 'hidden',
-                background: '#ffffff',
+                background: 'rgb(10, 7, 43)',
               }}
             >
               <CCardBody className="p-5">
@@ -64,37 +64,37 @@ const Login = () => {
                   <img
                     src={opslensLogo}
                     alt="OpsLens"
-                    style={{ width: '100%', height: 'auto', maxHeight: '140px', objectFit: 'contain', marginBottom: '1.5rem', backgroundColor: 'white' }}
+                    style={{ width: '100%', height: 'auto', maxHeight: '140px', objectFit: 'contain', marginBottom: '1.5rem', backgroundColor: 'transparent' }}
                   />
                 </div>
 
                 <CForm>
                   <CInputGroup className="mb-4">
-                    <CInputGroupText className="bg-light border-end-0 rounded-start-pill ps-3">
-                      <CIcon icon={cilUser} className="text-secondary" />
+                    <CInputGroupText style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRight: 'none' }} className="rounded-start-pill ps-3">
+                      <CIcon icon={cilUser} className="text-light" />
                     </CInputGroupText>
                     <CFormInput
-                      className="bg-light border-start-0 rounded-end-pill py-2"
+                      className="rounded-end-pill py-2 login-dark-input"
                       placeholder="Username"
                       autoComplete="username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      style={{ boxShadow: 'none' }}
+                      style={{ boxShadow: 'none', borderLeft: 'none' }}
                     />
                   </CInputGroup>
 
                   <CInputGroup className="mb-4">
-                    <CInputGroupText className="bg-light border-end-0 rounded-start-pill ps-3">
-                      <CIcon icon={cilLockLocked} className="text-secondary" />
+                    <CInputGroupText style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRight: 'none' }} className="rounded-start-pill ps-3">
+                      <CIcon icon={cilLockLocked} className="text-light" />
                     </CInputGroupText>
                     <CFormInput
                       type="password"
-                      className="bg-light border-start-0 rounded-end-pill py-2"
+                      className="rounded-end-pill py-2 login-dark-input"
                       placeholder="Password"
                       autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      style={{ boxShadow: 'none' }}
+                      style={{ boxShadow: 'none', borderLeft: 'none' }}
                     />
                   </CInputGroup>
 
@@ -107,7 +107,7 @@ const Login = () => {
                           id="rememberMe"
                           style={{ borderColor: '#cbd5e1' }}
                         />
-                        <label className="form-check-label small text-secondary" htmlFor="rememberMe">
+                        <label className="form-check-label small text-light" htmlFor="rememberMe">
                           Remember me
                         </label>
                       </div>
@@ -121,7 +121,7 @@ const Login = () => {
                       color="primary"
                       className="rounded-pill py-2 fw-bold text-uppercase"
                       style={{
-                        background: 'linear-gradient(90deg, #0891b2 0%, #06b6d4 100%)',
+                        background: 'linear-gradient(90deg, #4f46e5 0%, #6366f1 100%)',
                         border: 'none',
                         letterSpacing: '0.05em',
                       }}

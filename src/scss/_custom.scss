@@ -319,3 +319,30 @@ select {
   padding: 0.35em 0.65em;
   border-radius: 0.5rem;
 }
+
+// Login page – dark card input overrides
+.login-dark-input.form-control {
+  color: #f1f5f9 !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.45) !important;
+  }
+
+  &:focus {
+    color: #f8fafc !important;
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25) !important;
+  }
+
+  // Override browser autofill dark backgrounds
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f1f5f9 !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(30, 27, 75, 0.95) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
