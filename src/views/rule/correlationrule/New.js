@@ -268,7 +268,7 @@ const New = () => {
                                 <span>{similarityThreshold}</span>
                             </label>
                             <div className="d-flex align-items-center gap-2">
-                                <span className="small text-muted">Strict</span>
+                                <span className="small text-muted">Loose</span>
                                 <input
                                     type="range"
                                     className="form-range"
@@ -279,15 +279,8 @@ const New = () => {
                                     value={similarityThreshold}
                                     onChange={(e) => setSimilarityThreshold(e.target.value)}
                                 />
-                                <span className="small text-muted">Loose</span>
+                                <span className="small text-muted">Strict</span>
                             </div>
-                        </div>
-
-                        <div className="alert alert-info">
-                            <strong>Preview Example:</strong><br />
-                            "Disk latency high on node-12"
-                            will group with
-                            "High IO wait detected on node-14"
                         </div>
                     </div>
                 )}
