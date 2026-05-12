@@ -36,36 +36,6 @@ const New = () => {
 
     const api = useAxios();
 
-    const handleSubmit = () => {
-        const fetchData = async () => {
-            try {
-                const payload = { groupname: name, grouptags: multiValues }
-                // include timeWindow if provided (as number)
-                if (timeWindow !== "") payload.groupwindow = Number(timeWindow)
-                const response = await api.post('/api/tagrules', payload);
-                console.log(response.data);
-                addToast(MyToast({
-                    title: "Tag Rule",
-                    timestamp: "Just now",
-                    body: "Tag Rule added successfully",
-                    color: 'success',
-                    autohide: true,
-                    dismissible: true
-                }))
-            } catch (error) {
-                console.error('Error submitting data:', error);
-                addToast(MyToast({
-                    title: "Tag Rule",
-                    timestamp: "Just now",
-                    body: "Failed to add tag rule.",
-                    color: 'danger',
-                    autohide: true,
-                    dismissible: true
-                }))
-            }
-        }
-        fetchData()
-    }
 
     // submit to correlationrules endpoint
     const handleCorrelationSubmit = () => {
@@ -121,7 +91,7 @@ const New = () => {
     }
 
     const handleBackButtonClick = () => {
-        navigate('/rule/tagrule/list');
+        navigate('/rule/correlationrule/list');
     };
 
     return (
@@ -299,9 +269,8 @@ const New = () => {
             </CForm>
 
             <div style={{ display: 'flex', gap: '10px' }}>
-                <CButton disabled={name == "" ? true : false} variant="outline" onClick={handleSubmit} color="primary">Add Tag Rule</CButton>
-                <CButton disabled={name == "" ? true : false} variant="outline" onClick={handleCorrelationSubmit} color="secondary">Submit to Correlation</CButton>
-                <CButton variant="outline" onClick={handleBackButtonClick} color="primary">Go Back</CButton>
+                <CButton disabled={name == "" ? true : false} variant="outline" onClick={handleCorrelationSubmit} color="primary">Add Rule</CButton>
+                <CButton variant="outline" onClick={handleBackButtonClick} color="secondary">Go Back</CButton>
             </div>
         </>
     )

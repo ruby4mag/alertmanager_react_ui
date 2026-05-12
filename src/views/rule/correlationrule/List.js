@@ -4,6 +4,7 @@ import { CListGroup, CListGroupItem, CToaster, CContainer, CRow, CCol, CButton }
 import useAxios from '../../../services/useAxios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../auth/AuthContext';
+import MyToast from '../../../components/Toast';
 
 const List = () => {
     const api = useAxios();
@@ -33,6 +34,31 @@ const List = () => {
         navigate('/rule/correlationrule/new');
     };
 
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this correlation rule?")) {
+            try {
+                await api.delete(`/api/correlationrules/${id}`);
+                setData(data.filter(item => (item._id || item.id || item.ID) !== id));
+                addToast(MyToast({
+                    title: "Success",
+                    body: "Rule deleted successfully.",
+                    color: "success",
+                    autohide: true,
+                    dismissible: true
+                }));
+            } catch (error) {
+                console.error("Error deleting rule:", error);
+                addToast(MyToast({
+                    title: "Error",
+                    body: "Failed to delete rule.",
+                    color: "danger",
+                    autohide: true,
+                    dismissible: true
+                }));
+            }
+        }
+    };
+
 
     return (
         <>
@@ -46,9 +72,12 @@ const List = () => {
                             <span>{item['groupname']}</span>
                             <div>
                                 {role == 'admin' ?
-                                    <Link to={`/rule/correlationrule/edit/${itemId}`}>
-                                        <CButton size="sm" variant="outline" color="primary" className="me-2">Edit</CButton>
-                                    </Link>
+                                    <>
+                                        <Link to={`/rule/correlationrule/edit/${itemId}`}>
+                                            <CButton size="sm" variant="outline" color="primary" className="me-2">Edit</CButton>
+                                        </Link>
+                                        <CButton size="sm" variant="outline" color="danger" className="me-2" onClick={() => handleDelete(itemId)}>Delete</CButton>
+                                    </>
                                     : ""
                                 }
                                 <Link to={`/rule/correlationrule/view/${itemId}`}>
